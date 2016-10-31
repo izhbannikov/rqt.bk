@@ -38,7 +38,7 @@ get.maf <-function(vec){
 ## a: shape parameter for GM method                                                          
 ###############################################################################################
 
-QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE){
+QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, eig.threshold=0.0005){
   ### DEBUG ###
   y <- matrix(ncol=1,data[,1])
   newgeno <- data[,2:dim(data)[2]]
@@ -67,9 +67,6 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE){
   #head(eig.decathlon2.active)
   #### End of calculating PCA ####
   
-  #### Thresholds for eigenvalues and cumulative variance ####
-  eig.threshold <- 0.0005
-  cumvar.threshold <- 90
   #### Regression after PCA ####
   S <- try(as.matrix(res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)]),TRUE)
   t.fit <- try(glm(y ~ .,data=data.frame(S), family = poisson(link=log)),TRUE)
