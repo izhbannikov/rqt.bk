@@ -8,7 +8,7 @@ library(CompQuadForm)
 library(parallel)
 
 ## Empirical null distribution for Q3 test
-null.dist.Q3<-read.table("n.log10.minp.1e09.txt",header=T)
+null.dist.Q3 <- read.table("~/Projects/rqt/n.log10.minp.1e09.txt",header=T)
 
 ## Get a given STT
 get.a<-function(L,STT){
@@ -42,29 +42,56 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE){
   ### DEBUG ###
   y <- matrix(ncol=1,data[,1])
   newgeno <- data[,2:dim(data)[2]]
-  covadat=NULL
-  STT=0.2
-  weight=FALSE
+  covadat <- NULL
+  STT <- 0.2
+  weight <- FALSE
   
   ####
-  if(length(covadat)!=0){resid<-try(resid(glm(y~.,data=data.frame(covadat),na.action=na.exclude)),TRUE)}
-  if(length(covadat)==0){resid<-try(resid(glm(y~1,na.action=na.exclude, family = binomial(link = log))),TRUE)}
-  S<-try(as.matrix(newgeno),TRUE)
-  fit<-try(glm(resid~.,data=data.frame(S)),TRUE)
-  na.S<-try(which(is.na(coef(fit)[-1])==TRUE),TRUE)
+  ## If covariates exist
+  #if(length(covadat)!=0){
+  #  resid<-try(resid(glm(y~.,data=data.frame(covadat),na.action=na.exclude)),TRUE)
+  #} else {
+  #  resid<-try(resid(glm(y~1,na.action=na.exclude, family = binomial(link = log))),TRUE)
+  #}
+  
+  #### Calculating PCA ####
+  pcadata <- cbind(y, newgeno)
+  res.pca <- prcomp(newgeno)
+  # Eigenvalues
+  eig <- (res.pca$sdev)^2
+  # Variances in percentage
+  variance <- eig*100/sum(eig)
+  # Cumulative variances
+  cumvar <- cumsum(variance)
+  eig.decathlon2.active <- data.frame(eig = eig, variance = variance, cumvariance = cumvar)
+  #head(eig.decathlon2.active)
+  #### End of calculating PCA ####
+  
+  #### Thresholds for eigenvalues and cumulative variance ####
+  eig.threshold <- 0.0005
+  cumvar.threshold <- 90
+  #### Regression after PCA ####
+  S <- try(as.matrix(res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)]),TRUE)
+  t.fit <- try(glm(y ~ .,data=data.frame(S), family = poisson(link=log)),TRUE)
+  fit <- try(glm(y ~ .,data=data.frame(S), family = binomial(link = log), start=coef(t.fit)),TRUE)
+  na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
+  
+  #### Calculating statistics and p-values ####
   if(length(na.S)>0){
-    S<-try(as.matrix(S[,-na.S]),TRUE)
-    fit<-try(glm(resid~.,data=data.frame(S)),TRUE)
+    S <- try(as.matrix(S[,-na.S]),TRUE)
+    fit <- try(glm(resid~.,data=data.frame(S)),TRUE)
   }
-  coef<-try(coef(summary(fit))[-1,1:2],TRUE)
+  coef <- try(coef(summary(fit))[-1,1:2],TRUE)
   
   
   if(mode(fit)=="character"){length(coef)<-0}
+  
   if(length(coef)!=0){
     if(length(coef)!=2){beta1<-coef[,1];se1<-coef[,2]}
     if(length(coef)==2){beta1<-coef[1];se1<-coef[2]}
     SS<-cbind(1,S); n<-length(y)
-    vv<-vcov(fit)[-1,-1];alpha<-(1/(se1^2))
+    vv<-vcov(fit)[-1,-1]
+    alpha<-(1/(se1^2))/sum(1/(se1^2))
     #vv<-solve(t(SS)%*%SS)[-1,-1]*var(y)*(n-1)/n;alpha<-(1/(se1^2))
     
     ##QTest1##
