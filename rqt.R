@@ -9,8 +9,13 @@ library(parallel)
 library(pls)
 
 ## Empirical null distribution for Q3 test
-#null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
-null.dist.Q3 <- read.table("/Users/ilya/Projects/rqt/n.log10.minp.1e09.txt",header=T)
+#null.dist.Q3 <- read.table("/Users/ilya/Projects/rqt/n.log10.minp.1e09.txt",header=T)
+if(Sys.info()[1] == "Windows") {
+  null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
+} else {
+  null.dist.Q3 <- read.table("/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
+}
+
 
 ## Get a given STT
 get.a<-function(L,STT){
@@ -55,8 +60,9 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
   #} else {
   #  resid<-try(resid(glm(y~1,na.action=na.exclude, family = binomial(link = log))),TRUE)
   #}
+  rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
+  names(rslt)<-c("Qstatistic", "p.value")
   
-  rslt <- list(data.frame(Q3=NA), data.frame(p.Q3=NA))
   tryCatch({
   if(dim(newgeno)[2] > 1) {
   
@@ -82,8 +88,6 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
     if(res.pca$center != FALSE){
       S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
     }
-  
-    #S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)]
   
   
     #### End of calculating PCA ####
@@ -122,7 +126,7 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
       SS <- cbind(1,S)
       n <- length(y)
       vv <- vcov(fit)[-1,-1]
-      alpha <- (1/(se1^2))/sum(1/(se1^2))
+      alpha <- (1/(se1^2)) #/sum(1/(se1^2))
     
       ##QTest1##
       if(weight == FALSE){
@@ -167,9 +171,6 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
     
       if(weight==FALSE){
         cov.beta <- c(t(alpha) %*% vv)
-        #print(cov.beta)
-        #print(t(alpha))
-        #print(vv)
         b.star <- beta1 - beta.pool0*cov.beta/var.pool0[1]
         vv.star <- vv - (cov.beta%*%t(cov.beta))/var.pool0[1]
       }
@@ -202,17 +203,17 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
         }
       
       
-        Q3final<-Q3[which.min(p.Q3.can)]
-        p.Q3<-(sum(null.dist.Q3[null.dist.Q3[,1]>-log10(min(p.Q3.can)),2])+1)/(sum(null.dist.Q3[,2])+1)
+        Q3final <- Q3[which.min(p.Q3.can)]
+        p.Q3 <- (sum(null.dist.Q3[null.dist.Q3[,1] > -log10(min(p.Q3.can)),2])+1)/(sum(null.dist.Q3[,2])+1)
       }
     
       if(length(beta1)==1){p.Q3<-p.Q1; Q3final<-Q1}
-      rslt<-list( data.frame(Q1, Q2, Q3=Q3final), data.frame(p.Q1,p.Q2,p.Q3))
+      rslt <- list( data.frame(Q1, Q2, Q3=Q3final), data.frame(p.Q1,p.Q2,p.Q3))
       names(rslt)<-c("Qstatistic", "p.value")	
     }
   
     if(length(coef)==0) { 
-      rslt<-NA
+      rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
     }
     options (warn=-1)
     
@@ -224,18 +225,22 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
     if(dim(reg.coef)[1] == 2) {
       rslt<-list( data.frame(Q1=reg.coef[2,3], Q2=reg.coef[2,3], Q3=reg.coef[2,3]), data.frame(p.Q1=reg.coef[2,4],p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]))
     } else if(dim(reg.coef)[1] == 1) {
-      rslt <- list(data.frame(Q3=0), data.frame(p.Q3=0))
+      rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
     } else {
-      rslt <- list(data.frame(Q3=NA), data.frame(p.Q3=NA))
+      rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
     }
     
   }
   },error=function(e) {
     print(e)
-    rslt <- list(data.frame(Q3=NA), data.frame(p.Q3=NA))
+    rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
+    names(rslt)<-c("Qstatistic", "p.value")
   }, finally=rslt)
 
   if(!is.na(rslt)) {
+    names(rslt)<-c("Qstatistic", "p.value")
+  } else {
+    rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
     names(rslt)<-c("Qstatistic", "p.value")
   }
   
