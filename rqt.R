@@ -7,9 +7,10 @@ library(Matrix)
 library(CompQuadForm)
 library(parallel)
 library(pls)
+library(glmnet)
 
 ## Empirical null distribution for Q3 test
-#null.dist.Q3 <- read.table("/Users/ilya/Projects/rqt/n.log10.minp.1e09.txt",header=T)
+null.dist.Q3 <- read.table("/Users/ilya/Projects/rqt/n.log10.minp.1e09.txt",header=T)
 if(Sys.info()[1] == "Windows") {
   null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
 } else {
@@ -33,6 +34,34 @@ get.maf <-function(vec){
   (length(which(vec==1))+2*length(which(vec==2)))/(2*length(vec))
 }
 
+vcov_rigde <- function(x, y,  rmod) {
+
+  ridge_se <- function(xs,y,yhat,my_mod){
+    # Note, you can't estimate an intercept here
+    n <- dim(xs)[1]
+    k <- dim(xs)[2]
+    sigma_sq <- sum((y - yhat)^2)/ (n-k)
+    lam <- my_mod$lambda.min
+    if(is.null(my_mod$lambda.min)==TRUE){lam <- 0}
+    i_lams <- Matrix(diag(x=1,nrow=k,ncol=k),sparse=TRUE)
+    xpx <- t(xs) %*% xs
+    xpxinvplam <- solve(xpx + lam*i_lams)
+    var_cov <- sigma_sq * (xpxinvplam %*% xpx %*% xpxinvplam)
+    se_bs <- sqrt(diag(var_cov))
+    
+    print('NOTE: These standard errors are very biased.')
+    return(list(vcov=var_cov, se=se_bs))
+  }
+  
+  # Predictions
+  r_yhat   <- predict(rmod,newx=x,s='lambda.min')
+  ro_yhat  <- predict(rmod,newx=x)
+  # Variance-covariance matrix and Standard Erros
+  rmod_ses <- ridge_se(x,y,r_yhat,rmod)
+  
+  return(rmod_ses)
+}
+
 
 
 
@@ -45,7 +74,7 @@ get.maf <-function(vec){
 ## a: shape parameter for GM method                                                          
 ###############################################################################################
 
-QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, reg.family="binomial"){
+QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, reg.family="binomial", method="pca"){
   ### DEBUG ###
   #y <- p
   #newgeno <- g
@@ -66,67 +95,82 @@ QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshol
   tryCatch({
   if(dim(newgeno)[2] > 1) {
   
-    #### Calculating PCA ####
-    pcadata <- cbind(y, newgeno)
-    res.pca <- prcomp(newgeno)
-    # Eigenvalues
-    eig <- (res.pca$sdev)^2
-    # Variances in percentage
-    variance <- eig*100/sum(eig)
-    # Cumulative variances
-    cumvar <- cumsum(variance)
-    eig.decathlon2.active <- data.frame(eig = eig, variance = variance, cumvariance = cumvar)
-    #head(eig.decathlon2.active)
+    if(method == "pca") {
+      #### Calculating PCA ####
+      pcadata <- cbind(y, newgeno)
+      res.pca <- prcomp(newgeno)
+      # Eigenvalues
+      eig <- (res.pca$sdev)^2
+      # Variances in percentage
+      variance <- eig*100/sum(eig)
+      # Cumulative variances
+      cumvar <- cumsum(variance)
+      eig.decathlon2.active <- data.frame(eig = eig, variance = variance, cumvariance = cumvar)
+      #head(eig.decathlon2.active)
   
-    ######### Filtering by threshold ##############
-    S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)] %*% t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)])
+      ######### Filtering by threshold ##############
+      S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)] %*% t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)])
   
-    ########## And add the center (and re-scale) back to data ###########
-    if(res.pca$scale != FALSE){
-      S <- scale(S, center = FALSE , scale=1/res.pca$scale)
-    }
-    if(res.pca$center != FALSE){
-      S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
-    }
-  
-  
-    #### End of calculating PCA ####
-  
-    #### PLS ####
-    #res.plsr <- plsr(y ~ ., data = newgeno, validation = "LOO")
-    # TODO TODO TODO
-    #############
-  
-    #### Regression after PCA ####
-  
-    if(reg.family == "binomial") {
-      #t.fit <- try(glm(y ~ ., data=data.frame(S), family = poisson(link = log)),TRUE) #Poisson first
-      #fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit), start = coef(t.fit)),TRUE)
-      fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit)),TRUE)
-      #print(coef(fit))
-    } else if(reg.family == "gaussian") {
-      fit <- try(glm(y ~ ., data=data.frame(S), family = gaussian),TRUE)
-    }
-    na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
-  
-    #### Calculating statistics and p-values ####
-    if(length(na.S) > 0){
-      S <- try(as.matrix(S[,-na.S]),TRUE)
-      fit <- try(glm(y ~ . ,data=data.frame(S)),TRUE)
-    }
-    coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-  
-  
-    if(mode(fit)=="character"){length(coef)<-0}
-  
-    if(length(coef)!=0){
+      ########## And add the center (and re-scale) back to data ###########
+      if(res.pca$scale != FALSE){
+        S <- scale(S, center = FALSE , scale=1/res.pca$scale)
+      }
+      if(res.pca$center != FALSE){
+        S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
+      }
     
-      if(length(coef)!=2){beta1<-coef[,1];se1<-coef[,2]}
-      if(length(coef)==2){beta1<-coef[1];se1<-coef[2]}
+      #### Regression after PCA ####
+      
+      if(reg.family == "binomial") {
+        #t.fit <- try(glm(y ~ ., data=data.frame(S), family = poisson(link = log)),TRUE) #Poisson first
+        #fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit), start = coef(t.fit)),TRUE)
+        fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit)),TRUE)
+        #print(coef(fit))
+      } else if(reg.family == "gaussian") {
+        fit <- try(glm(y ~ ., data=data.frame(S), family = gaussian),TRUE)
+      }
+      na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
+    
+      if(length(na.S) > 0){
+        S <- try(as.matrix(S[,-na.S]),TRUE)
+        fit <- try(glm(y ~ . ,data=data.frame(S)),TRUE)
+      }
+      coef <- try(coef(summary(fit))[-1,1:2],TRUE)
+    
+    
+      if(mode(fit)=="character"){length(coef) <-0 }
+    
+      #### End of PCA ####
+      
+      if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
+      if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
       SS <- cbind(1,S)
       n <- length(y)
       vv <- vcov(fit)[-1,-1]
       alpha <- (1/(se1^2)) #/sum(1/(se1^2))
+      
+      
+    } else if(method == "pls") {
+      #### PLS ####
+      #res.plsr <- plsr(y ~ ., data = newgeno, validation = "LOO")
+      # TODO TODO TODO
+      #############
+    } else if(method == "lasso" | method == "ridge") {
+      #### LASSO/Ridge ####
+      fit <- cv.glmnet(x=as.matrix(newgeno),alpha=ifelse(method=="lasso", 1, 0), y=as.factor(y),family=reg.family)
+      coef <- coef(fit)[-1]
+      beta1 <- coef[which(coef != 0)]
+      n <- length(y)
+      vv <- vcov_rigde(x=as.matrix(newgeno), y=y, rmod=fit)$vcov[which(coef != 0), which(coef != 0)]
+      se1 <- sqrt(ifelse(class(vv) == "dgeMatrix", diag(vv), vv))
+      alpha <- (1/(se1^2)) #/sum(1/(se1^2))
+      ###### End of LASSO/Ridge #######
+    } else {
+      # Default pass
+    }
+  
+   
+    if(length(coef)!=0){
     
       ##QTest1##
       if(weight == FALSE){
