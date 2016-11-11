@@ -1,22 +1,5 @@
 # A basic function for gene-level association test #
 
-library(plyr)
-library(CCP)
-#library(homals)
-library(Matrix)
-library(CompQuadForm)
-library(parallel)
-library(pls)
-library(glmnet)
-
-## Empirical null distribution for Q3 test
-null.dist.Q3 <- read.table("/Users/ilya/Projects/rqt/n.log10.minp.1e09.txt",header=T)
-if(Sys.info()[1] == "Windows") {
-  null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
-} else {
-  null.dist.Q3 <- read.table("/data/work/iz12/rqt/package/n.log10.minp.1e09.txt",header=T)
-}
-
 
 ## Get a given STT
 get.a<-function(L,STT){

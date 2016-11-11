@@ -1,15 +1,15 @@
 #### 
 
-if(Sys.info()[1] == "Windows") {
-  source("W:/data/work/iz12/rqt/package/rqt.R")
-} else {
-  source("/data/work/iz12/rqt/package/rqt.R")
+## Empirical null distribution for Q3 test
+rQTtest.prepare <- function() {
+  null.dist.Q3 <- read.table(system.file("data/n.log10.minp.1e09.txt",package="rqt"), header=T)
+  assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
 }
 
 
-
-
-rQTest <- function(pheno, geno, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, reg.family="binomial") {
+rQTest <- function(pheno, geno, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, reg.family="binomial", method="pca") {
+  # Prepare test: load distribution table and prepare some other information#
+  rQTtest.prepare()
   
   num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
   
