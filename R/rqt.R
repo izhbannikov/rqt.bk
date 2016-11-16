@@ -1,22 +1,21 @@
 # A basic function for gene-level association test #
 
 
-## Get a given STT
-get.a<-function(L,STT){
+#' Get a given STT
+get.a<-function(L,STT) {
   aa<-diff<-seq(0,1,length=200)
   for(i in 1:length(aa)){
     diff[i]<-abs(get.stt(L,aa[i],STT)-STT)
   }
   return(aa[which.min(diff)])
 }
+
 get.stt<-function(L,a,STT){
   1-pgamma(L*qgamma(1-STT,a,1),L*a,1)
 }
-## get minor allele frequency
-get.maf <-function(vec){
-  (length(which(vec==1))+2*length(which(vec==2)))/(2*length(vec))
-}
 
+#' Calculates variance-covariance matrix for LASSO/ridge regression.
+#' 
 vcov_rigde <- function(x, y,  rmod) {
 
   ridge_se <- function(xs,y,yhat,my_mod){
@@ -48,24 +47,21 @@ vcov_rigde <- function(x, y,  rmod) {
 
 
 
-###############################################################################################
-## QTest.one(phe.cova,geno,yname, r2)  #QTest for single gene                                
-##                                                                                           
-## y: trait, newgeno: genotype matrix                                           
-## cut.r2: r^2 cutoff, n.perm: # of pumutations                                              
-## n.perm: number of permutation for GM method                                              
-## a: shape parameter for GM method                                                          
-###############################################################################################
-
-QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D"){
-  ### DEBUG ###
-  #y <- p
-  #newgeno <- g
-  #covadat <- NULL
-  #STT <- 0.2
-  #weight <- FALSE
-  #cumvar.threshold <- 90
-  
+#' This function performs a single (no permutations) gene-level test based on combined effect sizes.
+#' 
+#' @param y Phenotype (vector).
+#' @param covadat A matrix of covariates (NULL) by default.
+#' @param newgeno Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)/
+#' @param STT  TODO
+#' @param weight Logical. TODO
+#' @param cumvar.threshold Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.
+#' @param method Method used to reduce multicollinerity and account for LD. Default: PCA.
+#' @param out.type Character, indicating a type of phenotype. Possible values: D (dichotomous or binary), 
+#' C (continous or qualitative).
+#' @return A list with p-values and corresponding statistics.
+#' @description TODO
+#' @export
+QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D") {
   ####
   ## If covariates exist
   #if(length(covadat)!=0){

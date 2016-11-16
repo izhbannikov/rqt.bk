@@ -1,9 +1,10 @@
 Package: rqt
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: A utility for gene-level meta-analysis
+Version: 0.99.0
 Date: 2016-11-11
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Author: Ilya Zhbannikov
+Maintainer: Who to complain to <ilya.zhbannikov@duke.edu>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
+RoxygenNote: 5.0.1
