@@ -57,14 +57,15 @@ vcov_rigde <- function(x, y,  rmod) {
 ## a: shape parameter for GM method                                                          
 ###############################################################################################
 
-QTest.one<-function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D"){
+QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D"){
   ### DEBUG ###
-  y <- p
-  newgeno <- g
-  covadat <- NULL
-  STT <- 0.2
-  weight <- FALSE
-  cumvar.threshold <- 90
+  #y <- p
+  #newgeno <- g
+  #covadat <- NULL
+  #STT <- 0.2
+  #weight <- FALSE
+  #cumvar.threshold <- 90
+  
   ####
   ## If covariates exist
   #if(length(covadat)!=0){

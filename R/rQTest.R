@@ -1,10 +1,10 @@
 #### 
-
 ## Empirical null distribution for Q3 test
 rQTtest.prepare <- function() {
   null.dist.Q3 <- read.table(system.file("data/n.log10.minp.1e09.txt",package="rqt"), header=T)
   assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
 }
+
 
 
 rQTest <- function(pheno, geno, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, out.type="D", method="pca") {
@@ -42,6 +42,3 @@ rQTest <- function(pheno, geno, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=9
   
   rslt
 }
-
-
-
