@@ -12,7 +12,7 @@ rQTestMeta <- function(data,
     dimensions <- dim(d)
     pheno <- d[,1]
     geno <- d[,2:dimensions[2]]
-    res <- rQTest(pheno = pheno, geno=geno, STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method)
+    res <- rQTest(pheno = pheno, geno=geno, STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, perm = perm)
     if(!is.na(res)) {
       pv <- c(pv, res$p.value$p.Q3)
     }

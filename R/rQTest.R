@@ -1,8 +1,13 @@
 
 #' Empirical null distribution for Q3 test.
 #' 
+#rQTtest.prepare <- function() {
+#  null.dist.Q3 <- read.table(system.file("data/n.log10.minp.1e09.txt",package="rqt"), header=T)
+#  assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
+#}
+
 rQTtest.prepare <- function() {
-  null.dist.Q3 <- read.table(system.file("data/n.log10.minp.1e09.txt",package="rqt"), header=T)
+  null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/rqt-master/data/n.log10.minp.1e09.txt", header=T)
   assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
 }
 
@@ -45,16 +50,20 @@ rQTest <- function(pheno, geno, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=9
                                                           } 
                                                           
                                                           pv <- t.res$p.value
-                                                          print(pv)
+                                                          
                                               })
                       )
     
     rslt0 <- try(as.numeric(QTest.one(y=pheno, covadat=NULL, newgeno=geno, STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method)$p.value),TRUE)
+    
     if(!is.na(rslt0)) {
       
-      rslt <- data.frame(p.Q1 = (length(which(rsltPP[,1] < rslt0[1])) + 1) / (perm + 1),
+      rslt <- list(
+          "Qstatistic"= data.frame(Q1=NA, Q2=NA, Q3=NA),
+          "p.value" = data.frame(p.Q1 = (length(which(rsltPP[,1] < rslt0[1])) + 1) / (perm + 1),
                          p.Q2 = (length(which(rsltPP[,2] < rslt0[2])) + 1) / (perm + 1),
                          p.Q3 = (length(which(rsltPP[,3] < rslt0[3])) + 1) / (perm + 1))
+      )
     } else {
       rslt <- NA
     }
