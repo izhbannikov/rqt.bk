@@ -14,44 +14,23 @@ get.stt<-function(L,a,STT){
   1-pgamma(L*qgamma(1-STT,a,1),L*a,1)
 }
 
-#' Calculates variance-covariance matrix for LASSO/ridge regression.
-#' 
-vcov_rigde <- function(x, y,  rmod) {
 
-  ridge_se <- function(xs,y,yhat,my_mod){
-    # Note, you can't estimate an intercept here
-    n <- dim(xs)[1]
-    k <- dim(xs)[2]
-    sigma_sq <- sum((y - yhat)^2)/ (n-k)
-    lam <- my_mod$lambda.min
-    if(is.null(my_mod$lambda.min)==TRUE){lam <- 0}
-    i_lams <- Matrix(diag(x=1,nrow=k,ncol=k),sparse=TRUE)
-    xpx <- t(xs) %*% xs
-    xpxinvplam <- solve(xpx + lam*i_lams)
-    var_cov <- sigma_sq * (xpxinvplam %*% xpx %*% xpxinvplam)
-    se_bs <- sqrt(diag(var_cov))
-    
-    print('NOTE: These standard errors are very biased.')
-    return(list(vcov=var_cov, se=se_bs))
+get.reg.family <- function(out.type) {
+  if(out.type == "D") {
+    reg.family="binomial"
+  } else if(out.type == "C") {
+    reg.family="gaussian"
+  } else {
+    stop(paste("Unknown out.type:", out.type))
   }
-  
-  # Predictions
-  r_yhat   <- predict(rmod,newx=x,s='lambda.min')
-  ro_yhat  <- predict(rmod,newx=x)
-  # Variance-covariance matrix and Standard Erros
-  rmod_ses <- ridge_se(x,y,r_yhat,rmod)
-  
-  return(rmod_ses)
+  return(reg.family)
 }
-
-
-
 
 #' This function performs a single (no permutations) gene-level test based on combined effect sizes.
 #' 
-#' @param y Phenotype (vector).
-#' @param covadat A matrix of covariates (NULL) by default.
-#' @param newgeno Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)/
+#' @param phenotype Phenotype (vector).
+#' @param genotype Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)
+#' @param covariates A matrix of covariates (NULL) by default.
 #' @param STT  TODO
 #' @param weight Logical. TODO
 #' @param cumvar.threshold Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.
@@ -61,147 +40,96 @@ vcov_rigde <- function(x, y,  rmod) {
 #' @return A list with p-values and corresponding statistics.
 #' @description TODO
 #' @export
-QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D") {
-  ####
-  ## If covariates exist
-  #if(length(covadat)!=0){
-  #  resid<-try(resid(glm(y~.,data=data.frame(covadat),na.action=na.exclude)),TRUE)
-  #} else {
-  #  resid<-try(resid(glm(y~1,na.action=na.exclude, family = binomial(link = log))),TRUE)
-  #}
-  
-  if(out.type == "D") {
-    reg.family="binomial"
-  } else if(out.type == "C") {
-    reg.family="gaussian"
-  } else {
-    stop(paste("Unknown out.type:", out.type))
+QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", center=FALSE, scale=FALSE) {
+  ### Data preprocessing, (scaling if needed) ###
+  #### Binding predictors (genotype and covariates) ####
+  preddata <- genotype
+  if(!is.null(covariates)) {
+    tryCatch({
+      preddata <- cbind(genotype, covariates)
+    }, error=function(e) {
+      stop(print(e))
+    })
   }
   
-  rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
+  if(scale) {
+    preddata <- as.data.frame(scale(preddata))
+  }
+  
+  reg.family <- get.reg.family(out.type)
+  
+  rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA, p.Q2=NA, p.Q3=NA) )
   names(rslt)<-c("Qstatistic", "p.value")
   
   tryCatch({
-    if(dim(newgeno)[2] > 1) {
+    if(dim(preddata)[2] > 1) {
+      ### Dimensionality reduction and account for LD ###
       if(method == "pca") {
-        #### Calculating PCA ####
-        pcadata <- cbind(y, newgeno)
-        res.pca <- prcomp(newgeno)
-        # Eigenvalues
-        eig <- (res.pca$sdev)^2
-        # Variances in percentage
-        variance <- eig*100/sum(eig)
-        # Cumulative variances
-        cumvar <- cumsum(variance)
-        eig.decathlon2.active <- data.frame(eig = eig, variance = variance, cumvariance = cumvar)
-        #head(eig.decathlon2.active)
+        res <- prerocess.pca(data=preddata, scale=scale, cumvar.threshold=cumvar.threshold)
+      } else if(method == "pls") {
+        if(out.type == "D") {
+          ##### PLSDA #####
+          res <- preprocess.plsda(data=preddata, phenotype=phenotype)
+        } else if(out.type == "C"){
+          ##### PLS #####
+          res <- preprocess.pls(data=preddata, phenotype=phenotype, cumvar.threshold=cumvar.threshold)
+        }
+      } else if(method == "lasso" | method == "ridge") {
+        res <- preprocess.lasso.ridge(data=preddata, phenotype=phenotype, reg.family=reg.family, method=method)
+      } else {
+        res[["S"]] <- preddata
+      }
   
-        ######### Filtering by threshold ##############
-        S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)] %*% t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)])
-  
-        ########## And add the center (and re-scale) back to data ###########
-        if(res.pca$scale != FALSE){
-          S <- scale(S, center = FALSE , scale=1/res.pca$scale)
-        }
-        if(res.pca$center != FALSE){
-          S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
-        }
-    
-        #### Regression after PCA ####
-      
-        if(reg.family == "binomial") {
-          #t.fit <- try(glm(y ~ ., data=data.frame(S), family = poisson(link = log)),TRUE) #Poisson first
-          #fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit), start = coef(t.fit)),TRUE)
-          fit <- try(glm(y ~ ., data=data.frame(S), family = binomial(link=logit)),TRUE)
-          #print(coef(fit))
-        } else if(reg.family == "gaussian") {
-          fit <- try(glm(y ~ ., data=data.frame(S), family = reg.family),TRUE)
-        }
-        na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
-    
-        if(length(na.S) > 0){
-          S <- try(as.matrix(S[,-na.S]),TRUE)
-          fit <- try(glm(y ~ . ,data=data.frame(S)),TRUE)
-        }
+      #### Regression after data preprocessing ####
+      if(!(method %in% c("lasso", "ridge"))) {
+        S <- res$S
+        res <- simple.multvar.reg(phenotype=phenotype, data=S, reg.family=reg.family)
+        fit <- res$fit
         coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-    
+      
         if(mode(fit)=="character"){length(coef) <-0 }
-    
-        #### End of PCA ####
       
         if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
         if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
-        SS <- cbind(1,S)
-        n <- length(y)
+      
         vv <- vcov(fit)[-1,-1]
         alpha <- (1/(se1^2)) #/sum(1/(se1^2))
       
-      
-      } else if(method == "pls") {
-        #### PLS ####
-        if(out.type == "D") {
-          ## PLS-DA ##
-          res.plsda <- opls(x = newgeno, y=as.factor(y), predI=NA, plotL = FALSE, log10L=F, algoC = "nipals")
-          d.plsda <- cbind(y=y, res.plsda$scoreMN)
-          fit <- lm(y ~ . , data=data.frame(d.plsda))
-          coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-          
-          if(mode(fit)=="character"){length(coef) <-0 }
-          
-          if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
-          if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
-          n <- length(y)
-          vv <- vcov(fit)[-1,-1]
-          alpha <- (1/(se1^2))#/sum(1/(se1^2))
-          
-        } else if(out.type == "C"){
-          ## PLS ##
-          inpdata <- cbind(y=y, newgeno)
-          res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
-          numcomp <- 1
-          for(i in 1:res.pls.tmp$ncomp) {
-            if (sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > cumvar.threshold/100) {
-              numcomp <- i
-              break
-            } else if(i == res.pls.tmp$ncomp) {
-              numcomp <- res.pls.tmp$ncomp
-            }
-          }
-        
-          res.pls <- plsr(y ~ ., ncomp=numcomp, data = inpdata, validation = "LOO")
-          d.plsr <- cbind(y=inpdata$y, res.pls$scores)
-          fit <- lm(y ~ . , data=data.frame(d.plsr))
-          coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-        
-          if(mode(fit)=="character"){length(coef) <-0 }
-          
-          if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
-          if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
-          n <- length(y)
-          vv <- vcov(fit)[-1,-1]
-          alpha <- (1/(se1^2))#/sum(1/(se1^2))
-        
-          #### End of PLS ###
-        }
-        #############
-      } else if(method == "lasso" | method == "ridge") {
-        #### LASSO/Ridge ####
-        fit <- cv.glmnet(x=as.matrix(newgeno),alpha=ifelse(method=="lasso", 1, 0), y=as.factor(y),family=reg.family)
-        coef <- coef(fit)[-1]
-        beta1 <- coef[which(coef != 0)]
-        n <- length(y)
-        vv <- vcov_rigde(x=as.matrix(newgeno), y=y, rmod=fit)$vcov[which(coef != 0), which(coef != 0)]
-        se1 <- sqrt(ifelse(class(vv) == "dgeMatrix", diag(vv), vv))
-        alpha <- (1/(se1^2)) #/sum(1/(se1^2))
-        ###### End of LASSO/Ridge #######
       } else {
-        # Default pass
+        fit <- res$fit
+        coef <- coef(fit)[-1]
+        
+        if(sum(coef) == 0) {
+          print("All coefficients in lasso/ridge regression are equal to 0. Trying ordinary regressing instead.")
+          res <- simple.multvar.reg(phenotype=phenotype, data=preddata, reg.family=reg.family)
+          S <- res$S
+          fit <- res$fit
+          coef <- try(coef(summary(fit))[-1,1:2],TRUE)
+          
+          if(mode(fit)=="character"){length(coef) <-0 }
+          
+          if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
+          if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
+          
+          vv <- vcov(fit)[-1,-1]
+        } else {
+          beta1 <- coef[which(coef != 0)]
+          vv <- vcov_rigde(x=as.matrix(preddata), y=phenotype, rmod=fit)$vcov[which(coef != 0), which(coef != 0)]
+          if(class(vv)[1] == "dgeMatrix") {
+            se1 <- sqrt(diag(vv))
+          } else {
+            se1 <- sqrt(vv)
+          }
+          vv <- as.matrix(vv)
+        }
+        
+        alpha <- as.matrix((1/(se1^2)), ncol=1) #/sum(1/(se1^2))
       }
-  
-   
-      if(length(coef)!=0){
       
-        ##QTest1##
+      
+      if(length(coef) != 0){
+      
+        ###### QTest1 ######
         if(weight == FALSE){
           var.pool0 <- t(alpha) %*% vv %*% alpha
           beta.pool0 <- t(alpha) %*% beta1
@@ -275,7 +203,6 @@ QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.thresh
             if(p.Q3.can[h]<=0|p.Q3.can[h]>1){p.Q3.can[h]<-liu(Q3[h],c(pi0[h],(1-pi0[h])),c(1,1))[1]}
           }
       
-        
           Q3final <- Q3[which.min(p.Q3.can)]
           p.Q3 <- (sum(null.dist.Q3[null.dist.Q3[,1] > -log10(min(p.Q3.can)),2])+1)/(sum(null.dist.Q3[,2])+1)
         }
@@ -291,7 +218,11 @@ QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.thresh
       options (warn=-1)
     } else {
       # Simple logistic regression:
-      res <- glm(y ~ ., data=data.frame(newgeno), family = binomial(link=logit))
+      if(out.type == "D") {
+        res <- glm(phenotype ~ ., data=data.frame(preddata), family = binomial(link=logit))
+      } else {
+        res <- glm(phenotype ~ ., data=data.frame(preddata), family = gaussian)
+      }
       reg.coef <- coef(summary(res))
     
       if(dim(reg.coef)[1] == 2) {
@@ -301,6 +232,7 @@ QTest.one <- function(y,covadat=NULL,newgeno,STT=0.2,weight=FALSE, cumvar.thresh
       } else {
         rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
       }
+  
     
     }
   },error=function(e) {
