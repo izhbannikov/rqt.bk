@@ -3,9 +3,9 @@
 
 #' Get a given STT
 get.a<-function(L,STT) {
-  aa<-diff<-seq(0,1,length=200)
+  aa <- diff <- seq(0,1,length=200)
   for(i in 1:length(aa)){
-    diff[i]<-abs(get.stt(L,aa[i],STT)-STT)
+    diff[i] <- abs(get.stt(L,aa[i], STT) - STT)
   }
   return(aa[which.min(diff)])
 }
@@ -27,20 +27,22 @@ get.reg.family <- function(out.type) {
 }
 
 #' This function performs a single (no permutations) gene-level test based on combined effect sizes.
-#' 
-#' @param phenotype Phenotype (vector).
-#' @param genotype Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)
-#' @param covariates A matrix of covariates (NULL) by default.
-#' @param STT  TODO
-#' @param weight Logical. TODO
+#' @param phenotype Phenotype (a matrix n by 1 where n - number of individuals).
+#' @param genotype Genotype (matrix n by m where n - number of individuals, m - number of genetic variants).
+#' @param covariates A matrix of covariates. Default: NULL.
+#' @param STT Numeric indicating soft truncation threshold (STT) to convert to gamma parameter (must be <= 0.4). 
+#' Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
+#' See, for example, Fridley, et al 2013: "Soft truncation thresholding for gene set analysis of RNA-seq data: Application to a vaccine study".
+#' @param weight Logical value. Indicates using weights (see Lee et al 2016). Default: FALSE.
 #' @param cumvar.threshold Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.
 #' @param method Method used to reduce multicollinerity and account for LD. Default: PCA.
 #' @param out.type Character, indicating a type of phenotype. Possible values: D (dichotomous or binary), 
 #' C (continous or qualitative).
-#' @return A list with p-values and corresponding statistics.
-#' @description TODO
+#' @param scale A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.
+#' @return A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
+#' @description 
 #' @export
-QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", center=FALSE, scale=FALSE) {
+QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", scale=FALSE) {
   ### Data preprocessing, (scaling if needed) ###
   #### Binding predictors (genotype and covariates) ####
   preddata <- genotype
@@ -69,13 +71,13 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
       } else if(method == "pls") {
         if(out.type == "D") {
           ##### PLSDA #####
-          res <- preprocess.plsda(data=preddata, phenotype=phenotype)
+          res <- preprocess.plsda(data=preddata, y=phenotype)
         } else if(out.type == "C"){
           ##### PLS #####
-          res <- preprocess.pls(data=preddata, phenotype=phenotype, cumvar.threshold=cumvar.threshold)
+          res <- preprocess.pls(data=preddata, y=phenotype, cumvar.threshold=cumvar.threshold)
         }
       } else if(method == "lasso" | method == "ridge") {
-        res <- preprocess.lasso.ridge(data=preddata, phenotype=phenotype, reg.family=reg.family, method=method)
+        res <- preprocess.lasso.ridge(data=preddata, y=phenotype, reg.family=reg.family, method=method)
       } else {
         res[["S"]] <- preddata
       }
@@ -83,7 +85,7 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
       #### Regression after data preprocessing ####
       if(!(method %in% c("lasso", "ridge"))) {
         S <- res$S
-        res <- simple.multvar.reg(phenotype=phenotype, data=S, reg.family=reg.family)
+        res <- simple.multvar.reg(y=phenotype, data=S, reg.family=reg.family)
         fit <- res$fit
         coef <- try(coef(summary(fit))[-1,1:2],TRUE)
       
@@ -101,7 +103,7 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
         
         if(sum(coef) == 0) {
           print("All coefficients in lasso/ridge regression are equal to 0. Trying ordinary regressing instead.")
-          res <- simple.multvar.reg(phenotype=phenotype, data=preddata, reg.family=reg.family)
+          res <- simple.multvar.reg(y=phenotype, data=preddata, reg.family=reg.family)
           S <- res$S
           fit <- res$fit
           coef <- try(coef(summary(fit))[-1,1:2],TRUE)
@@ -188,7 +190,7 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
           L3<-try(diag(l3),TRUE);if(length(l3)==1){L3<-l3}
           q2.proj<-(t(U3)%*%b.star)^2/l3; 
           p2.1<-pchisq(q2.proj,df=1,lower.tail=FALSE)
-          a<-get.a(length(p2.1),STT)
+          a <- get.a(length(p2.1),STT)
           Q2.proj<-sum(2*qgamma(p2.1,a,1,lower.tail=FALSE))
           p.Q2.proj<-pchisq(Q2.proj,df=2*a*length(l3),lower.tail=FALSE)
           Q2.1<-qchisq(p.Q2.proj,df=1,lower.tail=FALSE)

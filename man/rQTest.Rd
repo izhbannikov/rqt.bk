@@ -4,19 +4,24 @@
 \alias{rQTest}
 \title{This function performs a gene-level test based on combined effect sizes.}
 \usage{
-rQTest(pheno, geno, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 90, out.type = "D", method = "pca")
+rQTest(phenotype, genotype, covariates = NULL, perm = 0, STT = 0.2,
+  weight = FALSE, cumvar.threshold = 90, out.type = "D", method = "pca",
+  scale = FALSE)
 }
 \arguments{
-\item{pheno}{Phenotype (vector).}
+\item{phenotype}{Phenotype (a matrix n by 1 where n - number of individuals).}
 
-\item{geno}{Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)/}
+\item{genotype}{Genotype (matrix n by m where n - number of individuals, m - number of genetic variants).}
+
+\item{covariates}{A matrix of covariates. Default: NULL.}
 
 \item{perm}{Integer indicating the number of permutations to compute p-values. Default: 0.}
 
-\item{STT}{TODO}
+\item{STT}{Numeric indicating soft truncation threshold (STT) to convert to gamma parameter (must be <= 0.4). 
+Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
+See, for example, Fridley, et al 2013: "Soft truncation thresholding for gene set analysis of RNA-seq data: Application to a vaccine study".}
 
-\item{weight}{Logical. TODO}
+\item{weight}{Logical value. Indicates using weights (see Lee et al 2016). Default: FALSE.}
 
 \item{cumvar.threshold}{Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.}
 
@@ -24,18 +29,17 @@ rQTest(pheno, geno, perm = 0, STT = 0.2, weight = FALSE,
 C (continous or qualitative).}
 
 \item{method}{Method used to reduce multicollinerity and account for LD. Default: PCA.}
+
+\item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.}
 }
 \value{
-A list with p-values and corresponding statistics.
-}
-\description{
-TODO
+A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
 }
 \examples{
 library(rqt)
 data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(pheno=pheno, geno=geno)
+res <- rQTest(phenotype=pheno, genotype=geno)
 }
 

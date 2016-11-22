@@ -1,7 +1,10 @@
 #### Dimensionality reduction methods ####
 
 #' Calculates variance-covariance matrix for LASSO/ridge regression.
-#' 
+#'@param x A matrix of predictors.
+#'@param y A vector of outputs (dependent variable).
+#'@param rmod An object returned from glmnet.
+#'@return A list of two: variance-covariance matrix, standard deviations of coefficients.
 vcov_rigde <- function(x, y,  rmod) {
   
   ridge_se <- function(xs,y,yhat,my_mod){
@@ -30,8 +33,13 @@ vcov_rigde <- function(x, y,  rmod) {
   return(rmod_ses)
 }
 
-#### Calculating PCA ####
+#' Preprocess input data with Principal Component Analysis method (PCA)
+#' @param data An input matrix with values of independent variables (predictors).
+#' @param scale A logical variable, indicates wheither or not scaling should be performed.
+#' @param cumvar.threshold A threshold value for explained variance.
+#' @return A list of one: "S" - a data frame of predictor values.
 prerocess.pca <- function(data, scale, cumvar.threshold) {
+  data = genotype
   res.pca <- prcomp(data, scale=scale)
   # Eigenvalues
   eig <- (res.pca$sdev)^2
@@ -45,26 +53,33 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
   S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)] %*% t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)])
   
   ########## And add the center (and re-scale) back to data ###########
-  if(scale != FALSE){
+  if(scale){
     S <- scale(S, center = FALSE , scale=1/res.pca$scale)
   }
-  if(center != FALSE){
+  if(center){
     S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
   }
   
   return(list(S = S))
 }
 
-## PLS-DA ##
-preprocess.plsda <- function(data, phenotype) {
+#' Preprocess input data with Partial Linear Square Regregression Discriminant Analysis method (PLSDA)
+#' @param data An input matrix with values of independent variables (predictors).
+#' @param y A vector with values of dependent variable (outcome).
+#' @return A list of one: "S" - a data frame of predictor values.
+preprocess.plsda <- function(data, y) {
   numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
-  res.plsda <- opls(x = data, y=as.factor(phenotype), predI=numcomp, plotL = FALSE, log10L=F, algoC = "nipals")
+  res.plsda <- opls(x = data, y=as.factor(y), predI=numcomp, plotL = FALSE, log10L=F, algoC = "nipals")
   #d.plsda <- cbind(y=phenotype, res.plsda$scoreMN)
   return(list(S=res.plsda$scoreMN))
 }
 
-## PLS ##
-preprocess.pls <- function(data, phenotype, cumvar.threshold) {
+#' Preprocess input data with Partial Linear Square Regregression method (PLS)
+#' @param data An input matrix with values of independent variables (predictors).
+#' @param y A vector with values of dependent variable (outcome).
+#' @param cumvar.threshold A threshold value for explained variance.
+#' @return A list of one: "S" - a data frame of predictors.
+preprocess.pls <- function(data, y, cumvar.threshold) {
 
   inpdata <- data.frame("y"=phenotype, data)
   res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
@@ -83,13 +98,19 @@ preprocess.pls <- function(data, phenotype, cumvar.threshold) {
   return(list(S=data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2], nrow=dim(res.pls$scores)[1], byrow=TRUE))))
 }
 
-preprocess.lasso.ridge <- function(data, phenotype, reg.family, method) {
+#' Preprocess input data with LASSO/Ridge regregression method
+#' @param data An input matrix with values of independent variables (predictors).
+#' @param y A vector with values of dependent variable (outcome).
+#' @param reg.family A regression family. Can be either "binomial" or "gaussian."
+#' @param method A method. Can be either "lasso" or "ridge."
+#' @return fit An object returned by "cv.glmnet" function.
+preprocess.lasso.ridge <- function(data, y, reg.family, method) {
   #### LASSO/Ridge ####
   tryCatch({
     if(reg.family == "binomial") {
-      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=as.factor(phenotype), family=reg.family)
+      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=as.factor(y), family=reg.family)
     } else {
-      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=phenotype, family=reg.family)
+      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=y, family=reg.family)
     }
   } , error=function(e) {
     stop(print(e))
@@ -98,11 +119,16 @@ preprocess.lasso.ridge <- function(data, phenotype, reg.family, method) {
   return(list(fit=fit))
 } 
 
-simple.multvar.reg <- function(phenotype, data, reg.family) {
+#' Applies linear of logistic regregression to the data.
+#' @param data An input matrix with values of independent variables (predictors).
+#' @param y A vector with values of dependent variable (outcome).
+#' @param reg.family A regression family. Can be either "binomial" or "gaussian."
+#' @return A list of two: "S" - a dataframe with predictors and "fit" - an object returned by "glm" function.
+simple.multvar.reg <- function(y, data, reg.family) {
   if(reg.family == "binomial") {
-    fit <- try(glm(phenotype ~ ., data=data.frame(data), family = binomial(link=logit)),TRUE)
+    fit <- try(glm(y ~ ., data=data.frame(data), family = binomial(link=logit)),TRUE)
   } else if(reg.family == "gaussian") {
-    fit <- try(glm(phenotype ~ ., data=data.frame(data), family = reg.family),TRUE)
+    fit <- try(glm(y ~ ., data=data.frame(data), family = reg.family),TRUE)
   } else {
     stop(paste("Unknown reg.family:", reg.family))
   }

@@ -15,25 +15,28 @@ rQTtest.prepare <- function() {
 
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
-#' @param phenotype Phenotype (vector).
-#' @param genotype Genotype (matrix n by m where n - number of individuals, m - number of genetic variants)
-#' @param covariates A matrix of covariates. Default: NULL
+#' @param phenotype Phenotype (a matrix n by 1 where n - number of individuals).
+#' @param genotype Genotype (matrix n by m where n - number of individuals, m - number of genetic variants).
+#' @param covariates A matrix of covariates. Default: NULL.
 #' @param perm Integer indicating the number of permutations to compute p-values. Default: 0.
-#' @param STT  TODO
-#' @param weight Logical. TODO
+#' @param STT Numeric indicating soft truncation threshold (STT) to convert to gamma parameter (must be <= 0.4). 
+#' Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
+#' See, for example, Fridley, et al 2013: "Soft truncation thresholding for gene set analysis of RNA-seq data: Application to a vaccine study".
+#' @param weight Logical value. Indicates using weights (see Lee et al 2016). Default: FALSE.
 #' @param cumvar.threshold Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.
+#' @param method Method used to reduce multicollinerity and account for LD. Default: PCA.
 #' @param out.type Character, indicating a type of phenotype. Possible values: D (dichotomous or binary), 
 #' C (continous or qualitative).
-#' @param method Method used to reduce multicollinerity and account for LD. Default: PCA.
-#' @return A list with p-values and corresponding statistics.
-#' @description TODO
+#' @param scale A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.
+#' @return A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
+#' @description 
 #' @export
 #' @examples
 #' library(rqt)
 #' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
-#' res <- rQTest(pheno=pheno, geno=geno)
+#' res <- rQTest(phenotype=pheno, genotype=geno)
 rQTest <- function(phenotype, genotype, covariates=NULL, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, out.type="D", method="pca", scale=FALSE) {
   # Prepare test: load distribution table and prepare some other information#
   rQTtest.prepare()
