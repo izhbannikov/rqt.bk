@@ -2,7 +2,10 @@
 
 ## Installation
 
-```devtools::install_github("izhbannikov/rqt")```
+```
+devtools::install_github("izhbannikov/rqt")
+
+```
 
 ## Usage
 
