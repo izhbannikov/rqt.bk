@@ -85,7 +85,9 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
       #### Regression after data preprocessing ####
       if(!(method %in% c("lasso", "ridge"))) {
         S <- res[["S"]]
+        
         res <- simple.multvar.reg(y=phenotype, data=S, reg.family=reg.family)
+        #print(res)
         fit <- res$fit
         coef <- try(coef(summary(fit))[-1,1:2],TRUE)
         if(mode(fit)=="character"){length(coef) <-0 }

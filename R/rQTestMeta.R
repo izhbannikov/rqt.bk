@@ -27,7 +27,7 @@
 #'res <- rQTestMeta(indata)
 #'res
 rQTestMeta <- function(data, 
-                       covariates,
+                       covariates=NULL,
                        perm=0, 
                        STT=0.2, 
                        weight=FALSE, 
@@ -41,7 +41,18 @@ rQTestMeta <- function(data,
     dimensions <- dim(data[[i]])
     pheno <- data[[i]][,1]
     geno <- data[[i]][,2:dimensions[2]]
-    res <- rQTest(pheno = pheno, geno=geno, covariates[[i]], STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, perm = perm, scale=scale)
+    if(!is.null(covariates)) {
+      res <- rQTest(phenotype = pheno, genotype = geno, 
+                  covariates = covariates[[i]],
+                  STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, 
+                  perm = perm, scale=scale)
+    } else {
+      res <- rQTest(phenotype = pheno, genotype = geno, 
+                    covariates = covariates,
+                    STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, 
+                    perm = perm, scale=scale)
+    }
+    
     if(!is.na(res)) {
       pv <- c(pv, res$p.value$p.Q3)
     }
