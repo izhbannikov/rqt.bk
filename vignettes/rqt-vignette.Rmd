@@ -12,8 +12,12 @@ Contact: ilya.zhbannikov@duke.edu for questions of usage the \code{rqt} or any o
 
 Below we provide several examples that show GWAS meta-analysis on gene-level layer.
 
+### Methods in brief
+
+The workflow of gene-level meta analysis consists of the following steps: (i) reducing the number of predictors, thereby alleviating correlations between variants (accounting for LD); (ii) then the regression mod-el is fitted on the reduced dataset to obtain corresponding regression coefficient ("effect sizes"); (iii) these coefficients are then to be pooled into a total index representing a total gene-level effect size and corresponding statistics is calculated. P- and q- values are then calculated using this statistics from asymptotic approximation or permutation procedure; (iv) the final step is combining gene-level p-values calculated from each study with Fisher's combined probability method.
+
 ## Installation
-### Stable version from CRAN
+### Stable version from Bioconductor
 
 TODO
 
@@ -41,8 +45,8 @@ covariates in form described above.
 ### Dichotomous phenotype
 ```{r}
 library(rqt)
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
-pheno <- data$V1
+data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRUE)
+pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 res <- rQTest(phenotype=pheno, genotype=geno, method="pca", out.type = "D")
 res
@@ -51,8 +55,8 @@ res
 ### Continuous phenotype
 ```{r}
 library(rqt)
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
-pheno <- data$V1
+data <- read.table(system.file("data/test.cont1.dat",package="rqt"), header = TRUE)
+pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 res <- rQTest(phenotype=pheno, genotype=geno, method="pca", out.type = "C")
 res
@@ -63,8 +67,8 @@ res
 This method is used for continous outcome, i.e. out.type = "C".
 ```{r}
 library(rqt)
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
-pheno <- data$V1
+data <- read.table(system.file("data/test.cont1.dat",package="rqt"), header = TRUE)
+pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 res <- rQTest(phenotype=pheno, genotype=geno, method="pls", out.type = "C")
 res
@@ -75,10 +79,10 @@ res
 This method of data preprocessing is used for dichotomous outcome.
 ```{r}
 library(rqt)
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
-pheno <- data$V1
+data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header=TRUE)
+pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(phenotype=pheno, genotype=geno, method="pls", out.type = "C")
+res <- rQTest(phenotype=pheno, genotype=geno, method="pls", out.type = "D", scale = TRUE)
 res
 ```
 
@@ -91,17 +95,30 @@ can accept additional covariates, in form of n by k matrix, as provided below:
 
 ```{r}
 library(rqt)
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
-pheno <- data$V1
+data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRUE)
+pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-covars <- ""
-res <- rQTest(phenotype=pheno, genotype=geno, covariates = covars, method="pca", out.type = "C")
+covars <- read.table(system.file("data/test.cova1.dat",package="rqt"), header=TRUE)
+res <- rQTest(phenotype=pheno, genotype=geno, covariates = covars, method="pca", out.type = "D")
 res
 ```
 
 ### Survival analysis
 
 TODO
+
+
+## Meta-analysis
+
+```{r}
+data1 <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRUE)
+data2 <- read.table(system.file("data/test.bin2.dat",package="rqt"), header = TRUE)
+data3 <- read.table(system.file("data/test.bin3.dat",package="rqt"), header = TRUE)
+indata <- list(data1, data2, data3)
+
+res <- rQTestMeta(indata)
+res
+```
 
 ## References
 
