@@ -62,7 +62,7 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
   
   rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=NA, p.Q2=NA, p.Q3=NA) )
   names(rslt)<-c("Qstatistic", "p.value")
-  
+  res <- list()
   tryCatch({
     if(dim(preddata)[2] > 1) {
       ### Dimensionality reduction and account for LD ###
@@ -84,16 +84,15 @@ QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE
   
       #### Regression after data preprocessing ####
       if(!(method %in% c("lasso", "ridge"))) {
-        S <- res$S
+        S <- res[["S"]]
         res <- simple.multvar.reg(y=phenotype, data=S, reg.family=reg.family)
         fit <- res$fit
         coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-      
         if(mode(fit)=="character"){length(coef) <-0 }
-      
+        
         if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
         if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
-      
+        
         vv <- vcov(fit)[-1,-1]
         alpha <- (1/(se1^2)) #/sum(1/(se1^2))
       

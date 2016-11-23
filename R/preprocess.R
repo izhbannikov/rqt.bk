@@ -55,9 +55,9 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
   if(scale){
     S <- scale(S, center = FALSE , scale=1/res.pca$scale)
   }
-  if(center){
-    S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
-  }
+  #if(center){
+  #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
+  #}
   
   return(list(S = S))
 }
@@ -80,7 +80,7 @@ preprocess.plsda <- function(data, y) {
 #' @return A list of one: "S" - a data frame of predictors.
 preprocess.pls <- function(data, y, cumvar.threshold) {
 
-  inpdata <- data.frame("y"=phenotype, data)
+  inpdata <- data.frame("y"=y, data)
   res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
   numcomp <- 1
   for(i in 1:res.pls.tmp$ncomp) {
@@ -94,7 +94,9 @@ preprocess.pls <- function(data, y, cumvar.threshold) {
   
   res.pls <- plsr(y ~ ., ncomp=numcomp, data = inpdata, validation = "LOO")
   #d.plsr <- cbind(y=inpdata$y, res.pls$scores)
-  return(list(S=data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2], nrow=dim(res.pls$scores)[1], byrow=TRUE))))
+  S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2], nrow=dim(res.pls$scores)[1], byrow=TRUE))
+  
+  return(list(S=S))
 }
 
 #' Preprocess input data with LASSO/Ridge regregression method
@@ -135,7 +137,9 @@ simple.multvar.reg <- function(y, data, reg.family) {
   
   if(length(na.S) > 0){
     S <- try(as.matrix(data[,-na.S]),TRUE)
-    fit <- try(glm(phenotype ~ . ,data=data.frame(S)),TRUE)
+    fit <- try(glm(y ~ . ,data=data.frame(S)),TRUE)
+  } else {
+    S <- data
   }
   return(list(S=S, fit=fit))
 }
