@@ -39,7 +39,6 @@ vcov_rigde <- function(x, y,  rmod) {
 #' @param cumvar.threshold A threshold value for explained variance.
 #' @return A list of one: "S" - a data frame of predictor values.
 prerocess.pca <- function(data, scale, cumvar.threshold) {
-  data = genotype
   res.pca <- prcomp(data, scale=scale)
   # Eigenvalues
   eig <- (res.pca$sdev)^2
