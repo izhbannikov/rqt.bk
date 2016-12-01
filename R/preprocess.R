@@ -68,9 +68,12 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
 #' @return A list of one: "S" - a data frame of predictor values.
 preprocess.plsda <- function(data, y) {
   numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
-  res.plsda <- opls(x = data, y=as.factor(y), predI=numcomp, plotL = FALSE, log10L=F, algoC = "nipals")
-  #d.plsda <- cbind(y=phenotype, res.plsda$scoreMN)
-  return(list(S=res.plsda$scoreMN))
+  model <- try(opls(x = data, y=as.factor(y), predI=numcomp, plotL = FALSE, log10L=F, algoC = "nipals"), silent = TRUE)
+  if(inherits(model, "try-error") &&
+     substr(unclass(attr(model, "condition"))$message, 1, 85) == "No model was built because the first predictive component was already not significant") {
+    model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, log10L=F, algoC = "nipals")
+  }
+  return(list(S=model$scoreMN))
 }
 
 #' Preprocess input data with Partial Linear Square Regregression method (PLS)
