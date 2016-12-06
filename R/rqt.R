@@ -42,11 +42,12 @@ get.reg.family <- function(out.type) {
 #' @return A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
 #' @description 
 #' @export
-QTest.one <- function(phenotype, genotype, covariates=NULL, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", scale=FALSE) {
+QTest.one <- function(phenotype, genotype, covariates, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", scale=FALSE) {
   ### Data preprocessing, (scaling if needed) ###
   #### Binding predictors (genotype and covariates) ####
   preddata <- genotype
-  if(!is.null(covariates)) {
+  
+  if(length(covariates) != 0) {
     tryCatch({
       preddata <- cbind(genotype, covariates)
     }, error=function(e) {
