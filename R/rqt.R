@@ -40,7 +40,6 @@ get.reg.family <- function(out.type) {
 #' C (continous or qualitative).
 #' @param scale A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.
 #' @return A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
-#' @description 
 #' @export
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2,weight=FALSE, cumvar.threshold=90, method="pca", out.type="D", scale=FALSE) {
   ### Data preprocessing, (scaling if needed) ###

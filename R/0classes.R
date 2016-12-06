@@ -4,12 +4,39 @@
 #'
 #'This class stores parameters and results of the rtq algorithms
 #'
+#'@section Slots:
+#'    \describe{
+#'      \item{\code{phenotype}:}{Phenotype (a vector of length \code{N}, where \code{N} - number of individuals).}
+#'      \item{\code{genotype}:}{Genotype (data frame \code{N} by \code{M} where \code{N} - number of individuals, \code{M}
+#'       - number of genetic variants).}
+#'      \item{\code{covariates}:}{data frame \code{N} by \code{K} where \code{N} - number of individuals, \code{K}
+#'       - number of covariates)}
+#'      \item{\code{results}:}{A list of two: test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
+#'      p-values (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
+#'}
+#'@rdname rqt-class
+#'@details see \code{\link[=print.rqt]{rqt-methods} for related methods}
 setClass("rqt", slots=c(phenotype="vector", genotype="data.frame", covariates="data.frame", results="list"))
 
 #' The rqt class constructor
 #' 
 #' This function generates rqt class objects
 #' 
+#' @param phenotype ExpressionSet object or numeric matrix of expression data, with features in rows and samples in columns
+#' @param genotype Numeric matrix of CNV data
+#' @param covariates Regulon class object containing the transcriptional interactome
+#' @param results Regulon class object containing the post-translational interactome
+#' @return Object of class rqt
+#' @examples
+#' library(rqt)
+#' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
+#' print(rqtobj)
+#' @rdname rqt-class
+#' @aliases rqtClass
+#' @export
 rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, results=NULL) {
   if(is.null(phenotype)) {
     phenotype <- c()
@@ -31,8 +58,23 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, results=NUL
 #' 
 #' This document lists a series of basic methods for the class rqt
 #'
-setMethod("print", "rqt", function(x, pval=.05) {
-  # TODO
+#' @rdname rqt-methods
+#' @return print returns summary information about the rqt object
+#' @rdname rqt-methods
+#' @aliases print.rqt
+#' @docType methods
+setMethod("print", "rqt", function(x) {
+  cat("Phenotype:\n")
+  print(head(x@phenotype))
+  cat("...\n\n")
+  cat("Genotype:\n")
+  print(head(x@genotype))
+  cat("...\n\n")
+  cat("Covariates:\n")
+  cat(head(x@covariates))
+  cat("\n\n")
+  cat("Results:\n\n")
+  print(x@results)
 })
 
 #' @rdname rqt-methods
@@ -46,9 +88,20 @@ setMethod("show", "rqt", function(object) {
 #' @rdname rqt-methods
 #' @aliases summary.rqt
 #' @return summary returns the integrated results from the analysis
+#' @docType methods
 #' @export
 setMethod("summary", "rqt", function(object) {
-  # TODO
+  cat("Phenotype:\n")
+  print(summary(object@phenotype))
+  cat("...\n\n")
+  cat("Genotype:\n")
+  print(summary(object@genotype))
+  cat("...\n\n")
+  cat("Covariates:\n")
+  cat(summary(object@covariates))
+  cat("\n\n")
+  cat("Results:\n\n")
+  print(summary(object@results))
 })
 
 

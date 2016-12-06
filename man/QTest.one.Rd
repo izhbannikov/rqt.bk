@@ -4,9 +4,8 @@
 \alias{QTest.one}
 \title{This function performs a single (no permutations) gene-level test based on combined effect sizes.}
 \usage{
-QTest.one(phenotype, genotype, covariates = NULL, STT = 0.2,
-  weight = FALSE, cumvar.threshold = 90, method = "pca", out.type = "D",
-  scale = FALSE)
+QTest.one(phenotype, genotype, covariates, STT = 0.2, weight = FALSE,
+  cumvar.threshold = 90, method = "pca", out.type = "D", scale = FALSE)
 }
 \arguments{
 \item{phenotype}{Phenotype (a matrix n by 1 where n - number of individuals).}
@@ -32,5 +31,8 @@ C (continous or qualitative).}
 }
 \value{
 A list of two: test statistics (Q1, Q2, Q3), p-values (p1.Q1, p2.Q2, p3.Q3).
+}
+\description{
+This function performs a single (no permutations) gene-level test based on combined effect sizes.
 }
 
