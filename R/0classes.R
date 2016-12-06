@@ -6,29 +6,40 @@
 #'
 #'@section Slots:
 #'    \describe{
-#'      \item{\code{phenotype}:}{Phenotype (a vector of length \code{N}, where \code{N} - number of individuals).}
-#'      \item{\code{genotype}:}{Genotype (data frame \code{N} by \code{M} where \code{N} - number of individuals, \code{M}
+#'      \item{\code{phenotype}:}{Phenotype (a vector of length 
+#'      \code{N}, where \code{N} - number of individuals).}
+#'      \item{\code{genotype}:}{Genotype (data frame \code{N} 
+#'      by \code{M} where \code{N} - number of individuals, \code{M}
 #'       - number of genetic variants).}
-#'      \item{\code{covariates}:}{data frame \code{N} by \code{K} where \code{N} - number of individuals, \code{K}
+#'      \item{\code{covariates}:}{data frame \code{N} 
+#'      by \code{K} where \code{N} - number of individuals, \code{K}
 #'       - number of covariates)}
-#'      \item{\code{results}:}{A list of two: test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
+#'      \item{\code{results}:}{A list of two: 
+#'      test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
 #'      p-values (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
 #'}
 #'@rdname rqt-class
 #'@details see \code{\link[=print.rqt]{rqt-methods} for related methods}
-setClass("rqt", slots=c(phenotype="vector", genotype="data.frame", covariates="data.frame", results="list"))
+setClass("rqt", slots=c(phenotype="vector", genotype="data.frame", 
+                        covariates="data.frame", results="list"))
 
 #' The rqt class constructor
 #' 
 #' This function generates rqt class objects
 #' 
-#' @param phenotype ExpressionSet object or numeric matrix of expression data, with features in rows and samples in columns
-#' @param genotype Numeric matrix of CNV data
-#' @param covariates Regulon class object containing the transcriptional interactome
-#' @param results Regulon class object containing the post-translational interactome
+#' @param phenotype Phenotype (a vector of length \code{N}, 
+#' where \code{N} - number of individuals).
+#' @param genotype Genotype (data frame \code{N} by \code{M} where \code{N}
+#' - number of individuals, \code{M} 
+#' - number of genetic variants).
+#' @param covariates data frame \code{N} by \code{K} where \code{N} 
+#' - number of individuals, \code{K}
+#' - number of covariates
+#' @param results A list of two: test statistics: 
+#' (\code{Q1}, \code{Q2}, \code{Q3}), 
+#' p-values: (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})
 #' @return Object of class rqt
 #' @examples
-#' library(rqt)
 #' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
@@ -37,7 +48,8 @@ setClass("rqt", slots=c(phenotype="vector", genotype="data.frame", covariates="d
 #' @rdname rqt-class
 #' @aliases rqtClass
 #' @export
-rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, results=NULL) {
+rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, 
+                     results=NULL) {
   if(is.null(phenotype)) {
     phenotype <- c()
   }
@@ -51,7 +63,8 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, results=NUL
     results <- list()
   }
     
-  new("rqt", phenotype=phenotype, genotype=genotype, covariates=covariates, results=results)
+  new("rqt", phenotype=phenotype, genotype=genotype, covariates=covariates, 
+      results=results)
 }
 
 #' Basic methods for class rqt
@@ -79,7 +92,8 @@ setMethod("print", "rqt", function(x) {
 
 #' @rdname rqt-methods
 #' @aliases show.rqt
-#' @return show returns summary information about the object of class rqt
+#' @return show returns summary information about 
+#' the object of class rqt
 #' @export
 setMethod("show", "rqt", function(object) {
   print(object)

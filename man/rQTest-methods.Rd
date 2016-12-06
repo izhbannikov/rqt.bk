@@ -16,22 +16,30 @@ rQTest(x, ...)
 
 \item{...}{Additional parameters to pass to the function}
 
-\item{perm}{Integer indicating the number of permutations to compute p-values. Default: 0.}
+\item{perm}{Integer indicating the number of permutations 
+to compute p-values. Default: 0.}
 
-\item{STT}{Numeric indicating soft truncation threshold (STT) to convert to gamma parameter (must be <= 0.4). 
+\item{STT}{Numeric indicating soft truncation threshold (STT) 
+to convert to gamma parameter (must be <= 0.4). 
 Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
-See, for example, Fridley, et al 2013: "Soft truncation thresholding for gene set analysis of RNA-seq data: Application to a vaccine study".}
+See, for example, Fridley, et al 2013: "Soft truncation thresholding 
+for gene set analysis of RNA-seq data: Application to a vaccine study".}
 
-\item{weight}{Logical value. Indicates using weights (see Lee et al 2016). Default: FALSE.}
+\item{weight}{Logical value. Indicates using weights (see Lee et al 2016). 
+Default: FALSE.}
 
-\item{cumvar.threshold}{Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.}
+\item{cumvar.threshold}{Numeric value indicating 
+the explained variance threshold for PCA-like methods. Default: 90.}
 
-\item{out.type}{Character, indicating a type of phenotype. Possible values: D (dichotomous or binary), 
-C (continous or quantitative).}
+\item{out.type}{Character, indicating a type of phenotype. 
+Possible values: \code{D} (dichotomous or binary), 
+\code{C} (continous or quantitative).}
 
-\item{method}{Method used to reduce multicollinerity and account for LD. Default: PCA.}
+\item{method}{Method used to reduce multicollinerity and account for LD. 
+Default: PCA.}
 
-\item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.}
+\item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of 
+the genotype dataset.}
 }
 \value{
 Updated rqt object with result slot
@@ -42,12 +50,11 @@ This function performs a gene-level test based on combined effect sizes.
 This function performs a gene-level test based on combined effect sizes.
 }
 \examples{
-library(rqt)
 data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
 rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
 res <- rQTest(rqtobj)
-res@results
+print(res)
 }
 

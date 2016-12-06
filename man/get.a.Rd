@@ -6,6 +6,15 @@
 \usage{
 get.a(L, STT)
 }
+\arguments{
+\item{L}{TODO}
+
+\item{STT}{Numeric indicating soft truncation threshold (STT) to convert 
+to gamma parameter (must be <= 0.4).}
+}
+\value{
+a TODO
+}
 \description{
 Get a given STT
 }

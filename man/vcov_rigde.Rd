@@ -14,7 +14,8 @@ vcov_rigde(x, y, rmod)
 \item{rmod}{An object returned from glmnet.}
 }
 \value{
-A list of two: variance-covariance matrix, standard deviations of coefficients.
+A list of two: variance-covariance matrix, 
+standard deviations of coefficients.
 }
 \description{
 Calculates variance-covariance matrix for LASSO/ridge regression.

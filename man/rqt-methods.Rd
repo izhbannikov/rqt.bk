@@ -19,7 +19,8 @@
 \value{
 print returns summary information about the rqt object
 
-show returns summary information about the object of class rqt
+show returns summary information about 
+the object of class rqt
 
 summary returns the integrated results from the analysis
 }

@@ -10,13 +10,20 @@ rqtClass(phenotype = NULL, genotype = NULL, covariates = NULL,
   results = NULL)
 }
 \arguments{
-\item{phenotype}{ExpressionSet object or numeric matrix of expression data, with features in rows and samples in columns}
+\item{phenotype}{Phenotype (a vector of length \code{N}, 
+where \code{N} - number of individuals).}
 
-\item{genotype}{Numeric matrix of CNV data}
+\item{genotype}{Genotype (data frame \code{N} by \code{M} where \code{N}
+- number of individuals, \code{M} 
+- number of genetic variants).}
 
-\item{covariates}{Regulon class object containing the transcriptional interactome}
+\item{covariates}{data frame \code{N} by \code{K} where \code{N} 
+- number of individuals, \code{K}
+- number of covariates}
 
-\item{results}{Regulon class object containing the post-translational interactome}
+\item{results}{A list of two: test statistics: 
+(\code{Q1}, \code{Q2}, \code{Q3}), 
+p-values: (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
 }
 \value{
 Object of class rqt
@@ -32,17 +39,20 @@ see \code{\link[=print.rqt]{rqt-methods} for related methods}
 \section{Slots}{
 
    \describe{
-     \item{\code{phenotype}:}{Phenotype (a vector of length \code{N}, where \code{N} - number of individuals).}
-     \item{\code{genotype}:}{Genotype (data frame \code{N} by \code{M} where \code{N} - number of individuals, \code{M}
+     \item{\code{phenotype}:}{Phenotype (a vector of length 
+     \code{N}, where \code{N} - number of individuals).}
+     \item{\code{genotype}:}{Genotype (data frame \code{N} 
+     by \code{M} where \code{N} - number of individuals, \code{M}
       - number of genetic variants).}
-     \item{\code{covariates}:}{data frame \code{N} by \code{K} where \code{N} - number of individuals, \code{K}
+     \item{\code{covariates}:}{data frame \code{N} 
+     by \code{K} where \code{N} - number of individuals, \code{K}
       - number of covariates)}
-     \item{\code{results}:}{A list of two: test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
+     \item{\code{results}:}{A list of two: 
+     test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
      p-values (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
 }
 }
 \examples{
-library(rqt)
 data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]

@@ -4,7 +4,8 @@
 #'@param x A matrix of predictors.
 #'@param y A vector of outputs (dependent variable).
 #'@param rmod An object returned from glmnet.
-#'@return A list of two: variance-covariance matrix, standard deviations of coefficients.
+#'@return A list of two: variance-covariance matrix, 
+#'standard deviations of coefficients.
 vcov_rigde <- function(x, y,  rmod) {
   
   ridge_se <- function(xs,y,yhat,my_mod){
@@ -34,8 +35,10 @@ vcov_rigde <- function(x, y,  rmod) {
 }
 
 #' Preprocess input data with Principal Component Analysis method (PCA)
-#' @param data An input matrix with values of independent variables (predictors).
-#' @param scale A logical variable, indicates wheither or not scaling should be performed.
+#' @param data An input matrix with values of 
+#' independent variables (predictors).
+#' @param scale A logical variable, indicates wheither or 
+#' not scaling should be performed.
 #' @param cumvar.threshold A threshold value for explained variance.
 #' @return A list of one: "S" - a data frame of predictor values.
 prerocess.pca <- function(data, scale, cumvar.threshold) {
@@ -46,10 +49,15 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
   variance <- eig*100/sum(eig)
   # Cumulative variances
   cumvar <- cumsum(variance)
-  eig.decathlon2.active <- data.frame(eig = eig, variance = variance, cumvariance = cumvar)
+  eig.decathlon2.active <- data.frame(eig = eig, 
+                                      variance = variance, 
+                                      cumvariance = cumvar)
   
   ######### Filtering by threshold ##############
-  S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)] %*% t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)])
+  S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
+                          cumvar.threshold)] %*% 
+    t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
+                                cumvar.threshold)])
   
   ########## And add the center (and re-scale) back to data ###########
   if(scale){
@@ -68,10 +76,14 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
 #' @return A list of one: "S" - a data frame of predictor values.
 preprocess.plsda <- function(data, y) {
   numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
-  model <- try(opls(x = data, y=as.factor(y), predI=numcomp, plotL = FALSE, log10L=F, algoC = "nipals"), silent = TRUE)
+  model <- try(opls(x = data, y=as.factor(y), predI=numcomp, 
+                    plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
+               silent = TRUE)
   if(inherits(model, "try-error") &&
-     substr(unclass(attr(model, "condition"))$message, 1, 85) == "No model was built because the first predictive component was already not significant") {
-    model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, log10L=F, algoC = "nipals")
+     substr(unclass(attr(model, "condition"))$message, 1, 85) == 
+     "No model was built because the first predictive component was already not significant") {
+    model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
+                  log10L=FALSE, algoC = "nipals")
   }
   return(list(S=model$scoreMN))
 }
@@ -87,7 +99,7 @@ preprocess.pls <- function(data, y, cumvar.threshold) {
   res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
   numcomp <- 1
   for(i in 1:res.pls.tmp$ncomp) {
-    if (sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > cumvar.threshold/100) {
+    if(sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > cumvar.threshold/100) {
       numcomp <- i
       break
     } else if(i == res.pls.tmp$ncomp) {
@@ -97,7 +109,8 @@ preprocess.pls <- function(data, y, cumvar.threshold) {
   
   res.pls <- plsr(y ~ ., ncomp=numcomp, data = inpdata, validation = "LOO")
   #d.plsr <- cbind(y=inpdata$y, res.pls$scores)
-  S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2], nrow=dim(res.pls$scores)[1], byrow=TRUE))
+  S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2], 
+                         nrow=dim(res.pls$scores)[1], byrow=TRUE))
   
   return(list(S=S))
 }
@@ -112,9 +125,11 @@ preprocess.lasso.ridge <- function(data, y, reg.family, method) {
   #### LASSO/Ridge ####
   tryCatch({
     if(reg.family == "binomial") {
-      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=as.factor(y), family=reg.family)
+      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), 
+                       y=as.factor(y), family=reg.family)
     } else {
-      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), y=y, family=reg.family)
+      fit <- cv.glmnet(x=as.matrix(data),alpha=ifelse(method=="lasso", 1, 0), 
+                       y=y, family=reg.family)
     }
   } , error=function(e) {
     stop(print(e))
@@ -127,12 +142,15 @@ preprocess.lasso.ridge <- function(data, y, reg.family, method) {
 #' @param data An input matrix with values of independent variables (predictors).
 #' @param y A vector with values of dependent variable (outcome).
 #' @param reg.family A regression family. Can be either "binomial" or "gaussian."
-#' @return A list of two: "S" - a dataframe with predictors and "fit" - an object returned by "glm" function.
+#' @return A list of two: "S" - a dataframe with predictors and "fit" 
+#' - an object returned by "glm" function.
 simple.multvar.reg <- function(y, data, reg.family) {
   if(reg.family == "binomial") {
-    fit <- try(glm(y ~ ., data=data.frame(data), family = binomial(link=logit)),TRUE)
+    fit <- try(glm(y ~ ., data=data.frame(data), 
+                   family = binomial(link=logit)),TRUE)
   } else if(reg.family == "gaussian") {
-    fit <- try(glm(y ~ ., data=data.frame(data), family = reg.family),TRUE)
+    fit <- try(glm(y ~ ., data=data.frame(data), 
+                   family = reg.family),TRUE)
   } else {
     stop(paste("Unknown reg.family:", reg.family))
   }

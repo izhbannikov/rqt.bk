@@ -1,17 +1,3 @@
-
-#' Empirical null distribution for Q3 test.
-#' 
-rQTtest.prepare <- function() {
-  null.dist.Q3 <- read.table(system.file("data/n.log10.minp.1e09.txt",package="rqt"), header=T)
-  assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
-}
-
-#rQTtest.prepare <- function() {
-#  #null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/rqt-master/data/n.log10.minp.1e09.txt", header=T)
-#  null.dist.Q3 <- read.table("W:/data/work/iz12/rqt/package/rqt-master/data/n.log10.minp.1e09.txt", header=T)
-#  assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
-#}
-
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
 #' @param x Object of class rqt
@@ -24,29 +10,38 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
-#' @param perm Integer indicating the number of permutations to compute p-values. Default: 0.
-#' @param STT Numeric indicating soft truncation threshold (STT) to convert to gamma parameter (must be <= 0.4). 
+#' @param perm Integer indicating the number of permutations 
+#' to compute p-values. Default: 0.
+#' @param STT Numeric indicating soft truncation threshold (STT) 
+#' to convert to gamma parameter (must be <= 0.4). 
 #' Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
-#' See, for example, Fridley, et al 2013: "Soft truncation thresholding for gene set analysis of RNA-seq data: Application to a vaccine study".
-#' @param weight Logical value. Indicates using weights (see Lee et al 2016). Default: FALSE.
-#' @param cumvar.threshold Numeric value indicating the explained variance threshold for PCA-like methods. Default: 90.
-#' @param method Method used to reduce multicollinerity and account for LD. Default: PCA.
-#' @param out.type Character, indicating a type of phenotype. Possible values: D (dichotomous or binary), 
-#' C (continous or quantitative).
-#' @param scale A logic parameter (TRUE/FALSE) indicating scaling of the genotype dataset.
+#' See, for example, Fridley, et al 2013: "Soft truncation thresholding 
+#' for gene set analysis of RNA-seq data: Application to a vaccine study".
+#' @param weight Logical value. Indicates using weights (see Lee et al 2016). 
+#' Default: FALSE.
+#' @param cumvar.threshold Numeric value indicating 
+#' the explained variance threshold for PCA-like methods. Default: 90.
+#' @param method Method used to reduce multicollinerity and account for LD. 
+#' Default: PCA.
+#' @param out.type Character, indicating a type of phenotype. 
+#' Possible values: \code{D} (dichotomous or binary), 
+#' \code{C} (continous or quantitative).
+#' @param scale A logic parameter (TRUE/FALSE) indicating scaling of 
+#' the genotype dataset.
 #' @examples
-#' library(rqt)
 #' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
 #' res <- rQTest(rqtobj)
-#' res@results
+#' print(res)
 #' @rdname rQTest-methods
 #' @export
 setMethod("rQTest", signature="rqt", 
-          function(x, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, out.type="D", method="pca", scale=FALSE) {
-            # Prepare test: load distribution table and prepare some other information #
+          function(x, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, 
+                   out.type="D", method="pca", scale=FALSE) {
+            # Prepare test: load distribution table and prepare #
+            # some other information #
             if(cumvar.threshold > 100) {
               cat("Warning: cumvar.threshold > 100 and will be set to 100.")
               cumvar.threshold <- 100
@@ -61,28 +56,46 @@ setMethod("rQTest", signature="rqt",
             
             # Start the tests #
             if(perm==0){
-              rslt <- try(QTest.one(phenotype=phenotype, genotype=genotype, covariates=covariates, STT=STT, cumvar.threshold=cumvar.threshold, 
+              rslt <- try(QTest.one(phenotype=phenotype, genotype=genotype, 
+                                    covariates=covariates, STT=STT, 
+                                    cumvar.threshold=cumvar.threshold, 
                           out.type=out.type, method=method, scale = scale),
                           TRUE)
             } else {
               rsltPP <- do.call(rbind, lapply(1:perm, function(k){
-                yP <- phenotype[sample(1:length(phenotype),length(phenotype),replace=F)]
-                t.res <- QTest.one(phenotype=yP,genotype=genotype, covariates=covariates,STT=STT,weight=weight,
-                                   cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, scale = scale)
+                yP <- phenotype[sample(1:length(phenotype),length(phenotype),
+                                       replace=FALSE)]
+                t.res <- QTest.one(phenotype=yP,genotype=genotype, 
+                                   covariates=covariates,STT=STT,
+                                   weight=weight,
+                                   cumvar.threshold=cumvar.threshold, 
+                                   out.type=out.type, method=method, 
+                                   scale = scale)
                 if(is.na(t.res)) {
-                  t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                  t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                                 data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
                   names(rslt)<-c("Qstatistic", "p.value")
                 }
                 pv <- t.res$p.value
               }))
               
-              rslt0 <- try(as.numeric(QTest.one(phenotype=phenotype, genotype=genotype, covariates=covariates, STT=STT, weight=weight, cumvar.threshold=cumvar.threshold, out.type=out.type, method=method, scale = scale)$p.value),TRUE)
+              rslt0 <- try(as.numeric(QTest.one(phenotype=phenotype, 
+                                      genotype=genotype, 
+                                      covariates=covariates, 
+                                      STT=STT, weight=weight, 
+                                      cumvar.threshold=cumvar.threshold, 
+                                      out.type=out.type, method=method, 
+                                      scale = scale)$p.value),TRUE)
               
               if(!is.na(rslt0)) {
                 rslt <- list("Qstatistic"= data.frame(Q1=NA, Q2=NA, Q3=NA),
-                             "p.value" = data.frame(p.Q1 = (length(which(rsltPP[,1] < rslt0[1])) + 1) / (perm + 1),
-                                                    p.Q2 = (length(which(rsltPP[,2] < rslt0[2])) + 1) / (perm + 1),
-                                                    p.Q3 = (length(which(rsltPP[,3] < rslt0[3])) + 1) / (perm + 1)))
+                             "p.value" = data.frame(
+                               p.Q1 = (length(which(rsltPP[,1] < 
+                                                  rslt0[1]))+1)/(perm+1),
+                              p.Q2 = (length(which(rsltPP[,2] < 
+                                                  rslt0[2]))+1)/(perm+1),
+                              p.Q3 = (length(which(rsltPP[,3] < 
+                                                  rslt0[3]))+1)/(perm+1)))
               } else {
                 rslt <- NA
               }

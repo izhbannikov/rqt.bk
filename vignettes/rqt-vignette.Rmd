@@ -50,7 +50,7 @@ pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
 res <- rQTest(obj, method="pca", out.type = "D")
-print(res@results)
+print(res)
 ```
 
 ### Continuous phenotype
@@ -61,7 +61,7 @@ pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
 res <- rQTest(obj, method="pca", out.type = "C")
-print(res@results)
+print(res)
 ```
 
 ### Preprocessing with Partial Least Square regression (PLS)
@@ -74,7 +74,7 @@ pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
 res <- rQTest(obj, method="pls", out.type = "C")
-print(res@results)
+print(res)
 ```
 
 ### Preprocessing with Partial Least Square Discriminant Analysis (PLS-DA)
@@ -87,7 +87,7 @@ pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
 res <- rQTest(obj, method="pls", out.type = "D", scale = TRUE)
-print(res@results)
+print(res)
 ```
 
 ### Using additional covariates
@@ -105,7 +105,7 @@ geno <- data[, 2:dim(data)[2]]
 covars <- read.table(system.file("data/test.cova1.dat",package="rqt"), header=TRUE)
 obj <- rqtClass(phenotype=pheno, genotype=geno, covariates = covars)
 res <- rQTest(obj, method="pca", out.type = "D")
-print(res@results)
+print(res)
 ```
 
 ### Survival analysis
@@ -137,6 +137,6 @@ print(res.meta)
 
 * Madsen, B.E, Browning, S.R. (2009) A Groupwise Association Test for Rare Mutations Using a Weighted Sum Statistic, PLoS Genet., 5(2).
 
-* Lee, J., Kim, Y.J., Lee, J., T2D-Genes Consortium, Kim, B-J., Lee, S., Park T. (2016) Gene-set association tests for next-generation sequencing data, Bioin-formatics, 32(17).
+* Lee, J., Kim, Y.J., Lee, J., T2D-Genes Consortium, Kim, B-J., Lee, S., Park T. (2016) Gene-set association tests for next-generation sequencing data, Bioinformatics, 32(17).
 
 * Tibshirani, R. (1996) Regression shrinkage and selection via the lasso. J. Royal. Statist. Soc B., Vol. 58, No. 1, pages 267-288.

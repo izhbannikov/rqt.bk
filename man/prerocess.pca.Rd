@@ -7,9 +7,11 @@
 prerocess.pca(data, scale, cumvar.threshold)
 }
 \arguments{
-\item{data}{An input matrix with values of independent variables (predictors).}
+\item{data}{An input matrix with values of 
+independent variables (predictors).}
 
-\item{scale}{A logical variable, indicates wheither or not scaling should be performed.}
+\item{scale}{A logical variable, indicates wheither or 
+not scaling should be performed.}
 
 \item{cumvar.threshold}{A threshold value for explained variance.}
 }
