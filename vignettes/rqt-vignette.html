@@ -118,7 +118,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">rqt: an R/Bioconductor package for gene-level meta-analysis</h1>
 <h4 class="author"><em>Ilya Zhbannikov</em></h4>
-<h4 class="date"><em>01 December, 2016</em></h4>
+<h4 class="date"><em>05 December, 2016</em></h4>
 
 </div>
 
@@ -166,10 +166,11 @@ devtools::install_github(&quot;izhbannikov/rqt&quot;)</code></pre>
 data &lt;- read.table(system.file(&quot;data/test.bin1.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
 pheno &lt;- data$pheno
 geno &lt;- data[, 2:dim(data)[2]]
-res &lt;- rQTest(phenotype=pheno, genotype=geno, method=&quot;pca&quot;, out.type = &quot;D&quot;)</code></pre>
+obj &lt;- rqtClass(phenotype=pheno, genotype=geno)
+res &lt;- rQTest(obj, method=&quot;pca&quot;, out.type = &quot;D&quot;)</code></pre>
 <pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
 <pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre class="r"><code>res</code></pre>
+<pre class="r"><code>print(res@results)</code></pre>
 <pre><code>## $Qstatistic
 ##          Q1        Q2        Q3
 ## 1 0.9086994 0.9938212 0.9086994
@@ -184,8 +185,9 @@ res &lt;- rQTest(phenotype=pheno, genotype=geno, method=&quot;pca&quot;, out.typ
 data &lt;- read.table(system.file(&quot;data/test.cont1.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
 pheno &lt;- data$pheno
 geno &lt;- data[, 2:dim(data)[2]]
-res &lt;- rQTest(phenotype=pheno, genotype=geno, method=&quot;pca&quot;, out.type = &quot;C&quot;)
-res</code></pre>
+obj &lt;- rqtClass(phenotype=pheno, genotype=geno)
+res &lt;- rQTest(obj, method=&quot;pca&quot;, out.type = &quot;C&quot;)
+print(res@results)</code></pre>
 <pre><code>## $Qstatistic
 ##          Q1       Q2       Q3
 ## 1 0.2846585 2.389537 2.219594
@@ -201,8 +203,9 @@ res</code></pre>
 data &lt;- read.table(system.file(&quot;data/test.cont1.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
 pheno &lt;- data$pheno
 geno &lt;- data[, 2:dim(data)[2]]
-res &lt;- rQTest(phenotype=pheno, genotype=geno, method=&quot;pls&quot;, out.type = &quot;C&quot;)
-res</code></pre>
+obj &lt;- rqtClass(phenotype=pheno, genotype=geno)
+res &lt;- rQTest(obj, method=&quot;pls&quot;, out.type = &quot;C&quot;)
+print(res@results)</code></pre>
 <pre><code>## $Qstatistic
 ##          Q1       Q2       Q3
 ## 1 0.1910558 71.34471 16.59228
@@ -218,13 +221,14 @@ res</code></pre>
 data &lt;- read.table(system.file(&quot;data/test.bin1.dat&quot;,package=&quot;rqt&quot;), header=TRUE)
 pheno &lt;- data$pheno
 geno &lt;- data[, 2:dim(data)[2]]
-res &lt;- rQTest(phenotype=pheno, genotype=geno, method=&quot;pls&quot;, out.type = &quot;D&quot;, scale = TRUE)</code></pre>
+obj &lt;- rqtClass(phenotype=pheno, genotype=geno)
+res &lt;- rQTest(obj, method=&quot;pls&quot;, out.type = &quot;D&quot;, scale = TRUE)</code></pre>
 <pre><code>## PLS-DA</code></pre>
 <pre><code>## 200 samples x 100 variables</code></pre>
 <pre><code>## standard scaling of predictors and response(s)</code></pre>
 <pre><code>##       R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort pR2Y pQ2
-## Total   0.0187    0.301  -0.292   0.2   1   0 0.95 0.8</code></pre>
-<pre class="r"><code>res</code></pre>
+## Total   0.0187    0.301  -0.292   0.2   1   0  0.9 0.7</code></pre>
+<pre class="r"><code>print(res@results)</code></pre>
 <pre><code>## $Qstatistic
 ##         Q1       Q2       Q3
 ## 1 11.12606 2.322913 11.12606
@@ -241,8 +245,9 @@ data &lt;- read.table(system.file(&quot;data/test.bin1.dat&quot;,package=&quot;r
 pheno &lt;- data$pheno
 geno &lt;- data[, 2:dim(data)[2]]
 covars &lt;- read.table(system.file(&quot;data/test.cova1.dat&quot;,package=&quot;rqt&quot;), header=TRUE)
-res &lt;- rQTest(phenotype=pheno, genotype=geno, covariates = covars, method=&quot;pca&quot;, out.type = &quot;D&quot;)
-res</code></pre>
+obj &lt;- rqtClass(phenotype=pheno, genotype=geno, covariates = covars)
+res &lt;- rQTest(obj, method=&quot;pca&quot;, out.type = &quot;D&quot;)
+print(res@results)</code></pre>
 <pre><code>## $Qstatistic
 ##         Q1       Q2       Q3
 ## 1 2.012625 3.761859 2.012625
@@ -258,24 +263,26 @@ res</code></pre>
 </div>
 <div id="meta-analysis-1" class="section level2">
 <h2>Meta-analysis</h2>
-<pre class="r"><code>data1 &lt;- read.table(system.file(&quot;data/test.bin1.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
-data2 &lt;- read.table(system.file(&quot;data/test.bin2.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
-data3 &lt;- read.table(system.file(&quot;data/test.bin3.dat&quot;,package=&quot;rqt&quot;), header = TRUE)
-indata &lt;- list(data1, data2, data3)
-
-res &lt;- rQTestMeta(indata)
-res</code></pre>
+<pre class="r"><code>library(rqt)
+data1 &lt;- read.table(system.file(&quot;data/phengen2.dat&quot;,package=&quot;rqt&quot;), skip=1)
+obj1 &lt;- rqtClass(phenotype=data1[,1], genotype=data1[, 2:dim(data1)[2]])
+data2 &lt;- read.table(system.file(&quot;data/phengen3.dat&quot;,package=&quot;rqt&quot;), skip=1)
+obj2 &lt;- rqtClass(phenotype=data2[,1], genotype=data2[, 2:dim(data2)[2]])
+data3 &lt;- read.table(system.file(&quot;data/phengen.dat&quot;,package=&quot;rqt&quot;), skip=1)
+obj3 &lt;- rqtClass(phenotype=data3[,1], genotype=data3[, 2:dim(data3)[2]])
+res.meta &lt;- rQTestMeta(list(obj1, obj2, obj3))
+print(res.meta)</code></pre>
 <pre><code>## $final.pvalue
-## [1] 0.1245406
+## [1] 0.004276623
 ## 
 ## $pvalueList
-## [1] 0.56545334 0.01570976 0.75750655
+## [1] 0.000858092 0.367634896 0.245240026
 ## 
 ## $df
 ## [1] 6
 ## 
 ## $chi.comb
-## [1] 10.00265</code></pre>
+## [1] 18.93396</code></pre>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>

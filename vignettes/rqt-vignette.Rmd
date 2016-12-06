@@ -48,8 +48,9 @@ library(rqt)
 data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(phenotype=pheno, genotype=geno, method="pca", out.type = "D")
-res
+obj <- rqtClass(phenotype=pheno, genotype=geno)
+res <- rQTest(obj, method="pca", out.type = "D")
+print(res@results)
 ```
 
 ### Continuous phenotype
@@ -58,8 +59,9 @@ library(rqt)
 data <- read.table(system.file("data/test.cont1.dat",package="rqt"), header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(phenotype=pheno, genotype=geno, method="pca", out.type = "C")
-res
+obj <- rqtClass(phenotype=pheno, genotype=geno)
+res <- rQTest(obj, method="pca", out.type = "C")
+print(res@results)
 ```
 
 ### Preprocessing with Partial Least Square regression (PLS)
@@ -70,8 +72,9 @@ library(rqt)
 data <- read.table(system.file("data/test.cont1.dat",package="rqt"), header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(phenotype=pheno, genotype=geno, method="pls", out.type = "C")
-res
+obj <- rqtClass(phenotype=pheno, genotype=geno)
+res <- rQTest(obj, method="pls", out.type = "C")
+print(res@results)
 ```
 
 ### Preprocessing with Partial Least Square Discriminant Analysis (PLS-DA)
@@ -82,8 +85,9 @@ library(rqt)
 data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header=TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
-res <- rQTest(phenotype=pheno, genotype=geno, method="pls", out.type = "D", scale = TRUE)
-res
+obj <- rqtClass(phenotype=pheno, genotype=geno)
+res <- rQTest(obj, method="pls", out.type = "D", scale = TRUE)
+print(res@results)
 ```
 
 ### Using additional covariates
@@ -99,8 +103,9 @@ data <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRU
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 covars <- read.table(system.file("data/test.cova1.dat",package="rqt"), header=TRUE)
-res <- rQTest(phenotype=pheno, genotype=geno, covariates = covars, method="pca", out.type = "D")
-res
+obj <- rqtClass(phenotype=pheno, genotype=geno, covariates = covars)
+res <- rQTest(obj, method="pca", out.type = "D")
+print(res@results)
 ```
 
 ### Survival analysis
@@ -111,13 +116,15 @@ TODO
 ## Meta-analysis
 
 ```{r}
-data1 <- read.table(system.file("data/test.bin1.dat",package="rqt"), header = TRUE)
-data2 <- read.table(system.file("data/test.bin2.dat",package="rqt"), header = TRUE)
-data3 <- read.table(system.file("data/test.bin3.dat",package="rqt"), header = TRUE)
-indata <- list(data1, data2, data3)
-
-res <- rQTestMeta(indata)
-res
+library(rqt)
+data1 <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+obj1 <- rqtClass(phenotype=data1[,1], genotype=data1[, 2:dim(data1)[2]])
+data2 <- read.table(system.file("data/phengen3.dat",package="rqt"), skip=1)
+obj2 <- rqtClass(phenotype=data2[,1], genotype=data2[, 2:dim(data2)[2]])
+data3 <- read.table(system.file("data/phengen.dat",package="rqt"), skip=1)
+obj3 <- rqtClass(phenotype=data3[,1], genotype=data3[, 2:dim(data3)[2]])
+res.meta <- rQTestMeta(list(obj1, obj2, obj3))
+print(res.meta)
 ```
 
 ## References
