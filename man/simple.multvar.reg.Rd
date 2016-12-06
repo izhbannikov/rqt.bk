@@ -9,12 +9,14 @@ simple.multvar.reg(y, data, reg.family)
 \arguments{
 \item{y}{A vector with values of dependent variable (outcome).}
 
-\item{data}{An input matrix with values of independent variables (predictors).}
+\item{data}{An input matrix with values of 
+independent variables (predictors).}
 
-\item{reg.family}{A regression family. Can be either "binomial" or "gaussian."}
+\item{reg.family}{A regression family. 
+Can be either "binomial" or "gaussian."}
 }
 \value{
-A list of two: "S" - a dataframe with predictors and "fit" 
+A list of two: "S" - a dataframe with predictors and "fit"
 - an object returned by "glm" function.
 }
 \description{

@@ -39,7 +39,7 @@ see \code{\link[=print.rqt]{rqt-methods} for related methods}
 \section{Slots}{
 
    \describe{
-     \item{\code{phenotype}:}{Phenotype (a vector of length 
+   \item{\code{phenotype}:}{Phenotype (a vector of length 
      \code{N}, where \code{N} - number of individuals).}
      \item{\code{genotype}:}{Genotype (data frame \code{N} 
      by \code{M} where \code{N} - number of individuals, \code{M}

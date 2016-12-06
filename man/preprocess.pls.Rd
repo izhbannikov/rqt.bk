@@ -2,12 +2,14 @@
 % Please edit documentation in R/preprocess.R
 \name{preprocess.pls}
 \alias{preprocess.pls}
-\title{Preprocess input data with Partial Linear Square Regregression method (PLS)}
+\title{Preprocess input data with Partial Linear Square Regregression 
+method (PLS)}
 \usage{
 preprocess.pls(data, y, cumvar.threshold)
 }
 \arguments{
-\item{data}{An input matrix with values of independent variables (predictors).}
+\item{data}{An input matrix with values of 
+independent variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
 
@@ -17,6 +19,7 @@ preprocess.pls(data, y, cumvar.threshold)
 A list of one: "S" - a data frame of predictors.
 }
 \description{
-Preprocess input data with Partial Linear Square Regregression method (PLS)
+Preprocess input data with Partial Linear Square Regregression 
+method (PLS)
 }
 

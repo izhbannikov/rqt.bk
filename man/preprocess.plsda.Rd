@@ -2,12 +2,14 @@
 % Please edit documentation in R/preprocess.R
 \name{preprocess.plsda}
 \alias{preprocess.plsda}
-\title{Preprocess input data with Partial Linear Square Regregression Discriminant Analysis method (PLSDA)}
+\title{Preprocess input data with Partial Linear Square 
+Regregression Discriminant Analysis method (PLSDA)}
 \usage{
 preprocess.plsda(data, y)
 }
 \arguments{
-\item{data}{An input matrix with values of independent variables (predictors).}
+\item{data}{An input matrix with values of independent 
+variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
 }
@@ -15,6 +17,7 @@ preprocess.plsda(data, y)
 A list of one: "S" - a data frame of predictor values.
 }
 \description{
-Preprocess input data with Partial Linear Square Regregression Discriminant Analysis method (PLSDA)
+Preprocess input data with Partial Linear Square 
+Regregression Discriminant Analysis method (PLSDA)
 }
 

@@ -7,11 +7,13 @@
 preprocess.lasso.ridge(data, y, reg.family, method)
 }
 \arguments{
-\item{data}{An input matrix with values of independent variables (predictors).}
+\item{data}{An input matrix with values of 
+independent variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
 
-\item{reg.family}{A regression family. Can be either "binomial" or "gaussian."}
+\item{reg.family}{A regression family. 
+Can be either "binomial" or "gaussian."}
 
 \item{method}{A method. Can be either "lasso" or "ridge."}
 }

@@ -6,7 +6,7 @@
 #'
 #'@section Slots:
 #'    \describe{
-#'      \item{\code{phenotype}:}{Phenotype (a vector of length 
+#'    \item{\code{phenotype}:}{Phenotype (a vector of length 
 #'      \code{N}, where \code{N} - number of individuals).}
 #'      \item{\code{genotype}:}{Genotype (data frame \code{N} 
 #'      by \code{M} where \code{N} - number of individuals, \code{M}
@@ -50,21 +50,21 @@ setClass("rqt", slots=c(phenotype="vector", genotype="data.frame",
 #' @export
 rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, 
                      results=NULL) {
-  if(is.null(phenotype)) {
-    phenotype <- c()
-  }
-  if(is.null(genotype)) {
-    genotype <- data.frame()
-  }
-  if(is.null(covariates)) {
-    covariates <- data.frame()
-  }
-  if(is.null(results)) {
-    results <- list()
-  }
-    
-  new("rqt", phenotype=phenotype, genotype=genotype, covariates=covariates, 
-      results=results)
+    if(is.null(phenotype)) {
+      phenotype <- c()
+    }
+    if(is.null(genotype)) {
+      genotype <- data.frame()
+    }
+    if(is.null(covariates)) {
+      covariates <- data.frame()
+    }
+    if(is.null(results)) {
+      results <- list()
+    }
+
+    new("rqt", phenotype=phenotype, genotype=genotype, 
+        covariates=covariates, results=results)
 }
 
 #' Basic methods for class rqt
@@ -77,17 +77,17 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
 #' @aliases print.rqt
 #' @docType methods
 setMethod("print", "rqt", function(x) {
-  cat("Phenotype:\n")
-  print(head(x@phenotype))
-  cat("...\n\n")
-  cat("Genotype:\n")
-  print(head(x@genotype))
-  cat("...\n\n")
-  cat("Covariates:\n")
-  cat(head(x@covariates))
-  cat("\n\n")
-  cat("Results:\n\n")
-  print(x@results)
+    cat("Phenotype:\n")
+    print(head(x@phenotype))
+    cat("...\n\n")
+    cat("Genotype:\n")
+    print(head(x@genotype))
+    cat("...\n\n")
+    cat("Covariates:\n")
+    cat(head(x@covariates))
+    cat("\n\n")
+    cat("Results:\n\n")
+    print(x@results)
 })
 
 #' @rdname rqt-methods
@@ -96,7 +96,7 @@ setMethod("print", "rqt", function(x) {
 #' the object of class rqt
 #' @export
 setMethod("show", "rqt", function(object) {
-  print(object)
+    print(object)
 })
 
 #' @rdname rqt-methods
@@ -105,17 +105,15 @@ setMethod("show", "rqt", function(object) {
 #' @docType methods
 #' @export
 setMethod("summary", "rqt", function(object) {
-  cat("Phenotype:\n")
-  print(summary(object@phenotype))
-  cat("...\n\n")
-  cat("Genotype:\n")
-  print(summary(object@genotype))
-  cat("...\n\n")
-  cat("Covariates:\n")
-  cat(summary(object@covariates))
-  cat("\n\n")
-  cat("Results:\n\n")
-  print(summary(object@results))
+    cat("Phenotype:\n")
+    print(summary(object@phenotype))
+    cat("...\n\n")
+    cat("Genotype:\n")
+    print(summary(object@genotype))
+    cat("...\n\n")
+    cat("Covariates:\n")
+    cat(summary(object@covariates))
+    cat("\n\n")
+    cat("Results:\n\n")
+    print(summary(object@results))
 })
-
-

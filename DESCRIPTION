@@ -20,4 +20,4 @@ Depends:
 VignetteBuilder: knitr
 Suggests: knitr (>= 1.11)
 biocViews: GenomeWideAssociation, Regression, Survival,
-        PrincipalComponent, StatisticalMethod
+        PrincipalComponent, StatisticalMethod, Sequencing

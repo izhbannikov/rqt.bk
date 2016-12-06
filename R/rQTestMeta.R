@@ -23,7 +23,8 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 #' Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
 #' See, for example, Fridley, et al 2013: "Soft truncation thresholding 
 #' for gene set analysis of RNA-seq data: Application to a vaccine study".
-#' @param weight Logical value. Indicates using weights (see Lee et al 2016). 
+#' @param weight Logical value. 
+#' Indicates using weights (see Lee et al 2016). 
 #' Default: FALSE.
 #' @param cumvar.threshold Numeric value indicating the explained 
 #' variance threshold for PCA-like methods. Default: 90.
