@@ -50,7 +50,7 @@ This function performs a gene-level test based on combined effect sizes.
 This function performs a gene-level test based on combined effect sizes.
 }
 \examples{
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
 rqtobj <- rqtClass(phenotype=pheno, genotype=geno)

@@ -40,7 +40,7 @@ see \code{\link[=print.rqt]{rqt-methods} for related methods}
 
    \describe{
    \item{\code{phenotype}:}{Phenotype (a vector of length 
-     \code{N}, where \code{N} - number of individuals).}
+       \code{N}, where \code{N} - number of individuals).}
      \item{\code{genotype}:}{Genotype (data frame \code{N} 
      by \code{M} where \code{N} - number of individuals, \code{M}
       - number of genetic variants).}
@@ -53,7 +53,7 @@ see \code{\link[=print.rqt]{rqt-methods} for related methods}
 }
 }
 \examples{
-data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
 rqtobj <- rqtClass(phenotype=pheno, genotype=geno)

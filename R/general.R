@@ -12,7 +12,6 @@ NULL
 #' 
 #' @return None
 rQTtest.prepare <- function() {
-  null.dist.Q3 <- data(sysdata, envir=baseenv())
   assign("null.dist.Q3", null.dist.Q3, envir=baseenv())
 }
 

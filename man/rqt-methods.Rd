@@ -16,6 +16,11 @@
 
 \S4method{summary}{rqt}(object)
 }
+\arguments{
+\item{x}{An object of \code{rqt} class}
+
+\item{object}{An object of \code{rqt} class}
+}
 \value{
 print returns summary information about the rqt object
 

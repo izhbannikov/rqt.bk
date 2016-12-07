@@ -16,7 +16,7 @@ RoxygenNote: 5.0.1
 Imports:
 	CCP,CompQuadForm,parallel,Matrix
 Depends:
-    glmnet,pls,plyr,ropls
+    R (>= 3.2),glmnet,pls,plyr,ropls
 VignetteBuilder: knitr
 Suggests: knitr (>= 1.11)
 biocViews: GenomeWideAssociation, Regression, Survival,

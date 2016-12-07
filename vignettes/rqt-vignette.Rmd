@@ -35,9 +35,6 @@ procedure; (iv) the final step is combining gene-level p-values
 calculated from each study with Fisher's combined probability method.
 
 ## Installation
-### Stable version from Bioconductor
-
-TODO
 
 ### Most-recent version from GitHub
 ```{r,eval=FALSE}
@@ -68,7 +65,7 @@ covariates in form described above.
 ```{r}
 library(rqt)
 data <- read.table(system.file("data/test.bin1.dat",package="rqt"), 
-                   header = TRUE)
+    header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -80,7 +77,7 @@ print(res)
 ```{r}
 library(rqt)
 data <- read.table(system.file("data/test.cont1.dat",package="rqt"), 
-                   header = TRUE)
+    header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -94,7 +91,7 @@ This method is used for continous outcome, i.e. out.type = "C".
 ```{r}
 library(rqt)
 data <- read.table(system.file("data/test.cont1.dat",package="rqt"), 
-                   header = TRUE)
+    header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -108,7 +105,7 @@ This method of data preprocessing is used for dichotomous outcome.
 ```{r}
 library(rqt)
 data <- read.table(system.file("data/test.bin1.dat",package="rqt"), 
-                   header=TRUE)
+    header=TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 obj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -130,20 +127,15 @@ can accept additional covariates, in form of
 ```{r}
 library(rqt)
 data <- read.table(system.file("data/test.bin1.dat",package="rqt"), 
-                   header = TRUE)
+    header = TRUE)
 pheno <- data$pheno
 geno <- data[, 2:dim(data)[2]]
 covars <- read.table(system.file("data/test.cova1.dat",package="rqt"), 
-                     header=TRUE)
+    header=TRUE)
 obj <- rqtClass(phenotype=pheno, genotype=geno, covariates = covars)
 res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
 ```
-
-### Survival analysis
-
-TODO
-
 
 ## Meta-analysis
 

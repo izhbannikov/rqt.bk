@@ -29,7 +29,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @param scale A logic parameter (TRUE/FALSE) indicating scaling of 
 #' the genotype dataset.
 #' @examples
-#' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+#' data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -38,69 +38,74 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @rdname rQTest-methods
 #' @export
 setMethod("rQTest", signature="rqt", 
-          function(x, perm=0, STT=0.2,weight=FALSE, cumvar.threshold=90, 
-                   out.type="D", method="pca", scale=FALSE) {
+    function(x, perm=0, STT=0.2, weight=FALSE, 
+            cumvar.threshold=90, out.type="D", 
+            method="pca", scale=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
-            if(cumvar.threshold > 100) {
-              cat("Warning: cumvar.threshold > 100 and will be set to 100.")
-              cumvar.threshold <- 100
-            }
-            
-            rQTtest.prepare()
-            num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
-            # Load data #
-            phenotype <- x@phenotype
-            genotype <- x@genotype
-            covariates <- x@covariates
-            
-            # Start the tests #
-            if(perm==0){
-              rslt <- try(QTest.one(phenotype=phenotype, genotype=genotype, 
-                                    covariates=covariates, STT=STT, 
-                                    cumvar.threshold=cumvar.threshold, 
-                          out.type=out.type, method=method, scale = scale),
-                          TRUE)
-            } else {
-              rsltPP <- do.call(rbind, lapply(1:perm, function(k){
-                yP <- phenotype[sample(1:length(phenotype),length(phenotype),
-                                       replace=FALSE)]
+        if(cumvar.threshold > 100) {
+            cat("Warning: cumvar.threshold > 100 and will be set to 100.")
+            cumvar.threshold <- 100
+        }
+  
+        rQTtest.prepare()
+        num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
+        # Load data #
+        phenotype <- x@phenotype
+        genotype <- x@genotype
+        covariates <- x@covariates
+        
+        # Start the tests #
+        if(perm==0){
+            rslt <- try(QTest.one(phenotype=phenotype, 
+                genotype=genotype, 
+                covariates=covariates, 
+                STT=STT, 
+                cumvar.threshold=cumvar.threshold, 
+                out.type=out.type, method=method, 
+                scale = scale),
+                TRUE)
+        } else {
+            rsltPP <- do.call(rbind, lapply(1:perm, function(k){
+                yP <- phenotype[sample(1:length(phenotype),
+                    length(phenotype),
+                    replace=FALSE)]
                 t.res <- QTest.one(phenotype=yP,genotype=genotype, 
-                                   covariates=covariates,STT=STT,
-                                   weight=weight,
-                                   cumvar.threshold=cumvar.threshold, 
-                                   out.type=out.type, method=method, 
-                                   scale = scale)
+                    covariates=covariates,STT=STT,
+                    weight=weight,
+                    cumvar.threshold=cumvar.threshold, 
+                    out.type=out.type, method=method, 
+                    scale = scale)
                 if(is.na(t.res)) {
-                  t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                                 data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
-                  names(rslt)<-c("Qstatistic", "p.value")
+                    t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                        data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                    names(rslt) <- c("Qstatistic", "p.value")
                 }
                 pv <- t.res$p.value
-              }))
+            }))
               
-              rslt0 <- try(as.numeric(QTest.one(phenotype=phenotype, 
-                                      genotype=genotype, 
-                                      covariates=covariates, 
-                                      STT=STT, weight=weight, 
-                                      cumvar.threshold=cumvar.threshold, 
-                                      out.type=out.type, method=method, 
-                                      scale = scale)$p.value),TRUE)
+            rslt0 <- try(as.numeric(QTest.one(phenotype=phenotype, 
+                genotype=genotype, 
+                covariates=covariates, 
+                STT=STT, weight=weight, 
+                cumvar.threshold=cumvar.threshold, 
+                out.type=out.type, method=method, 
+                scale = scale)$p.value),TRUE)
               
-              if(!is.na(rslt0)) {
+            if(!is.na(rslt0)) {
                 rslt <- list("Qstatistic"= data.frame(Q1=NA, Q2=NA, Q3=NA),
-                             "p.value" = data.frame(
-                               p.Q1 = (length(which(rsltPP[,1] < 
-                                                  rslt0[1]))+1)/(perm+1),
-                              p.Q2 = (length(which(rsltPP[,2] < 
-                                                  rslt0[2]))+1)/(perm+1),
-                              p.Q3 = (length(which(rsltPP[,3] < 
-                                                  rslt0[3]))+1)/(perm+1)))
-              } else {
+                    "p.value" = data.frame(
+                    p.Q1 = (length(which(rsltPP[,1] < 
+                    rslt0[1]))+1)/(perm+1),
+                    p.Q2 = (length(which(rsltPP[,2] < 
+                    rslt0[2]))+1)/(perm+1),
+                    p.Q3 = (length(which(rsltPP[,3] < 
+                    rslt0[3]))+1)/(perm+1)))
+            } else {
                 rslt <- NA
-              }
             }
+        }
           
-            x@results <- rslt
-            return(x)
+        x@results <- rslt
+        return(x)
 })

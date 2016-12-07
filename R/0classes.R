@@ -7,7 +7,7 @@
 #'@section Slots:
 #'    \describe{
 #'    \item{\code{phenotype}:}{Phenotype (a vector of length 
-#'      \code{N}, where \code{N} - number of individuals).}
+#'        \code{N}, where \code{N} - number of individuals).}
 #'      \item{\code{genotype}:}{Genotype (data frame \code{N} 
 #'      by \code{M} where \code{N} - number of individuals, \code{M}
 #'       - number of genetic variants).}
@@ -21,7 +21,7 @@
 #'@rdname rqt-class
 #'@details see \code{\link[=print.rqt]{rqt-methods} for related methods}
 setClass("rqt", slots=c(phenotype="vector", genotype="data.frame", 
-                        covariates="data.frame", results="list"))
+    covariates="data.frame", results="list"))
 
 #' The rqt class constructor
 #' 
@@ -40,7 +40,7 @@ setClass("rqt", slots=c(phenotype="vector", genotype="data.frame",
 #' p-values: (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})
 #' @return Object of class rqt
 #' @examples
-#' data <- read.table(system.file("data/phengen2.dat",package="rqt"), skip=1)
+#' data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
@@ -49,18 +49,18 @@ setClass("rqt", slots=c(phenotype="vector", genotype="data.frame",
 #' @aliases rqtClass
 #' @export
 rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL, 
-                     results=NULL) {
+    results=NULL) {
     if(is.null(phenotype)) {
-      phenotype <- c()
+        phenotype <- c()
     }
     if(is.null(genotype)) {
-      genotype <- data.frame()
+        genotype <- data.frame()
     }
     if(is.null(covariates)) {
-      covariates <- data.frame()
+        covariates <- data.frame()
     }
     if(is.null(results)) {
-      results <- list()
+        results <- list()
     }
 
     new("rqt", phenotype=phenotype, genotype=genotype, 
@@ -72,6 +72,8 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
 #' This document lists a series of basic methods for the class rqt
 #'
 #' @rdname rqt-methods
+#' @param x An object of \code{rqt} class
+#' @param object An object of \code{rqt} class
 #' @return print returns summary information about the rqt object
 #' @rdname rqt-methods
 #' @aliases print.rqt
