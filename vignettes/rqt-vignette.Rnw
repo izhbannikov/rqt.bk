@@ -1,9 +1,8 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage{hyperref}
-\usepackage{fixltx2e}
 
-%\VignetteIndexEntry{Using RQT}
+%\VignetteIndexEntry{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
 
 \title{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
 \author{Ilya Y. Zhbannikov}
@@ -174,25 +173,31 @@ sessionInfo()
 \section{References}
 \begin{thebibliography}{00}
 
-\bibitem{Wu2011} Wu, M. C., Lee, S., Cai, T., Li, Y., Boehnke, M., and Lin, X. (2011) 
+\bibitem{Wu2011} Wu, M. C., Lee, S., Cai, T., Li, Y., Boehnke, M., 
+and Lin, X. (2011) 
 Rare Variant Association Testing for Sequencing Data Using the Sequence 
 Kernel Associa-tion Test (SKAT). The American Journal of 
 Human Genetics, 89, 82-93.
-\bibitem{Li2008} Li, B. and Leal, S.M. (2008) Methods for Detecting Associations 
+\bibitem{Li2008} Li, B. and Leal, S.M. (2008) Methods for 
+Detecting Associations 
 with Rare Vari-ants for Common Diseases: Application to Analysis 
 of Sequence Data. The American Journal of Human Genetics, 83, 311-321.
-\bibitem{Liu2010} Liu D., Leal S. (2010) A Novel Adaptive Method for the Analysis 
+\bibitem{Liu2010} Liu D., Leal S. (2010) A Novel Adaptive Method for 
+the Analysis 
 of Next-Generation Sequencing Data to Detect Complex Trait 
 Associations with Rare Variants Due to Gene Main Effects and 
 Interactions, PLoS Genet., 6(10).
-\bibitem{Madsen2009} Madsen, B.E, Browning, S.R. (2009) A Groupwise Association 
+\bibitem{Madsen2009} Madsen, B.E, Browning, S.R. (2009) 
+A Groupwise Association 
 Test for Rare Mutations Using a Weighted Sum Statistic, PLoS Genet., 5(2).
 
-\bibitem{Lee2016} Lee, J., Kim, Y.J., Lee, J., T2D-Genes Consortium, Kim, B-J., 
+\bibitem{Lee2016} Lee, J., Kim, Y.J., Lee, J., T2D-Genes Consortium, 
+Kim, B-J., 
 Lee, S., Park T. (2016) Gene-set association tests for 
 next-generation sequencing data, Bioinformatics, 32(17).
 
-\bibitem{Tibshirani1996} Tibshirani, R. (1996) Regression shrinkage and selection 
+\bibitem{Tibshirani1996} Tibshirani, R. (1996) Regression shrinkage 
+and selection 
 via the lasso. J. Royal. Statist. Soc B., Vol. 58, No. 1, pages 267-288.
 \end{thebibliography}
 %--------
