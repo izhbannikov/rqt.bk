@@ -1,4 +1,4 @@
-# rqt: an R-package for gene-level meta analysis
+# rqt: utilities for gene-level meta-analysis
 
 ## Installation
 
