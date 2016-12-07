@@ -86,7 +86,7 @@ setMethod("print", "rqt", function(x) {
     print(head(x@genotype))
     cat("...\n\n")
     cat("Covariates:\n")
-    cat(head(x@covariates))
+    print(head(x@covariates))
     cat("\n\n")
     cat("Results:\n\n")
     print(x@results)

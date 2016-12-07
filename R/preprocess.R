@@ -81,8 +81,7 @@ preprocess.plsda <- function(data, y) {
         silent = TRUE)
     if(inherits(model, "try-error") &&
         substr(unclass(attr(model, "condition"))$message, 1, 85) == 
-        "No model was built because the first predictive 
-        component was already not significant") {
+"No model was built because the first predictive component was already not significant") {
         model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
             log10L=FALSE, algoC = "nipals")
     }
