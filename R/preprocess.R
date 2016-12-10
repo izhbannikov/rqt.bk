@@ -85,7 +85,7 @@ preprocess.plsda <- function(data, y) {
         model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
             log10L=FALSE, algoC = "nipals")
     }
-    return(list(S=model$scoreMN))
+    return(list(S=model@scoreMN))
 }
 
 #' Preprocess input data with Partial Linear Square Regregression 

@@ -43,6 +43,15 @@ using this statistics from asymptotic approximation or permutation
 procedure; (iv) the final step is combining gene-level p-values 
 calculated from each study with Fisher's combined probability method.
 
+\section{Installation of \emph{rqt} package}
+In order to install the \emph{rqt} package, the user must first install R (\url{http://www.r-project.org}). After that, \emph{rqt} can be installed with:
+
+<<echo=TRUE, eval=FALSE, results=hide>>=
+source("http://bioconductor.org/biocLite.R")
+biocLite(c("rqt"))
+@
+
+
 \section{Data description}
 \subsection{Single dataset}
 In \texttt{rqt} requires the following datasets: 
@@ -69,7 +78,7 @@ covariates in form described above.
 \subsection{Gene-level analysis on a single dataset}
 \subsection{Dichotomous phenotype}
 
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header=TRUE))
@@ -84,7 +93,7 @@ print(res)
 
 \subsection{Continuous phenotype}
 
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
                                            package="rqt"), header = TRUE))
@@ -100,7 +109,7 @@ print(res)
 \subsection{Preprocessing with Partial Least Square regression (PLS)}
 
 This method is used for continous outcome, i.e. out.type = "C".
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
                                            package="rqt"), header = TRUE))
@@ -117,7 +126,7 @@ print(res)
 
 This method of data preprocessing is used for dichotomous outcome.
 
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header=TRUE))
@@ -141,7 +150,7 @@ In such cases, the package \texttt{rqt}
 can accept additional covariates, in form of 
 \texttt{N} by \texttt{K} matrix, as provided below:
 
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header = TRUE))
@@ -159,7 +168,7 @@ print(res)
 
 \section{Meta-analysis}
 
-<<>>=
+<<echo=TRUE, results=verbatim>>=
 library(rqt)
 data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
                                             package="rqt"), skip=1))
@@ -194,8 +203,5 @@ print(res.meta)
 <<echo=TRUE, results=verbatim>>=
 sessionInfo()
 @
-%--------
-\clearpage
-%--------
 
 \end{document}
