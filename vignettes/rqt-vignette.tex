@@ -297,8 +297,12 @@ This method of data preprocessing is used for dichotomous outcome.
 > res <- rQTest(obj, method="pls", out.type = "D", scale = TRUE)
 \end{Sinput}
 \begin{Soutput}
+PLS-DA
+200 samples x 100 variables and 1 response
+standard scaling of predictors and response(s)
       R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort pR2Y pQ2
-Total   0.0187    0.301  -0.292   0.2   1   0  0.8 0.7
+Total   0.0187    0.301  -0.292   0.2   1   0 0.95 0.8
+<simpleError in model$scoreMN: $ operator not defined for this S4 class>
 \end{Soutput}
 \begin{Sinput}
 > print(res)
@@ -346,12 +350,12 @@ data frame with 0 columns and 0 rows
 Results:
 
 $Qstatistic
-        Q1       Q2       Q3
-1 11.12606 2.322913 11.12606
+  Q1 Q2 Q3
+1 NA NA NA
 
 $p.value
-          p.Q1         p.Q2         p.Q3
-1 0.0008512339 0.0008512339 0.0008512339
+  p.Q1 p.Q2 p.Q3
+1   NA   NA   NA
 \end{Soutput}
 \end{Schunk}
 
@@ -471,16 +475,16 @@ $p.value
 \end{Sinput}
 \begin{Soutput}
 $final.pvalue
-[1] 0.004276623
+[1] 0.01995627
 
 $pvalueList
-[1] 0.000858092 0.367634896 0.245240026
+[1] 0.006016377 0.367634896 0.245240026
 
 $df
 [1] 6
 
 $chi.comb
-[1] 18.93396
+[1] 15.03891
 \end{Soutput}
 \end{Schunk}
 
@@ -491,30 +495,30 @@ $chi.comb
 > sessionInfo()
 \end{Sinput}
 \begin{Soutput}
-R version 3.2.4 (2016-03-10)
+R version 3.3.2 (2016-10-31)
 Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: OS X 10.12.1 (unknown)
+Running under: macOS Sierra 10.12.1
 
 locale:
 [1] C
 
 attached base packages:
-[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
 [8] methods   base     
 
 other attached packages:
- [1] rqt_0.99.0                 SummarizedExperiment_1.0.2
- [3] Biobase_2.30.0             GenomicRanges_1.22.4      
- [5] GenomeInfoDb_1.6.3         IRanges_2.4.8             
- [7] S4Vectors_0.8.11           BiocGenerics_0.16.1       
- [9] ropls_1.2.14               plyr_1.8.4                
+ [1] rqt_0.99.3                 SummarizedExperiment_1.4.0
+ [3] Biobase_2.34.0             GenomicRanges_1.26.1      
+ [5] GenomeInfoDb_1.10.1        IRanges_2.8.1             
+ [7] S4Vectors_0.12.1           BiocGenerics_0.20.0       
+ [9] ropls_1.6.2                plyr_1.8.4                
 [11] pls_2.5-0                  glmnet_2.0-5              
 [13] foreach_1.4.3              Matrix_1.2-7.1            
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.8        lattice_0.20-34    codetools_0.2-15   grid_3.2.4        
- [5] zlibbioc_1.16.0    CCP_1.1            XVector_0.10.0     iterators_1.0.8   
- [9] tools_3.2.4        CompQuadForm_1.4.1
+ [1] Rcpp_0.12.8        lattice_0.20-34    codetools_0.2-15   grid_3.3.2        
+ [5] zlibbioc_1.20.0    CCP_1.1            XVector_0.14.0     iterators_1.0.8   
+ [9] tools_3.3.2        CompQuadForm_1.4.2
 \end{Soutput}
 \end{Schunk}
 %--------

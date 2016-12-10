@@ -14,7 +14,7 @@ rqtClass(phenotype = NULL, genotype = NULL, covariates = NULL,
 \code{N}, where \code{N} - number of individuals).}
 
 \item{genotype}{Genotype - an object of class 
-\code{SummarizedExperiment0}. Should contain one assay 
+\code{SummarizedExperiment}. Should contain one assay 
 (matrix, \code{N} 
 by \code{M} where \code{N} - number of individuals, \code{M}
  - number of genetic variants).}
@@ -44,7 +44,7 @@ see \code{\link[=print.rqt]{rqt-methods} for related methods}
    \item{\code{phenotype}:}{Phenotype (a vector of length 
        \code{N}, where \code{N} - number of individuals).}
      \item{\code{genotype}:}{Genotype - an object of class 
-     \code{SummarizedExperiment0}. Should contain one assay 
+     \code{SummarizedExperiment}. Should contain one assay 
      (matrix, \code{N} 
      by \code{M} where \code{N} - number of individuals, \code{M}
       - number of genetic variants).}

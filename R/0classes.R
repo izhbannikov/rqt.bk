@@ -9,7 +9,7 @@
 #'    \item{\code{phenotype}:}{Phenotype (a vector of length 
 #'        \code{N}, where \code{N} - number of individuals).}
 #'      \item{\code{genotype}:}{Genotype - an object of class 
-#'      \code{SummarizedExperiment0}. Should contain one assay 
+#'      \code{SummarizedExperiment}. Should contain one assay 
 #'      (matrix, \code{N} 
 #'      by \code{M} where \code{N} - number of individuals, \code{M}
 #'       - number of genetic variants).}
@@ -22,7 +22,7 @@
 #'}
 #'@rdname rqt-class
 #'@details see \code{\link[=print.rqt]{rqt-methods} for related methods}
-setClass("rqt", slots=c(phenotype="vector", genotype="SummarizedExperiment0", covariates="data.frame", results="list"))
+setClass("rqt", slots=c(phenotype="vector", genotype="SummarizedExperiment", covariates="data.frame", results="list"))
 
 #' The rqt class constructor
 #' 
@@ -30,7 +30,7 @@ setClass("rqt", slots=c(phenotype="vector", genotype="SummarizedExperiment0", co
 #' @param  phenotype Phenotype (a vector of length 
 #'        \code{N}, where \code{N} - number of individuals).
 #' @param genotype Genotype - an object of class 
-#'      \code{SummarizedExperiment0}. Should contain one assay 
+#'      \code{SummarizedExperiment}. Should contain one assay 
 #'      (matrix, \code{N} 
 #'      by \code{M} where \code{N} - number of individuals, \code{M}
 #'       - number of genetic variants).
