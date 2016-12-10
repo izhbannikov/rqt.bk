@@ -1,7 +1,7 @@
 Package: rqt
 Type: Package
 Title: rqt: utilities for gene-level meta-analysis
-Version: 0.99.2
+Version: 0.99.3
 Date: 2016-12-10
 Author: I. Y. Zhbannikov, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
@@ -10,7 +10,8 @@ Description: Despite the recent advances of modern GWAS methods, it still remain
 			the whole gene rather than for single variant. The R-package rqt offers gene-level 
 			GWAS meta-analysis. For more information, see: 
 			"Gene-set association tests for next-generation sequencing data" by Lee et al (2016),
-			Bioinformatics, 32(17), i611-i619, <doi:10.1093/bioinformatics/btw429>.
+			Bioinformatics, 32(17), 
+			i611-i619, <doi:10.1093/bioinformatics/btw429>.
 License: GPL
 RoxygenNote: 5.0.1
 Imports:
