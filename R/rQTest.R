@@ -29,11 +29,14 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @param scale A logic parameter (TRUE/FALSE) indicating scaling of 
 #' the genotype dataset.
 #' @examples
-#' data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+#' package="rqt"), header=TRUE))
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
-#' rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
-#' res <- rQTest(rqtobj)
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' res <- rQTest(obj, method="pca", out.type = "D")
 #' print(res)
 #' @rdname rQTest-methods
 #' @export
@@ -52,7 +55,7 @@ setMethod("rQTest", signature="rqt",
         num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
         # Load data #
         phenotype <- x@phenotype
-        genotype <- x@genotype
+        genotype <- assays(x@genotype)[[1]]
         covariates <- x@covariates
         
         # Start the tests #
@@ -105,7 +108,7 @@ setMethod("rQTest", signature="rqt",
                 rslt <- NA
             }
         }
-          
+        
         x@results <- rslt
         return(x)
 })

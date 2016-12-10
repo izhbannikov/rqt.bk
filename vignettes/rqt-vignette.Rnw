@@ -53,16 +53,22 @@ devtools::install_github("izhbannikov/rqt")
 
 \section{Data description}
 \subsection{Single dataset}
-In \texttt{rqt} requires two datasets: phenotype (a n by 1) matrix 
-and genotype (a n by m) matrix, where n - is the total 
-number of individuals in the study and m is the total number 
-of genetic variants. Optionally, rqt can accept covariates, 
-in form of n by k matrix, where k is the total number of 
+In \texttt{rqt} requires the following datasets: 
+(i) \texttt{phenotype} (a \texttt{N} by 1) matrix (i.e. a vector); 
+and (ii) \texttt{genotype} - an object of class 
+\texttt{SummarizedExperiment} containing one assay:
+(a \texttt{N} by \texttt{M}) matrix, where 
+\texttt{N} - is the total 
+number of individuals in the study and \texttt{M} is the total number 
+of genetic variants. Optionally, \texttt{rqt} can accept covariates, 
+in form of \texttt{N} by \texttt{K} matrix, where \texttt{K} 
+is the total number of 
 covariates used in the study. Phenotype can be dichotomous 
 (0/1, where 1 indicates control and 0 case).
 
 \subsection{Meta-analysis}
-In meta-analysis, \texttt{rqt} requires a list of M (M - number 
+In meta-analysis, \texttt{rqt} requires a list of \texttt{M} 
+(\texttt{M} - number 
 of datasets used in meta-analysis) and optionally it accepts
 covariates in form described above.
 
@@ -73,11 +79,13 @@ covariates in form described above.
 
 <<>>=
 library(rqt)
-data <- read.table(system.file("extdata/test.bin1.dat",package="rqt"), 
-    header = TRUE)
-pheno <- data$pheno
+data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+                                           package="rqt"), header=TRUE))
+pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-obj <- rqtClass(phenotype=pheno, genotype=geno)
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
 @
@@ -86,11 +94,13 @@ print(res)
 
 <<>>=
 library(rqt)
-data <- read.table(system.file("extdata/test.cont1.dat",package="rqt"), 
-    header = TRUE)
-pheno <- data$pheno
+data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
+                                           package="rqt"), header = TRUE))
+pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-obj <- rqtClass(phenotype=pheno, genotype=geno)
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pca", out.type = "C")
 print(res)
 @
@@ -100,11 +110,13 @@ print(res)
 This method is used for continous outcome, i.e. out.type = "C".
 <<>>=
 library(rqt)
-data <- read.table(system.file("extdata/test.cont1.dat",package="rqt"), 
-    header = TRUE)
-pheno <- data$pheno
+data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
+                                           package="rqt"), header = TRUE))
+pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-obj <- rqtClass(phenotype=pheno, genotype=geno)
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pls", out.type = "C")
 print(res)
 @
@@ -115,11 +127,13 @@ This method of data preprocessing is used for dichotomous outcome.
 
 <<>>=
 library(rqt)
-data <- read.table(system.file("extdata/test.bin1.dat",package="rqt"), 
-    header=TRUE)
-pheno <- data$pheno
+data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+                                           package="rqt"), header=TRUE))
+pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-obj <- rqtClass(phenotype=pheno, genotype=geno)
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pls", out.type = "D", scale = TRUE)
 print(res)
 @
@@ -137,13 +151,15 @@ can accept additional covariates, in form of
 
 <<>>=
 library(rqt)
-data <- read.table(system.file("extdata/test.bin1.dat",package="rqt"), 
-    header = TRUE)
-pheno <- data$pheno
+data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+                                           package="rqt"), header = TRUE))
+pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
 covars <- read.table(system.file("extdata/test.cova1.dat",package="rqt"), 
     header=TRUE)
-obj <- rqtClass(phenotype=pheno, genotype=geno, covariates = covars)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj, covariates = covars)
 res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
 @
@@ -153,12 +169,30 @@ print(res)
 
 <<>>=
 library(rqt)
-data1 <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
-obj1 <- rqtClass(phenotype=data1[,1], genotype=data1[, 2:dim(data1)[2]])
-data2 <- read.table(system.file("extdata/phengen3.dat",package="rqt"), skip=1)
-obj2 <- rqtClass(phenotype=data2[,1], genotype=data2[, 2:dim(data2)[2]])
-data3 <- read.table(system.file("extdata/phengen.dat",package="rqt"), skip=1)
-obj3 <- rqtClass(phenotype=data3[,1], genotype=data3[, 2:dim(data3)[2]])
+data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
+                                            package="rqt"), skip=1))
+pheno <- data1[,1]
+geno <- data1[, 2:dim(data1)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj1 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
+data2 <- data.matrix(read.table(system.file("extdata/phengen3.dat",
+                                            package="rqt"), skip=1))
+pheno <- data2[,1]
+geno <- data2[, 2:dim(data2)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj2 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
+data3 <- data.matrix(read.table(system.file("extdata/phengen.dat",
+                                            package="rqt"), skip=1))
+pheno <- data3[,1]
+geno <- data3[, 2:dim(data3)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj3 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
 res.meta <- rQTestMeta(list(obj1, obj2, obj3))
 print(res.meta)
 @

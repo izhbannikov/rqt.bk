@@ -6,6 +6,8 @@
 #' @import pls
 #' @import glmnet
 #' @import ropls
+#' @import methods
+#' @import SummarizedExperiment
 NULL
 
 #' Empirical null distribution for Q3 test.
