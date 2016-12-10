@@ -1,15 +1,17 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage{hyperref}
+\usepackage{fixltx2e}
 
-%\VignetteIndexEntry{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
+%\VignetteIndexEntry{Using RQT}
 
-\title{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
+\title{Using RQT, an R package for gene-level meta-analysis}
 \author{Ilya Y. Zhbannikov}
 \date{\today}
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \maketitle
 
 \section{Overview}
@@ -40,15 +42,6 @@ statistics is calculated. P- and q- values are then calculated
 using this statistics from asymptotic approximation or permutation 
 procedure; (iv) the final step is combining gene-level p-values 
 calculated from each study with Fisher's combined probability method.
-
-\section{Installation}
-
-\subsection{Most-recent version from GitHub}
-
-<<eval=FALSE>>=
-require(devtools)
-devtools::install_github("izhbannikov/rqt")
-@
 
 \section{Data description}
 \subsection{Single dataset}

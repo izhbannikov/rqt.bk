@@ -1,10 +1,11 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage{hyperref}
+\usepackage{fixltx2e}
 
-%\VignetteIndexEntry{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
+%\VignetteIndexEntry{Using RQT}
 
-\title{Using RQT, an R/Bioconductor package for gene-level meta-analysis}
+\title{Using RQT, an R package for gene-level meta-analysis}
 \author{Ilya Y. Zhbannikov}
 \date{\today}
 
@@ -42,17 +43,6 @@ statistics is calculated. P- and q- values are then calculated
 using this statistics from asymptotic approximation or permutation 
 procedure; (iv) the final step is combining gene-level p-values 
 calculated from each study with Fisher's combined probability method.
-
-\section{Installation}
-
-\subsection{Most-recent version from GitHub}
-
-\begin{Schunk}
-\begin{Sinput}
-> require(devtools)
-> devtools::install_github("izhbannikov/rqt")
-\end{Sinput}
-\end{Schunk}
 
 \section{Data description}
 \subsection{Single dataset}
@@ -300,8 +290,8 @@ This method of data preprocessing is used for dichotomous outcome.
 PLS-DA
 200 samples x 100 variables and 1 response
 standard scaling of predictors and response(s)
-      R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort pR2Y pQ2
-Total   0.0187    0.301  -0.292   0.2   1   0 0.95 0.8
+      R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort pR2Y  pQ2
+Total   0.0187    0.301  -0.292   0.2   1   0  0.8 0.55
 <simpleError in model$scoreMN: $ operator not defined for this S4 class>
 \end{Soutput}
 \begin{Sinput}
