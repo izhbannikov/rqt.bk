@@ -13,23 +13,44 @@ devtools::install_github("izhbannikov/rqt")
 
 ```
 library(rqt)
-data <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
+data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+    package="rqt"), header=TRUE))
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
-rqtobj <- rqtClass(phenotype=pheno, genotype=geno)
-res <- rQTest(rqtobj)
-print(res@results)
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+res <- rQTest(obj, method="pca", out.type = "D")
+print(res)
 ```
 
 ### Multiple datasets (meta analysis)
 ```
 library(rqt)
-data1 <- read.table(system.file("extdata/phengen2.dat",package="rqt"), skip=1)
-obj1 <- rqtClass(phenotype=data1[,1], genotype=data1[, 2:dim(data1)[2]])
-data2 <- read.table(system.file("extdata/phengen3.dat",package="rqt"), skip=1)
-obj2 <- rqtClass(phenotype=data2[,1], genotype=data2[, 2:dim(data2)[2]])
-data3 <- read.table(system.file("extdata/phengen.dat",package="rqt"), skip=1)
-obj3 <- rqtClass(phenotype=data3[,1], genotype=data3[, 2:dim(data3)[2]])
-res <- rQTestMeta(list(obj1, obj2, obj3))
-print(res@results)
+data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
+                                            package="rqt"), skip=1))
+pheno <- data1[,1]
+geno <- data1[, 2:dim(data1)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj1 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
+data2 <- data.matrix(read.table(system.file("extdata/phengen3.dat",
+                                            package="rqt"), skip=1))
+pheno <- data2[,1]
+geno <- data2[, 2:dim(data2)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj2 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
+data3 <- data.matrix(read.table(system.file("extdata/phengen.dat",
+                                            package="rqt"), skip=1))
+pheno <- data3[,1]
+geno <- data3[, 2:dim(data3)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+obj3 <- rqtClass(phenotype=pheno, genotype=geno.obj)
+
+res.meta <- rQTestMeta(list(obj1, obj2, obj3))
+print(res.meta)
 ```
