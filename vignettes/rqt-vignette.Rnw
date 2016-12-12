@@ -47,8 +47,7 @@ calculated from each study with Fisher's combined probability method.
 In order to install the \emph{rqt} package, the user must first install R (\url{http://www.r-project.org}). After that, \emph{rqt} can be installed with:
 
 <<echo=TRUE, eval=FALSE, results=hide>>=
-source("http://bioconductor.org/biocLite.R")
-biocLite(c("rqt"))
+devtools::install_github("izhbannikov/rqt", buildVignette=TRUE)
 @
 
 
