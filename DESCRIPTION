@@ -17,6 +17,6 @@ RoxygenNote: 5.0.1
 Imports:
 	CCP,CompQuadForm,parallel,Matrix
 Depends:
-    R (>= 3.4),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
+    R (>= 3.3),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
 biocViews: GenomeWideAssociation, Regression, Survival,
         PrincipalComponent, StatisticalMethod, Sequencing
