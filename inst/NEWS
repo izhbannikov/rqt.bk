@@ -1,4 +1,4 @@
-New for version 0.99.13
+New for version 0.99.14
 ======================
 * Version released
 * rqt object now accepts genotype data as an object of SummarizedExperiment class.
