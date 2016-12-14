@@ -1,5 +1,5 @@
-New for version 0.99.16
+New for version 0.99.17
 ======================
 * Version released
 * rqt object now accepts genotype data as an object of SummarizedExperiment class.
-* Vignette changed to markdown type.
+* Vignette updated. Now it follows BiocStyle.

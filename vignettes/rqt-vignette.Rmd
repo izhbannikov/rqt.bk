@@ -1,13 +1,14 @@
 ---
 title: 'Using RQT, an R package for gene-level meta-analysis'
 author: "Ilya Y. Zhbannikov"
-date: "12/14/2016"
-output: html_document
+date: "`r BiocStyle::doc_date()`"
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Tutorial for rqt package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Overview
 

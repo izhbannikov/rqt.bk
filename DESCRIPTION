@@ -1,7 +1,7 @@
 Package: rqt
 Type: Package
 Title: rqt: utilities for gene-level meta-analysis
-Version: 0.99.16
+Version: 0.99.17
 Date: 2016-12-14
 Author: I. Y. Zhbannikov, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
@@ -20,5 +20,6 @@ Imports:
 	CCP,CompQuadForm,parallel,Matrix
 Depends:
     R (>= 3.3),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
+Encoding: UTF-8
 biocViews: GenomeWideAssociation, Regression, Survival,
         PrincipalComponent, StatisticalMethod, Sequencing
