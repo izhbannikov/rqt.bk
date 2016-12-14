@@ -1,20 +1,15 @@
-\documentclass{article}
-\usepackage{fullpage}
-\usepackage{hyperref}
-\usepackage{fixltx2e}
+---
+title: 'Using RQT, an R package for gene-level meta-analysis'
+author: "Ilya Y. Zhbannikov"
+date: "12/14/2016"
+output: html_document
+---
 
-%\VignetteIndexEntry{Using RQT}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-\title{Using RQT, an R package for gene-level meta-analysis}
-\author{Ilya Y. Zhbannikov}
-\date{\today}
-
-
-\begin{document}
-\SweaveOpts{concordance=TRUE}
-\maketitle
-
-\section{Overview}
+## Overview
 
 Despite the recent advances of modern GWAS methods, 
 it is still remains an important problem of addressing 
@@ -29,7 +24,7 @@ usage the \texttt{rqt} or any other issues.
 Below we provide several examples that show GWAS 
 meta-analysis on gene-level layer.
 
-\subsection{Methods in brief}
+### Methods in brief
 
 The workflow of gene-level meta analysis consists of the following steps: 
 (i) reducing the number of predictors, thereby alleviating 
@@ -43,16 +38,18 @@ using this statistics from asymptotic approximation or permutation
 procedure; (iv) the final step is combining gene-level p-values 
 calculated from each study with Fisher's combined probability method.
 
-\section{Installation of \emph{rqt} package}
+## Installation of \emph{rqt} package
+
 In order to install the \emph{rqt} package, the user must first install R (\url{http://www.r-project.org}). After that, \emph{rqt} can be installed with:
 
-<<echo=TRUE, eval=FALSE, results=hide>>=
+```{r, echo=TRUE, eval=FALSE}
 devtools::install_github("izhbannikov/rqt", buildVignette=TRUE)
-@
+```
 
+## Data description
 
-\section{Data description}
-\subsection{Single dataset}
+### Single dataset
+
 In \texttt{rqt} requires the following datasets: 
 (i) \texttt{phenotype} (a \texttt{N} by 1) matrix (i.e. a vector); 
 and (ii) \texttt{genotype} - an object of class 
@@ -66,19 +63,21 @@ is the total number of
 covariates used in the study. Phenotype can be dichotomous 
 (0/1, where 1 indicates control and 0 case).
 
-\subsection{Meta-analysis}
+### Meta-analysis
+
 In meta-analysis, \texttt{rqt} requires a list of \texttt{M} 
 (\texttt{M} - number 
 of datasets used in meta-analysis) and optionally it accepts
 covariates in form described above.
 
-\section{Examples}
+## Examples
 
-\subsection{Gene-level analysis on a single dataset}
-\subsection{Dichotomous phenotype}
+### Gene-level analysis on a single dataset
 
-<<echo=TRUE, results=verbatim>>=
+#### Dichotomous phenotype
+```{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header=TRUE))
 pheno <- data[,1]
@@ -88,12 +87,13 @@ geno.obj <- SummarizedExperiment(geno)
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
-@
+```
 
-\subsection{Continuous phenotype}
+#### Continuous phenotype
 
-<<echo=TRUE, results=verbatim>>=
+```{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
                                            package="rqt"), header = TRUE))
 pheno <- data[,1]
@@ -103,13 +103,15 @@ geno.obj <- SummarizedExperiment(geno)
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pca", out.type = "C")
 print(res)
-@
+```
 
-\subsection{Preprocessing with Partial Least Square regression (PLS)}
+#### Preprocessing with Partial Least Square regression (PLS)
 
 This method is used for continous outcome, i.e. out.type = "C".
-<<echo=TRUE, results=verbatim>>=
+
+````{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
                                            package="rqt"), header = TRUE))
 pheno <- data[,1]
@@ -119,14 +121,15 @@ geno.obj <- SummarizedExperiment(geno)
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pls", out.type = "C")
 print(res)
-@
+```
 
-\subsection{Preprocessing with Partial Least Square Discriminant Analysis (PLS-DA)}
+#### Preprocessing with Partial Least Square Discriminant Analysis (PLS-DA)
 
 This method of data preprocessing is used for dichotomous outcome.
 
-<<echo=TRUE, results=verbatim>>=
+````{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header=TRUE))
 pheno <- data[,1]
@@ -136,9 +139,9 @@ geno.obj <- SummarizedExperiment(geno)
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 res <- rQTest(obj, method="pls", out.type = "D", scale = TRUE)
 print(res)
-@
+```
 
-\subsection{Using additional covariates}
+#### Using additional covariates
 
 Quite often, researchers want to supply not only genetic 
 data but also specific covariates, 
@@ -149,8 +152,9 @@ In such cases, the package \texttt{rqt}
 can accept additional covariates, in form of 
 \texttt{N} by \texttt{K} matrix, as provided below:
 
-<<echo=TRUE, results=verbatim>>=
+````{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
                                            package="rqt"), header = TRUE))
 pheno <- data[,1]
@@ -162,13 +166,13 @@ covars <- read.table(system.file("extdata/test.cova1.dat",package="rqt"),
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj, covariates = covars)
 res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
-@
+```
 
+### Meta-analysis
 
-\section{Meta-analysis}
-
-<<echo=TRUE, results=verbatim>>=
+```{r, echo=TRUE, message=FALSE}
 library(rqt)
+
 data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
                                             package="rqt"), skip=1))
 pheno <- data1[,1]
@@ -195,12 +199,10 @@ obj3 <- rqtClass(phenotype=pheno, genotype=geno.obj)
 
 res.meta <- rQTestMeta(list(obj1, obj2, obj3))
 print(res.meta)
-@
+```
 
 
-\section{Session information}
-<<echo=TRUE, results=verbatim>>=
+## Session information
+```{r, echo=TRUE}
 sessionInfo()
-@
-
-\end{document}
+```
