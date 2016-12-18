@@ -5,13 +5,15 @@
 \title{Preprocess input data with Partial Linear Square 
 Regregression Discriminant Analysis method (PLSDA)}
 \usage{
-preprocess.plsda(data, y)
+preprocess.plsda(data, y, verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of independent 
 variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of one: "S" - a data frame of predictor values.
