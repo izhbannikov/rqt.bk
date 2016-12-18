@@ -52,6 +52,13 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
         cumvariance = cumvar)
   
     ######### Filtering by threshold ##############
+    if(length(which(eig.decathlon2.active$cumvar <= cumvar.threshold)) == 0) {
+        print("Warning: cumvar.threshold is too low and will be set to")
+        print(paste("first component of cumulative variance:", 
+                    eig.decathlon2.active$cumvar[1]))
+        cumvar.threshold <- eig.decathlon2.active$cumvar[1]
+    }
+    
     S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
         cumvar.threshold)] %*% 
     t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
