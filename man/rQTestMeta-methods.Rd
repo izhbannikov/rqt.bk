@@ -10,7 +10,8 @@ combined effect sizes.}
 rQTestMeta(x, ...)
 
 \S4method{rQTestMeta}{list}(x, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE)
+  cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE,
+  asym.pval = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{List of objects of class rqt}
@@ -42,6 +43,11 @@ for LD. Default: PCA.}
 
 \item{scale}{A logic parameter (TRUE/FALSE) indicating 
 scaling of the genotype dataset.}
+
+\item{asym.pval}{Indicates Monte Carlo approximation for p-values. 
+Default: FALSE.}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of four: (i) final.pvalue - 

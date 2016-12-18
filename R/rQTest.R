@@ -28,6 +28,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' \code{C} (continous or quantitative).
 #' @param scale A logic parameter (TRUE/FALSE) indicating scaling of 
 #' the genotype dataset.
+#' @param asym.pval Indicates Monte Carlo approximation for p-values. Default: FALSE.
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @examples
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
@@ -44,13 +45,16 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 setMethod("rQTest", signature="rqt", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=90, out.type="D", 
-            method="pca", scale=FALSE, verbose=FALSE) {
+            method="pca", scale=FALSE, asym.pval=FALSE,
+            verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
         if(cumvar.threshold > 100) {
             cat("Warning: cumvar.threshold > 100 and will be set to 100.")
             cumvar.threshold <- 100
         }
+      
+        
   
         rQTtest.prepare()
         num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
@@ -58,6 +62,14 @@ setMethod("rQTest", signature="rqt",
         phenotype <- x@phenotype
         genotype <- assays(x@genotype)[[1]]
         covariates <- x@covariates
+        
+        if((weight == TRUE) & (scale == TRUE)) {
+          if(verbose) {
+              print("Warining! You can not use scaling in presence of weights!")
+              print("Parameter weight will be set to FALSE.")
+          }
+          weight == FALSE
+        }
         
         # Start the tests #
         if(perm==0){
@@ -71,27 +83,27 @@ setMethod("rQTest", signature="rqt",
                 scale = scale, verbose=verbose),
                 TRUE)
             
-            
-            rsltMC <- do.call(rbind, lapply(1:dim(genotype)[1], function(k){
-              yP <- phenotype[sample(1:length(phenotype),
+            if(asym.pval) {
+                rsltMC <- do.call(rbind, lapply(1:dim(genotype)[1], function(k){
+                    yP <- phenotype[sample(1:length(phenotype),
                                      length(phenotype),
                                      replace=FALSE)]
-              t.res <- QTest.one(phenotype=yP,genotype=genotype, 
+                    t.res <- QTest.one(phenotype=yP,genotype=genotype, 
                                  covariates=covariates,STT=STT,
                                  weight=weight,
                                  cumvar.threshold=cumvar.threshold, 
                                  out.type=out.type, method=method, 
                                  scale = scale)
-              if(is.na(t.res)) {
-                t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                    if(is.na(t.res)) {
+                        t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
                                data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
-                names(t.res) <- c("Qstatistic", "p.value")
-              }
-              tt.res <- t.res$Qstatistic
-            }))
+                        names(t.res) <- c("Qstatistic", "p.value")
+                    }
+                    tt.res <- t.res$Qstatistic
+                }))
             
-            if(!is.na(rslt0)) {
-              rslt <- list("Qstatistic"= data.frame(Q1=rslt0$Qstatistic$Q1, 
+                if(!is.na(rslt0)) {
+                    rslt <- list("Qstatistic"= data.frame(Q1=rslt0$Qstatistic$Q1, 
                                                     Q2=rslt0$Qstatistic$Q2, 
                                                     Q3=rslt0$Qstatistic$Q3),
                            "p.value" = data.frame(
@@ -100,9 +112,13 @@ setMethod("rQTest", signature="rqt",
                              p.Q2 = (length(which(rsltMC[,2] >= 
                                                     rslt0$Qstatistic$Q2))+1)/(dim(genotype)[1]+1),
                              p.Q3 = (length(which(rsltMC[,3] >= 
-                                                    rslt0$Qstatistic$Q3))+1)/(dim(genotype)[1]+1)))
+                                                    rslt0$Qstatistic$Q3))+1)/(dim(genotype)[1]+1)),
+                           beta = rslt0$beta)
+                } else {
+                    rslt <- NA
+                }
             } else {
-              rslt <- NA
+                rslt <- rslt0
             }
         } else {
             rsltPP <- do.call(rbind, lapply(1:perm, function(k){
@@ -129,17 +145,18 @@ setMethod("rQTest", signature="rqt",
                 STT=STT, weight=weight, 
                 cumvar.threshold=cumvar.threshold, 
                 out.type=out.type, method=method, 
-                scale = scale)$p.value),TRUE)
+                scale = scale)),TRUE)
               
             if(!is.na(rslt0)) {
-                rslt <- list("Qstatistic"= data.frame(Q1=NA, Q2=NA, Q3=NA),
-                    "p.value" = data.frame(
+                rslt <- list(Qstatistic= data.frame(Q1=NA, Q2=NA, Q3=NA),
+                    p.value = data.frame(
                     p.Q1 = (length(which(rsltPP[,1] < 
-                    rslt0[1]))+1)/(perm+1),
+                    rslt0$p.value[1]))+1)/(perm+1),
                     p.Q2 = (length(which(rsltPP[,2] < 
-                    rslt0[2]))+1)/(perm+1),
+                    rslt0$p.value[2]))+1)/(perm+1),
                     p.Q3 = (length(which(rsltPP[,3] < 
-                    rslt0[3]))+1)/(perm+1)))
+                    rslt0$p.value[3]))+1)/(perm+1)),
+                    beta = rslt0$beta)
             } else {
                 rslt <- NA
             }

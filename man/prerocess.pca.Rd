@@ -4,7 +4,7 @@
 \alias{prerocess.pca}
 \title{Preprocess input data with Principal Component Analysis method (PCA)}
 \usage{
-prerocess.pca(data, scale, cumvar.threshold)
+prerocess.pca(data, scale, cumvar.threshold, verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of 

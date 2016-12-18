@@ -44,7 +44,9 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
 prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
+    
     res.pca <- prcomp(data, scale=scale)
+    
     # Eigenvalues
     eig <- (res.pca$sdev)^2
     # Variances in percentage
@@ -71,13 +73,13 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
         cumvar.threshold)])
   
     ########## And add the center (and re-scale) back to data ###########
-    if(scale){
-        S <- scale(S, center = FALSE , scale=1/res.pca$scale)
-    }
+    #if(scale){
+    #    S <- scale(S, center = FALSE , scale=1/res.pca$scale)
+    #}
     #if(center){
     #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
     #}
-  
+    
     return(list(S = S))
 }
 
@@ -92,12 +94,12 @@ preprocess.plsda <- function(data, y, verbose=FALSE) {
     numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
     model <- try(opls(x = data, y=as.factor(y), predI=numcomp, 
         plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
-        silent = TRUE, verbose=verbose)
+        silent = TRUE)
     if(inherits(model, "try-error") &&
         substr(unclass(attr(model, "condition"))$message, 1, 85) == 
 "No model was built because the first predictive component was already not significant") {
         model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
-            log10L=FALSE, algoC = "nipals", silent = TRUE, verbose=verbose)
+            log10L=FALSE, algoC = "nipals", silent = TRUE)
     }
     return(list(S=model@scoreMN))
 }

@@ -42,11 +42,14 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             stop(print(e))
         })
     }
-  
-    if(scale) {
-        preddata <- as.data.frame(scale(preddata))
-    }
-
+    
+    # Removing constant columns #
+    preddata <- preddata[,apply(preddata, 2, var, na.rm=TRUE) != 0]
+    
+    #if(scale) {
+    #    preddata <- as.data.frame(scale(preddata))
+    #}
+    
     reg.family <- get.reg.family(out.type)
 
     rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
@@ -81,7 +84,8 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 S <- res[["S"]]
                 res <- simple.multvar.reg(y=phenotype, data=S, 
                     reg.family=reg.family)
-                fit <- res$fit
+                S <- res[["S"]]
+                fit <- res[["fit"]]
                 coef <- try(coef(summary(fit))[-1,1:2],TRUE)
                 
                 if(mode(fit)=="character"){length(coef) <-0 }
@@ -124,7 +128,8 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           
                 alpha <- as.matrix((1/(se1^2)), ncol=1) #/sum(1/(se1^2))
             }
-        
+            beta.pool0 <- 0
+            beta.pool <- 0
             if(length(coef) != 0) {
                 ###### QTest1 ######
                 if(weight == FALSE) {
@@ -137,11 +142,14 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           
                 if(weight == TRUE) {
                     maf.S <- apply(S,2,function(v)mean(na.omit(v))/2)
+                    
                     w.S0 <- qbeta(maf.S,1,25,lower.tail=FALSE)
+                
                     WS <- diag(w.S0)
                     if(length(beta1)==1){
                         WS <- w.S0
                     }
+                    
                     var.pool <- t(alpha) %*% WS %*% vv %*% WS %*% alpha
                     beta.pool <- t(alpha) %*% WS %*% beta1
                     z.score <- beta.pool/sqrt(var.pool)
@@ -228,17 +236,17 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 }
                 
                 if(length(beta1)==1){p.Q3<-p.Q1; Q3final<-Q1}
-          
-                rslt <- list( data.frame(Q1, Q2, Q3=Q3final), 
-                    data.frame(p.Q1,p.Q2,p.Q3))
-                names(rslt) <- c("Qstatistic", "p.value")
+                
+                rslt <- list(Qstatistic=data.frame(Q1, Q2, Q3=Q3final), 
+                          p.value=data.frame(p.Q1,p.Q2,p.Q3),
+                          beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
             }
   
             if(length(coef)==0) { 
-                rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                    data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
+                             beta=NA)
             }
-            options (warn=-1)
         } else {
             # Simple logistic regression:
             if(out.type == "D") {
@@ -251,31 +259,32 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             reg.coef <- coef(summary(res))
     
             if(dim(reg.coef)[1] == 2) {
-                rslt<-list( data.frame(Q1=reg.coef[2,3], 
-                    Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
-                    data.frame(p.Q1=reg.coef[2,4],
-                    p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]))
+                rslt <- list(Qstatistic=data.frame(Q1=reg.coef[2,3], 
+                                Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
+                        p.value=data.frame(p.Q1=reg.coef[2,4],
+                                   p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]),
+                        beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
             } else if(dim(reg.coef)[1] == 1) {
-                rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                    data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
+                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                        p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA),
+                        beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
             } else {
-                rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                    data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
+              rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                           p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                           beta=NA)
             }
         }
     },error=function(e) {
         print(e)
-        rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-            data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
-        names(rslt)<-c("Qstatistic", "p.value")
+        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                    p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                    beta=NA)
     }, finally=rslt)
 
-    if(!is.na(rslt)) {
-        names(rslt)<-c("Qstatistic", "p.value")
-    } else {
-        rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-            data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA) )
-        names(rslt)<-c("Qstatistic", "p.value")
+    if(is.na(rslt$p.value$p.Q3)) {
+        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                     p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                     beta=NA)
     }
   
     return(rslt)
