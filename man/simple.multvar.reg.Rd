@@ -4,7 +4,7 @@
 \alias{simple.multvar.reg}
 \title{Applies linear of logistic regregression to the data.}
 \usage{
-simple.multvar.reg(y, data, reg.family)
+simple.multvar.reg(y, data, reg.family, verbose = FALSE)
 }
 \arguments{
 \item{y}{A vector with values of dependent variable (outcome).}
@@ -14,6 +14,8 @@ independent variables (predictors).}
 
 \item{reg.family}{A regression family. 
 Can be either "binomial" or "gaussian."}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of two: "S" - a dataframe with predictors and "fit"

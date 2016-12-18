@@ -4,10 +4,11 @@
 #'@param x A matrix of predictors.
 #'@param y A vector of outputs (dependent variable).
 #'@param rmod An object returned from glmnet.
+#'@param verbose Indicates verbosing output. Default: FALSE.
 #'@return A list of two: variance-covariance matrix, 
 #'standard deviations of coefficients.
-vcov_rigde <- function(x, y,  rmod) {
-    ridge_se <- function(xs,y,yhat,my_mod){
+vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
+    ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
         # Note, you can't estimate an intercept here
         n <- dim(xs)[1]
         k <- dim(xs)[2]
@@ -20,7 +21,9 @@ vcov_rigde <- function(x, y,  rmod) {
         var_cov <- sigma_sq * (xpxinvplam %*% xpx %*% xpxinvplam)
         se_bs <- sqrt(diag(var_cov))
       
-        print('NOTE: These standard errors are very biased.')
+        if(verbose) 
+            print('NOTE: These standard errors are very biased.')
+        
         return(list(vcov=var_cov, se=se_bs))
     }
   
@@ -28,7 +31,7 @@ vcov_rigde <- function(x, y,  rmod) {
     r_yhat   <- predict(rmod,newx=x,s='lambda.min')
     ro_yhat  <- predict(rmod,newx=x)
     # Variance-covariance matrix and Standard Erros
-    rmod_ses <- ridge_se(x,y,r_yhat,rmod)
+    rmod_ses <- ridge_se(x,y,r_yhat,rmod,verbose=verbose)
     return(rmod_ses)
 }
 
@@ -38,8 +41,9 @@ vcov_rigde <- function(x, y,  rmod) {
 #' @param scale A logical variable, indicates wheither or 
 #' not scaling should be performed.
 #' @param cumvar.threshold A threshold value for explained variance.
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
-prerocess.pca <- function(data, scale, cumvar.threshold) {
+prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
     res.pca <- prcomp(data, scale=scale)
     # Eigenvalues
     eig <- (res.pca$sdev)^2
@@ -53,9 +57,11 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
   
     ######### Filtering by threshold ##############
     if(length(which(eig.decathlon2.active$cumvar <= cumvar.threshold)) == 0) {
-        print("Warning: cumvar.threshold is too low and will be set to")
-        print(paste("first component of cumulative variance:", 
+        if(verbose) {  
+            print("Warning: cumvar.threshold is too low and will be set to")
+            print(paste("first component of cumulative variance:", 
                     eig.decathlon2.active$cumvar[1]))
+        }
         cumvar.threshold <- eig.decathlon2.active$cumvar[1]
     }
     
@@ -80,17 +86,18 @@ prerocess.pca <- function(data, scale, cumvar.threshold) {
 #' @param data An input matrix with values of independent 
 #' variables (predictors).
 #' @param y A vector with values of dependent variable (outcome).
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
-preprocess.plsda <- function(data, y) {
+preprocess.plsda <- function(data, y, verbose=FALSE) {
     numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
     model <- try(opls(x = data, y=as.factor(y), predI=numcomp, 
         plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
-        silent = TRUE)
+        silent = TRUE, verbose=verbose)
     if(inherits(model, "try-error") &&
         substr(unclass(attr(model, "condition"))$message, 1, 85) == 
 "No model was built because the first predictive component was already not significant") {
         model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
-            log10L=FALSE, algoC = "nipals")
+            log10L=FALSE, algoC = "nipals", silent = TRUE, verbose=verbose)
     }
     return(list(S=model@scoreMN))
 }
@@ -101,8 +108,9 @@ preprocess.plsda <- function(data, y) {
 #' independent variables (predictors).
 #' @param y A vector with values of dependent variable (outcome).
 #' @param cumvar.threshold A threshold value for explained variance.
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictors.
-preprocess.pls <- function(data, y, cumvar.threshold) {
+preprocess.pls <- function(data, y, cumvar.threshold, verbose=FALSE) {
     inpdata <- data.frame("y"=y, data)
     res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
     numcomp <- 1
@@ -132,8 +140,10 @@ preprocess.pls <- function(data, y, cumvar.threshold) {
 #' @param reg.family A regression family. 
 #' Can be either "binomial" or "gaussian."
 #' @param method A method. Can be either "lasso" or "ridge."
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return fit An object returned by "cv.glmnet" function.
-preprocess.lasso.ridge <- function(data, y, reg.family, method) {
+preprocess.lasso.ridge <- function(data, y, reg.family, method, 
+                                   verbose=FALSE) {
     #### LASSO/Ridge ####
     tryCatch({
         if(reg.family == "binomial") {
@@ -157,9 +167,10 @@ preprocess.lasso.ridge <- function(data, y, reg.family, method) {
 #' @param y A vector with values of dependent variable (outcome).
 #' @param reg.family A regression family. 
 #' Can be either "binomial" or "gaussian."
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of two: "S" - a dataframe with predictors and "fit"
 #' - an object returned by "glm" function.
-simple.multvar.reg <- function(y, data, reg.family) {
+simple.multvar.reg <- function(y, data, reg.family, verbose=FALSE) {
     if(reg.family == "binomial") {
         fit <- try(glm(y ~ ., data=data.frame(data), 
             family = binomial(link=logit)),TRUE)

@@ -4,7 +4,7 @@
 \alias{vcov_rigde}
 \title{Calculates variance-covariance matrix for LASSO/ridge regression.}
 \usage{
-vcov_rigde(x, y, rmod)
+vcov_rigde(x, y, rmod, verbose = FALSE)
 }
 \arguments{
 \item{x}{A matrix of predictors.}
@@ -12,6 +12,8 @@ vcov_rigde(x, y, rmod)
 \item{y}{A vector of outputs (dependent variable).}
 
 \item{rmod}{An object returned from glmnet.}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of two: variance-covariance matrix, 

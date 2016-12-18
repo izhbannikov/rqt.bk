@@ -28,6 +28,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' \code{C} (continous or quantitative).
 #' @param scale A logic parameter (TRUE/FALSE) indicating scaling of 
 #' the genotype dataset.
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @examples
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
 #' package="rqt"), header=TRUE))
@@ -43,7 +44,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 setMethod("rQTest", signature="rqt", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=90, out.type="D", 
-            method="pca", scale=FALSE) {
+            method="pca", scale=FALSE, verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
         if(cumvar.threshold > 100) {
@@ -60,14 +61,49 @@ setMethod("rQTest", signature="rqt",
         
         # Start the tests #
         if(perm==0){
-            rslt <- try(QTest.one(phenotype=phenotype, 
+            rslt0 <- try(QTest.one(phenotype=phenotype, 
                 genotype=genotype, 
                 covariates=covariates, 
                 STT=STT, 
+                weight=weight,
                 cumvar.threshold=cumvar.threshold, 
                 out.type=out.type, method=method, 
-                scale = scale),
+                scale = scale, verbose=verbose),
                 TRUE)
+            
+            
+            rsltMC <- do.call(rbind, lapply(1:dim(genotype)[1], function(k){
+              yP <- phenotype[sample(1:length(phenotype),
+                                     length(phenotype),
+                                     replace=FALSE)]
+              t.res <- QTest.one(phenotype=yP,genotype=genotype, 
+                                 covariates=covariates,STT=STT,
+                                 weight=weight,
+                                 cumvar.threshold=cumvar.threshold, 
+                                 out.type=out.type, method=method, 
+                                 scale = scale)
+              if(is.na(t.res)) {
+                t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                               data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                names(t.res) <- c("Qstatistic", "p.value")
+              }
+              tt.res <- t.res$Qstatistic
+            }))
+            
+            if(!is.na(rslt0)) {
+              rslt <- list("Qstatistic"= data.frame(Q1=rslt0$Qstatistic$Q1, 
+                                                    Q2=rslt0$Qstatistic$Q2, 
+                                                    Q3=rslt0$Qstatistic$Q3),
+                           "p.value" = data.frame(
+                             p.Q1 = (length(which(rsltMC[,1] >= 
+                                                    rslt0$Qstatistic$Q1))+1)/(dim(genotype)[1]+1),
+                             p.Q2 = (length(which(rsltMC[,2] >= 
+                                                    rslt0$Qstatistic$Q2))+1)/(dim(genotype)[1]+1),
+                             p.Q3 = (length(which(rsltMC[,3] >= 
+                                                    rslt0$Qstatistic$Q3))+1)/(dim(genotype)[1]+1)))
+            } else {
+              rslt <- NA
+            }
         } else {
             rsltPP <- do.call(rbind, lapply(1:perm, function(k){
                 yP <- phenotype[sample(1:length(phenotype),
@@ -78,11 +114,11 @@ setMethod("rQTest", signature="rqt",
                     weight=weight,
                     cumvar.threshold=cumvar.threshold, 
                     out.type=out.type, method=method, 
-                    scale = scale)
+                    scale = scale, verbose=verbose)
                 if(is.na(t.res)) {
                     t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
                         data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
-                    names(rslt) <- c("Qstatistic", "p.value")
+                    names(t.res) <- c("Qstatistic", "p.value")
                 }
                 pv <- t.res$p.value
             }))

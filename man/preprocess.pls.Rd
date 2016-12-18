@@ -5,7 +5,7 @@
 \title{Preprocess input data with Partial Linear Square Regregression 
 method (PLS)}
 \usage{
-preprocess.pls(data, y, cumvar.threshold)
+preprocess.pls(data, y, cumvar.threshold, verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of 
@@ -14,6 +14,8 @@ independent variables (predictors).}
 \item{y}{A vector with values of dependent variable (outcome).}
 
 \item{cumvar.threshold}{A threshold value for explained variance.}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of one: "S" - a data frame of predictors.

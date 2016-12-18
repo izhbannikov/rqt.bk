@@ -30,7 +30,7 @@ get.reg.family <- function(out.type) {
 }
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
-    cumvar.threshold=90, method="pca", out.type="D", scale=FALSE) {
+    cumvar.threshold=90, method="pca", out.type="D", scale=FALSE, verbose=FALSE) {
     ### Data preprocessing, (scaling if needed) ###
     #### Binding predictors (genotype and covariates) ####
     preddata <- genotype
@@ -58,19 +58,20 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             ### Dimensionality reduction and account for LD ###
             if(method == "pca") {
                 res <- prerocess.pca(data=preddata, scale=scale, 
-                    cumvar.threshold=cumvar.threshold)
+                    cumvar.threshold=cumvar.threshold, verbose=verbose)
             } else if(method == "pls") {
                 if(out.type == "D") {
                     ##### PLSDA #####
-                    res <- preprocess.plsda(data=preddata, y=phenotype)
+                    res <- preprocess.plsda(data=preddata, y=phenotype, 
+                        verbose=verbose)
                 } else if(out.type == "C"){
                     ##### PLS #####
                     res <- preprocess.pls(data=preddata, y=phenotype, 
-                        cumvar.threshold=cumvar.threshold)
+                        cumvar.threshold=cumvar.threshold, verbose=verbose)
                 }
             } else if(method == "lasso" | method == "ridge") {
                 res <- preprocess.lasso.ridge(data=preddata, y=phenotype, 
-                    reg.family=reg.family, method=method)
+                    reg.family=reg.family, method=method, verbose=verbose)
             } else {
                 res[["S"]] <- preddata
             }

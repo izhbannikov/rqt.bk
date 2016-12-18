@@ -14,6 +14,8 @@ independent variables (predictors).}
 not scaling should be performed.}
 
 \item{cumvar.threshold}{A threshold value for explained variance.}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 A list of one: "S" - a data frame of predictor values.

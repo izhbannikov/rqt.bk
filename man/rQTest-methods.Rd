@@ -9,7 +9,8 @@
 rQTest(x, ...)
 
 \S4method{rQTest}{rqt}(x, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE)
+  cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{Object of class rqt}
@@ -40,6 +41,8 @@ Default: PCA.}
 
 \item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of 
 the genotype dataset.}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 Updated rqt object with result slot

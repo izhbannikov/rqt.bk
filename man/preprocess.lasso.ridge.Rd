@@ -4,7 +4,7 @@
 \alias{preprocess.lasso.ridge}
 \title{Preprocess input data with LASSO/Ridge regregression method}
 \usage{
-preprocess.lasso.ridge(data, y, reg.family, method)
+preprocess.lasso.ridge(data, y, reg.family, method, verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of 
@@ -16,6 +16,8 @@ independent variables (predictors).}
 Can be either "binomial" or "gaussian."}
 
 \item{method}{A method. Can be either "lasso" or "ridge."}
+
+\item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
 fit An object returned by "cv.glmnet" function.
