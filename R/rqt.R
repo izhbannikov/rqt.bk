@@ -82,6 +82,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     reg.family=reg.family)
                 fit <- res$fit
                 coef <- try(coef(summary(fit))[-1,1:2],TRUE)
+                
                 if(mode(fit)=="character"){length(coef) <-0 }
                 if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
                 if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
@@ -101,7 +102,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     S <- res$S
                     fit <- res$fit
                     coef <- try(coef(summary(fit))[-1,1:2],TRUE)
-          
+                    
                     if(mode(fit)=="character"){length(coef) <-0 }
                     if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
                     if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
