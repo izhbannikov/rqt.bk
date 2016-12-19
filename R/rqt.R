@@ -31,33 +31,24 @@ get.reg.family <- function(out.type) {
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
     cumvar.threshold=90, method="pca", out.type="D", scale=FALSE, verbose=FALSE) {
-    ### Data preprocessing, (scaling if needed) ###
-    #### Binding predictors (genotype and covariates) ####
-    preddata <- genotype
-
-    if(length(covariates) != 0) {
-        tryCatch({
-            preddata <- cbind(genotype, covariates)
-        }, error=function(e) {
-            stop(print(e))
-        })
-    }
-    
-    # Removing constant columns #
-    preddata <- preddata[,apply(preddata, 2, var, na.rm=TRUE) != 0]
-    
-    #if(scale) {
-    #    preddata <- as.data.frame(scale(preddata))
-    #}
     
     reg.family <- get.reg.family(out.type)
 
-    rslt <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-        data.frame(p.Q1=NA, p.Q2=NA, p.Q3=NA) )
-    names(rslt) <- c("Qstatistic", "p.value")
+    rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                 p.value=data.frame(p.Q1=NA, p.Q2=NA, p.Q3=NA), 
+                 beta=NA)
+    
     res <- list()
     tryCatch({
-        if(dim(preddata)[2] > 1) {
+        if(dim(genotype)[2] > 1) {
+            # Removing constant columns #
+            preddata <- data.frame(genotype[,apply(genotype, 2, var, na.rm=TRUE) != 0])
+            # Removing highly correlated columns #
+            tmp <- cor(preddata)
+            tmp[upper.tri(tmp)] <- 0
+            diag(tmp) <- 0
+            preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
+            
             ### Dimensionality reduction and account for LD ###
             if(method == "pca") {
                 res <- prerocess.pca(data=preddata, scale=scale, 
@@ -66,7 +57,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 if(out.type == "D") {
                     ##### PLSDA #####
                     res <- preprocess.plsda(data=preddata, y=phenotype, 
-                        verbose=verbose)
+                        scale=scale, verbose=verbose)
                 } else if(out.type == "C"){
                     ##### PLS #####
                     res <- preprocess.pls(data=preddata, y=phenotype, 
@@ -82,8 +73,13 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             #### Regression after data preprocessing ####
             if(!(method %in% c("lasso", "ridge"))) {
                 S <- res[["S"]]
-                res <- simple.multvar.reg(y=phenotype, data=S, 
-                    reg.family=reg.family)
+                
+                # Build null model #
+                null.model <- build.null.model(y=phenotype, x=covariates,
+                                                 reg.family=reg.family)
+
+                res <- simple.multvar.reg(null.model=null.model, Z=S)
+                
                 S <- res[["S"]]
                 fit <- res[["fit"]]
                 coef <- try(coef(summary(fit))[-1,1:2],TRUE)
@@ -97,13 +93,20 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             } else {
                 fit <- res$fit
                 coef <- coef(fit)[-1]
-          
+                
+                S <- res[["S"]]
+                
                 if(sum(coef) == 0) {
                     print("All coefficients in lasso/ridge regression 
                           are equal to 0. 
                           Trying ordinary regressing instead.")
-                    res <- simple.multvar.reg(y=phenotype, data=preddata, 
-                        reg.family=reg.family)
+                    
+                    S <- preddata
+                    # Build null model #
+                    null.model <- build.null.model(y=phenotype, x=covariates,
+                                                 reg.family=reg.family)
+                    
+                    res <- simple.multvar.reg(null.model=null.model, Z=S)
                     S <- res$S
                     fit <- res$fit
                     coef <- try(coef(summary(fit))[-1,1:2],TRUE)
@@ -248,16 +251,16 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                              beta=NA)
             }
         } else {
-            # Simple logistic regression:
-            if(out.type == "D") {
-                res <- glm(phenotype ~ ., data=data.frame(preddata), 
-                    family = binomial(link=logit))
-            } else {
-                res <- glm(phenotype ~ ., data=data.frame(preddata), 
-                    family = gaussian)
-            }
-            reg.coef <- coef(summary(res))
-    
+            # Simple regression:
+            # Build null model #
+          
+            null.model <- build.null.model(y=phenotype, x=covariates,
+                                         reg.family=reg.family)
+            
+            res <- simple.multvar.reg(null.model=null.model, Z=preddata)
+            print(res)
+            reg.coef <- coef(summary(res$fit))
+            
             if(dim(reg.coef)[1] == 2) {
                 rslt <- list(Qstatistic=data.frame(Q1=reg.coef[2,3], 
                                 Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 

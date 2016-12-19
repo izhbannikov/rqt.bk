@@ -68,7 +68,7 @@ setMethod("rQTest", signature="rqt",
               print("Warining! You can not use scaling in presence of weights!")
               print("Parameter weight will be set to FALSE.")
           }
-          weight == FALSE
+          weight <- FALSE
         }
         
         # Start the tests #
