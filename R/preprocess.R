@@ -44,7 +44,9 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
 prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
+    
     res.pca <- prcomp(data, scale=scale)
+    
     # Eigenvalues
     eig <- (res.pca$sdev)^2
     # Variances in percentage
@@ -71,13 +73,13 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
         cumvar.threshold)])
   
     ########## And add the center (and re-scale) back to data ###########
-    if(scale){
-        S <- scale(S, center = FALSE , scale=1/res.pca$scale)
-    }
+    #if(scale){
+    #    S <- scale(S, center = FALSE , scale=1/res.pca$scale)
+    #}
     #if(center){
     #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
     #}
-  
+    
     return(list(S = S))
 }
 
@@ -88,17 +90,26 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
 #' @param y A vector with values of dependent variable (outcome).
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
-preprocess.plsda <- function(data, y, verbose=FALSE) {
-    numcomp <- ifelse(dim(data)[2] < 10, dim(data)[2], NA)
-    model <- try(opls(x = data, y=as.factor(y), predI=numcomp, 
+preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE) {
+    
+    if(scale){
+        data.scaled <- scale(data, center = TRUE)
+    } else {
+      data.scaled <- data
+    }
+    
+    numcomp <- ifelse(dim(data.scaled)[2] < 10, dim(data.scaled)[2], NA)
+    model <- try(opls(x = data.scaled, y=as.factor(y), predI=numcomp, 
         plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
-        silent = TRUE, verbose=verbose)
+        silent = TRUE)
+    
     if(inherits(model, "try-error") &&
         substr(unclass(attr(model, "condition"))$message, 1, 85) == 
 "No model was built because the first predictive component was already not significant") {
-        model <- opls(x = data, y=as.factor(y), predI=1, plotL = FALSE, 
-            log10L=FALSE, algoC = "nipals", silent = TRUE, verbose=verbose)
+        model <- opls(x = data.scaled, y=as.factor(y), predI=1, plotL = FALSE, 
+            log10L=FALSE, algoC = "nipals", silent = TRUE)
     }
+    #print(model)
     return(list(S=model@scoreMN))
 }
 
@@ -162,31 +173,59 @@ preprocess.lasso.ridge <- function(data, y, reg.family, method,
 } 
 
 #' Applies linear of logistic regregression to the data.
-#' @param data An input matrix with values of 
-#' independent variables (predictors).
+#' @param null.model A fitted null model
+#' @param Z A genotype matrix
+#' @param verbose Indicates verbosing output. Default: FALSE.
+#' @return A list of two: "S" - a dataframe with predictors and "fit"
+#' - an object returned by "glm" function.
+simple.multvar.reg <- function(null.model, Z, verbose=FALSE) {
+    # Fit regression according to provided null model #
+    fit <- try(glm(null.model ~ ., data=data.frame(Z)),TRUE)
+    na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
+
+    if( length(na.S) > 0 & (dim(data.frame(Z))[2] > 1) ){
+        S <- try(as.matrix(Z[,-na.S]),TRUE)
+        fit <- try(glm(null.model ~ . ,data=data.frame(S)),TRUE)
+    } else {
+        S <- Z
+    }
+    return(list(S=S, fit=fit))
+}
+
+#' Applies linear of logistic regregression to the data.
 #' @param y A vector with values of dependent variable (outcome).
+#' @param x A data.frame of covariates.
 #' @param reg.family A regression family. 
 #' Can be either "binomial" or "gaussian."
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of two: "S" - a dataframe with predictors and "fit"
 #' - an object returned by "glm" function.
-simple.multvar.reg <- function(y, data, reg.family, verbose=FALSE) {
+build.null.model <- function(y, x, reg.family, verbose=FALSE) {
     if(reg.family == "binomial") {
-        fit <- try(glm(y ~ ., data=data.frame(data), 
-            family = binomial(link=logit)),TRUE)
+        if(length(x) != 0) {
+            fit <- try(glm(y ~ ., data=data.frame(x), 
+                           na.action=na.exclude,
+                         family = binomial(link=logit)),TRUE)
+        } else {
+            fit <- try(glm(y ~ 1, na.action=na.exclude,
+                         family = binomial(link=logit)),TRUE)
+        }
     } else if(reg.family == "gaussian") {
-        fit <- try(glm(y ~ ., data=data.frame(data), 
-            family = reg.family),TRUE)
+        if(length(x) != 0) {
+            fit <- try(glm(y ~ x, data=data.frame(x), 
+                   na.action=na.exclude,
+                   family = reg.family),TRUE)
+        } else {
+            fit <- try(glm(y ~ 1, 
+                     na.action=na.exclude,
+                     family = reg.family),TRUE)
+        }
     } else {
         stop(paste("Unknown reg.family:", reg.family))
     }
-    na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
-
-    if(length(na.S) > 0){
-        S <- try(as.matrix(data[,-na.S]),TRUE)
-        fit <- try(glm(y ~ . ,data=data.frame(S)),TRUE)
-    } else {
-        S <- data
-    }
-    return(list(S=S, fit=fit))
+  
+    return(resid(fit))
 }
+
+
+

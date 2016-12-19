@@ -35,6 +35,9 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 #' C (continous or qualitative).
 #' @param scale A logic parameter (TRUE/FALSE) indicating 
 #' scaling of the genotype dataset.
+#' @param asym.pval Indicates Monte Carlo approximation for p-values. 
+#' Default: FALSE.
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @rdname rQTestMeta-methods
 #' @examples
 #'data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
@@ -66,7 +69,8 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 setMethod("rQTestMeta", signature="list", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
         cumvar.threshold=90, out.type="D", 
-        method="pca", scale=FALSE) {
+        method="pca", scale=FALSE, asym.pval=FALSE,
+        verbose=FALSE) {
             
         if(cumvar.threshold > 100) {
             cat("Warning: cumvar.threshold > 100 
@@ -86,7 +90,9 @@ setMethod("rQTestMeta", signature="list",
                 out.type=out.type, 
                 method=method, 
                 perm = perm, 
-                scale=scale)
+                scale=scale,
+                asym.pval=asym.pval,
+                verbose=verbose)
               
             if(length(res@results) != 0) {
                 pv <- c(pv, res@results$p.value$p.Q3)
@@ -96,7 +102,7 @@ setMethod("rQTestMeta", signature="list",
         ### Combining p-values via Fisher's test ###
         chi.comb <- sum(-2*log(pv[which(!is.na(pv))]))
         df <- 2*length(pv)
-        final.pvalue <- 1-pchisq(q = chi.comb, df=df)
+        final.pvalue <- 1-pchisq(q=chi.comb, df=df)
         #### End of combining p-values ####
         ### End of meta-analysis ###
            
