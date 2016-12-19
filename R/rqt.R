@@ -258,7 +258,6 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                                          reg.family=reg.family)
             
             res <- simple.multvar.reg(null.model=null.model, Z=genotype)
-            print(res)
             reg.coef <- coef(summary(res$fit))
             
             if(dim(reg.coef)[1] == 2) {
@@ -266,11 +265,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                                 Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
                         p.value=data.frame(p.Q1=reg.coef[2,4],
                                    p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]),
-                        beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
-            } else if(dim(reg.coef)[1] == 1) {
-                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                        p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA),
-                        beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
+                        beta=reg.coef[2,1])
             } else {
               rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                            p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
