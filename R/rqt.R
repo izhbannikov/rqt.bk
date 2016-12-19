@@ -257,7 +257,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             null.model <- build.null.model(y=phenotype, x=covariates,
                                          reg.family=reg.family)
             
-            res <- simple.multvar.reg(null.model=null.model, Z=preddata)
+            res <- simple.multvar.reg(null.model=null.model, Z=genotype)
             print(res)
             reg.coef <- coef(summary(res$fit))
             
