@@ -183,7 +183,7 @@ simple.multvar.reg <- function(null.model, Z, verbose=FALSE) {
     fit <- try(glm(null.model ~ ., data=data.frame(Z)),TRUE)
     na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
 
-    if(length(na.S) > 0){
+    if( length(na.S) > 0 & (dim(data.frame(Z))[2] > 1) ){
         S <- try(as.matrix(Z[,-na.S]),TRUE)
         fit <- try(glm(null.model ~ . ,data=data.frame(S)),TRUE)
     } else {
