@@ -5,7 +5,7 @@
 \title{Preprocess input data with Partial Linear Square 
 Regregression Discriminant Analysis method (PLSDA)}
 \usage{
-preprocess.plsda(data, y, verbose = FALSE)
+preprocess.plsda(data, y, scale = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of independent 
