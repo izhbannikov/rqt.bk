@@ -17,9 +17,9 @@ RoxygenNote: 5.0.1
 Suggests: BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
 Imports:
-	CCP,CompQuadForm,parallel,Matrix
+	CCP,CompQuadForm,parallel,Matrix,metap
 Depends:
-    R (>= 3.3),glmnet,pls,plyr,ropls,methods,SummarizedExperiment,metap
+    R (>= 3.3),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
 Encoding: UTF-8
 biocViews: GenomeWideAssociation, Regression, Survival,
         PrincipalComponent, StatisticalMethod, Sequencing
