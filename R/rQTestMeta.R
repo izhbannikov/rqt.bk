@@ -3,11 +3,9 @@
 #' 
 #' @param x List of objects of class rqt
 #' @param ... Additional parameters to pass to the function
-#' @return A list of four: (i) final.pvalue - 
+#' @return A list of two: (i) final.pvalue - 
 #' a final p-value across all studies; 
 #' (ii) pvalueList - p-values for each study; 
-#' (iii) df - degrees of freedom; 
-#' (iv) chi.comb - meta-analysis Chi-square statistics
 #' @export
 #' @docType methods
 #' @rdname rQTestMeta-methods
@@ -136,6 +134,5 @@ setMethod("rQTestMeta", signature="list",
         ### End of meta-analysis ###
            
         return(list(final.pvalue=final.pvalue, 
-            pvalueList=pv, df=df, 
-            chi.comb=chi.comb))
+            pvalueList=pv))
 })
