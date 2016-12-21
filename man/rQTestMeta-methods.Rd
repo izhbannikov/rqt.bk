@@ -11,7 +11,7 @@ rQTestMeta(x, ...)
 
 \S4method{rQTestMeta}{list}(x, perm = 0, STT = 0.2, weight = FALSE,
   cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE,
-  asym.pval = FALSE, verbose = FALSE)
+  asym.pval = FALSE, comb.test = "wilkinson", verbose = FALSE)
 }
 \arguments{
 \item{x}{List of objects of class rqt}
@@ -46,6 +46,8 @@ scaling of the genotype dataset.}
 
 \item{asym.pval}{Indicates Monte Carlo approximation for p-values. 
 Default: FALSE.}
+
+\item{comb.test}{Statistical test for combining p-values.}
 
 \item{verbose}{Indicates verbosing output. Default: FALSE.}
 }

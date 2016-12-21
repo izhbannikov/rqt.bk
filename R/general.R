@@ -7,6 +7,7 @@
 #' @import glmnet
 #' @import ropls
 #' @import methods
+#' @import metap
 #' @import SummarizedExperiment
 NULL
 
