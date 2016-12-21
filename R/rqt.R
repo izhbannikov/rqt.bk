@@ -90,6 +90,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           
                 vv <- vcov(fit)[-1,-1]
                 alpha <- (1/(se1^2)) #/sum(1/(se1^2))
+                alpha <- alpha/sum(1/(se1^2))
             } else {
                 fit <- res$fit
                 coef <- coef(fit)[-1]
@@ -129,7 +130,8 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     vv <- as.matrix(vv)
                 }
           
-                alpha <- as.matrix((1/(se1^2)), ncol=1) #/sum(1/(se1^2))
+                alpha <- as.matrix((1/(se1^2)), ncol=1)
+                alpha <- alpha/sum(1/(se1^2))
             }
             beta.pool0 <- 0
             beta.pool <- 0
