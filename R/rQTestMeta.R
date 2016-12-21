@@ -37,6 +37,7 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 #' scaling of the genotype dataset.
 #' @param asym.pval Indicates Monte Carlo approximation for p-values. 
 #' Default: FALSE.
+#' @param comb.test Statistical test for combining p-values.
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @rdname rQTestMeta-methods
 #' @examples
@@ -70,6 +71,7 @@ setMethod("rQTestMeta", signature="list",
     function(x, perm=0, STT=0.2, weight=FALSE, 
         cumvar.threshold=90, out.type="D", 
         method="pca", scale=FALSE, asym.pval=FALSE,
+        comb.test = "wilkinson",
         verbose=FALSE) {
             
         if(cumvar.threshold > 100) {
@@ -100,9 +102,36 @@ setMethod("rQTestMeta", signature="list",
         }
             
         ### Combining p-values via Fisher's test ###
-        chi.comb <- sum(-2*log(pv[which(!is.na(pv))]))
-        df <- 2*length(pv)
-        final.pvalue <- 1-pchisq(q=chi.comb, df=df)
+        
+        if(comb.test == "wilkinson") {
+            # Wilkinson
+            final.pvalue <- wilkinsonp(pv)$p
+        } else  if(comb.test == "fisher") {
+            # Fisher
+            chi.comb <- sum(-2*log(pv[which(!is.na(pv))]))
+            df <- 2*length(pv)
+            final.pvalue <- 1-pchisq(q=chi.comb, df=df)
+        } else if(comb.test == "minimump") {
+            # minimump
+            final.pvalue <- minimump(pv)$p
+        } else if(comb.test == "sump") {
+            # sump
+            final.pvalue <- sump(pv)$p
+        } else if(comb.test == "sumlog") {
+            # sumlog
+            final.pvalue <- sumlog(pv)$p
+        } else if(comb.test == "meanp") {
+            final.pvalue <- meanp(pv)$p
+        } else if(comb.test == "logitp") {
+            final.pvalue <- logitp(pv)$p
+        } else if(comb.test == "votep") {
+            final.pvalue <- votep(pv)$p
+        } else {
+            # Wilkinson
+            final.pvalue <- wilkinsonp(pv)$p
+        }
+        
+        
         #### End of combining p-values ####
         ### End of meta-analysis ###
            
