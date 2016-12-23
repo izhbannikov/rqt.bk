@@ -88,6 +88,8 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
 #' @param data An input matrix with values of independent 
 #' variables (predictors).
 #' @param y A vector with values of dependent variable (outcome).
+#' @param scale A logical variable, indicates wheither or 
+#' not scaling should be performed.
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
 preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE) {

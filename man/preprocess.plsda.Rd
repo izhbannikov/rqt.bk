@@ -13,6 +13,9 @@ variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
 
+\item{scale}{A logical variable, indicates wheither or 
+not scaling should be performed.}
+
 \item{verbose}{Indicates verbosing output. Default: FALSE.}
 }
 \value{
