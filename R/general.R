@@ -9,11 +9,8 @@
 #' @import methods
 #' @import metap
 #' @import SummarizedExperiment
-#' @importFrom stats binomial cor glm
-#' @importFrom na.exclude na.omit
-#' @importFrom pchisq pgamma prcomp 
-#' @importFrom qbeta qchisq qgamma
-#' @importFrom resid var vcov
+#' @import stats
+#' @import utils
 NULL
 
 #' Empirical null distribution for Q3 test.
