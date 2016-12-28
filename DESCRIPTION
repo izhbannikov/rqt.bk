@@ -19,7 +19,7 @@ VignetteBuilder: knitr
 Imports:
 	stats,CCP,CompQuadForm,parallel,Matrix,metap
 Depends:
-    R (>= 3.4),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
+    R (>= 3.3),glmnet,pls,plyr,ropls,methods,SummarizedExperiment
 Encoding: UTF-8
 biocViews: GenomeWideAssociation, Regression, Survival,
         PrincipalComponent, StatisticalMethod, Sequencing
