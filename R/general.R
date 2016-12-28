@@ -12,8 +12,8 @@
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
 #' @importFrom stats qbeta qchisq qgamma
-#' @imprtFrom stats resid var vcov
-#' @imprtFrom stats na.exclude na.omit
+#' @importFrom stats resid var vcov
+#' @importFrom stats na.exclude na.omit
 NULL
 
 #' Empirical null distribution for Q3 test.
