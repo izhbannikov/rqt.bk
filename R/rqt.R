@@ -30,7 +30,7 @@ get.reg.family <- function(out.type) {
 }
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
-    cumvar.threshold=90, method="pca", out.type="D", scale=FALSE, verbose=FALSE) {
+    cumvar.threshold=75, method="pls", out.type="D", scale=FALSE, verbose=FALSE) {
     
     reg.family <- get.reg.family(out.type)
 
@@ -40,16 +40,22 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
     
     res <- list()
     tryCatch({
+    
         if(dim(genotype)[2] > 1) {
+          
             # Removing constant columns #
             preddata <- data.frame(genotype[,apply(genotype, 2, var, na.rm=TRUE) != 0])
+            
             # Removing highly correlated columns #
-            tmp <- cor(preddata)
-            tmp[upper.tri(tmp)] <- 0
-            diag(tmp) <- 0
-            preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
+            if(method != "none") {
+                tmp <- cor(preddata)
+                tmp[upper.tri(tmp)] <- 0
+                diag(tmp) <- 0
+                preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
+            }
             
             ### Dimensionality reduction and account for LD ###
+            indexes <- NA
             if(method == "pca") {
                 res <- prerocess.pca(data=preddata, scale=scale, 
                     cumvar.threshold=cumvar.threshold, verbose=verbose)
@@ -57,11 +63,13 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 if(out.type == "D") {
                     ##### PLSDA #####
                     res <- preprocess.plsda(data=preddata, y=phenotype, 
-                        scale=scale, verbose=verbose)
+                        scale=scale, verbose=verbose, 
+                        cumvar.threshold=cumvar.threshold)
                 } else if(out.type == "C"){
                     ##### PLS #####
                     res <- preprocess.pls(data=preddata, y=phenotype, 
-                        cumvar.threshold=cumvar.threshold, verbose=verbose)
+                        cumvar.threshold=cumvar.threshold, 
+                        verbose=verbose, scale=scale)
                 }
             } else if(method == "lasso" | method == "ridge") {
                 res <- preprocess.lasso.ridge(data=preddata, y=phenotype, 
@@ -73,7 +81,10 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             #### Regression after data preprocessing ####
             if(!(method %in% c("lasso", "ridge"))) {
                 S <- res[["S"]]
-                
+                if(method == "pca") {
+                    indexes <- res[["indexes"]]
+                #    print(dim(S))
+                }
                 # Build null model #
                 null.model <- build.null.model(y=phenotype, x=covariates,
                                                  reg.family=reg.family)
@@ -84,26 +95,30 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 fit <- res[["fit"]]
                 coef <- try(coef(summary(fit))[-1,1:2],TRUE)
                 
-                if(mode(fit)=="character"){length(coef) <-0 }
-                if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
-                if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
+                if(mode(fit)=="character"){ length(coef) <-0 }
+                if(length(coef) != 2) { beta1 <- coef[,1];se1 <- coef[,2] }
+                if(length(coef) == 2) { beta1 <- coef[1];se1 <- coef[2] }
           
                 vv <- vcov(fit)[-1,-1]
-                alpha <- (1/(se1^2)) #/sum(1/(se1^2))
+                alpha <- 1/(se1^2)
                 alpha <- alpha/sum(1/(se1^2))
+                
+                mean.vif <- mean(vif(fit), na.rm=TRUE)
+                
             } else {
+                
                 fit <- res$fit
                 coef <- coef(fit)[-1]
-                
-                S <- res[["S"]]
+                S <- preddata
                 
                 if(sum(coef) == 0) {
                     print("All coefficients in lasso/ridge regression 
                           are equal to 0. 
                           Trying ordinary regressing instead.")
                     
-                    S <- preddata
+                    
                     # Build null model #
+                    
                     null.model <- build.null.model(y=phenotype, x=covariates,
                                                  reg.family=reg.family)
                     
@@ -117,11 +132,13 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
                     vv <- vcov(fit)[-1,-1]
                 } else {
+                    
                     beta1 <- coef[which(coef != 0)]
                     vv <- vcov_rigde(x=as.matrix(preddata), 
                         y=phenotype, 
                         rmod=fit)$vcov[which(coef != 0), 
                                        which(coef != 0)]
+                    
                     if(class(vv)[1] == "dgeMatrix") {
                         se1 <- sqrt(diag(vv))
                     } else {
@@ -132,9 +149,18 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           
                 alpha <- as.matrix((1/(se1^2)), ncol=1)
                 alpha <- alpha/sum(1/(se1^2))
+                
+                # Temporary disabled:
+                #mean.vif <- mean(vif(fit), na.rm=TRUE)
+                #print(mean.vif)
+                mean.vif <- NA
             }
+            
             beta.pool0 <- 0
             beta.pool <- 0
+            var.pool <- NA
+            var.pool0 <- NA
+            
             if(length(coef) != 0) {
                 ###### QTest1 ######
                 if(weight == FALSE) {
@@ -143,13 +169,15 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     z.score0 <- beta.pool0/sqrt(var.pool0)
                     Q1 <- z.score0^2
                     p.Q1 <- pchisq(Q1, df=1, lower.tail=FALSE)
-                }
-          
-                if(weight == TRUE) {
-                    maf.S <- apply(S,2,function(v)mean(na.omit(v))/2)
+                } else {
+                    if(!(method %in% c("pca", "pls"))) {
+                        maf.S <- apply(S,2, function(v)mean(na.omit(v))/2)
+                    } else {
+                        maf.S <- apply(S,2, function(v) mean(na.omit(abs(v)))/2 )
+                    }
                     
                     w.S0 <- qbeta(maf.S,1,25,lower.tail=FALSE)
-                
+                    
                     WS <- diag(w.S0)
                     if(length(beta1)==1){
                         WS <- w.S0
@@ -161,7 +189,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     Q1 <- z.score^2
                     p.Q1 <- pchisq(Q1, df=1, lower.tail=FALSE)
                 }
-          
+                
                 ### QTest2 ###
                 Q2.eigen <- eigen(vv)
                 U2 <- Q2.eigen$vectors
@@ -188,7 +216,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     w.vv<-WS %*% vv %*% WS
                     c(t(alpha)%*%w.vv)->cov.beta
                     b.star <- WS %*% beta1 - beta.pool*cov.beta/var.pool[1]
-                    vv.star <- w.vv-(cov.beta%*%t(cov.beta))/var.pool[1]
+                    vv.star <- w.vv - (cov.beta%*%t(cov.beta))/var.pool[1]
                 }
                 
                 if(length(beta1) !=1 ) {
@@ -244,47 +272,53 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 
                 rslt <- list(Qstatistic=data.frame(Q1, Q2, Q3=Q3final), 
                           p.value=data.frame(p.Q1,p.Q2,p.Q3),
-                          beta=ifelse(weight==TRUE, beta.pool, beta.pool0))
+                          beta=ifelse(weight==TRUE, beta.pool, beta.pool0),
+                          var.pooled=ifelse(weight==TRUE, var.pool, var.pool0),
+                          mean.vif=mean.vif)
             }
   
             if(length(coef)==0) { 
                 rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                              p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
-                             beta=NA)
+                             beta=NA, var.pooled=NA, mean.vif=NA)
             }
         } else {
             # Simple regression:
             # Build null model #
-          
+            
             null.model <- build.null.model(y=phenotype, x=covariates,
                                          reg.family=reg.family)
             
             res <- simple.multvar.reg(null.model=null.model, Z=genotype)
             reg.coef <- coef(summary(res$fit))
-            
+            mean.vif <- mean(vif(res$fit), na.rm=TRUE)
             if(dim(reg.coef)[1] == 2) {
                 rslt <- list(Qstatistic=data.frame(Q1=reg.coef[2,3], 
                                 Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
                         p.value=data.frame(p.Q1=reg.coef[2,4],
                                    p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]),
-                        beta=reg.coef[2,1])
+                        beta=reg.coef[2,1],
+                        var.pooled=reg.coef[2,2],
+                        mean.vif=mean.vif)
             } else {
               rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                            p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                           beta=NA)
+                           beta=NA, var.pooled=NA, mean.vif=NA)
             }
+            
+            
         }
     },error=function(e) {
         print(e)
         rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                     p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                    beta=NA)
+                    beta=NA, var.pooled=NA, mean.vif=NA)
     }, finally=rslt)
 
     if(is.na(rslt$p.value$p.Q3)) {
         rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                      p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                     beta=NA)
+                     beta=NA, var.pooled=NA, mean.vif=NA)
     }
   
     return(rslt)

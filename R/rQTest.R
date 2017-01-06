@@ -20,9 +20,9 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @param weight Logical value. Indicates using weights (see Lee et al 2016). 
 #' Default: FALSE.
 #' @param cumvar.threshold Numeric value indicating 
-#' the explained variance threshold for PCA-like methods. Default: 90.
+#' the explained variance threshold for PCA-like methods. Default: 75
 #' @param method Method used to reduce multicollinerity and account for LD. 
-#' Default: PCA.
+#' Default: PLS-DA.
 #' @param out.type Character, indicating a type of phenotype. 
 #' Possible values: \code{D} (dichotomous or binary), 
 #' \code{C} (continous or quantitative).
@@ -44,8 +44,8 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @export
 setMethod("rQTest", signature="rqt", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
-            cumvar.threshold=90, out.type="D", 
-            method="pca", scale=FALSE, asym.pval=FALSE,
+            cumvar.threshold=75, out.type="D", 
+            method="pls", scale=FALSE, asym.pval=FALSE,
             verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
@@ -54,10 +54,8 @@ setMethod("rQTest", signature="rqt",
             cumvar.threshold <- 100
         }
       
-        
-  
         rQTtest.prepare()
-        num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
+        #num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
         # Load data #
         phenotype <- x@phenotype
         genotype <- assays(x@genotype)[[1]]

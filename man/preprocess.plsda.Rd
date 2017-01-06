@@ -5,7 +5,8 @@
 \title{Preprocess input data with Partial Linear Square 
 Regregression Discriminant Analysis method (PLSDA)}
 \usage{
-preprocess.plsda(data, y, scale = FALSE, verbose = FALSE)
+preprocess.plsda(data, y, scale = FALSE, verbose = FALSE,
+  cumvar.threshold = 75)
 }
 \arguments{
 \item{data}{An input matrix with values of independent 
@@ -17,6 +18,8 @@ variables (predictors).}
 not scaling should be performed.}
 
 \item{verbose}{Indicates verbosing output. Default: FALSE.}
+
+\item{cumvar.threshold}{A threshold value for explained variance.}
 }
 \value{
 A list of one: "S" - a data frame of predictor values.

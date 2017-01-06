@@ -9,7 +9,7 @@
 rQTest(x, ...)
 
 \S4method{rQTest}{rqt}(x, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 90, out.type = "D", method = "pca", scale = FALSE,
+  cumvar.threshold = 75, out.type = "D", method = "pls", scale = FALSE,
   asym.pval = FALSE, verbose = FALSE)
 }
 \arguments{
@@ -30,14 +30,14 @@ for gene set analysis of RNA-seq data: Application to a vaccine study".}
 Default: FALSE.}
 
 \item{cumvar.threshold}{Numeric value indicating 
-the explained variance threshold for PCA-like methods. Default: 90.}
+the explained variance threshold for PCA-like methods. Default: 75}
 
 \item{out.type}{Character, indicating a type of phenotype. 
 Possible values: \code{D} (dichotomous or binary), 
 \code{C} (continous or quantitative).}
 
 \item{method}{Method used to reduce multicollinerity and account for LD. 
-Default: PCA.}
+Default: PLS-DA.}
 
 \item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of 
 the genotype dataset.}

@@ -79,8 +79,9 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
     #if(center){
     #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
     #}
-    
-    return(list(S = S))
+    indexes <- which(eig.decathlon2.active$cumvar <= 
+                       cumvar.threshold)
+    return(list(S = S, indexes=indexes))
 }
 
 #' Preprocess input data with Partial Linear Square 
@@ -90,9 +91,10 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
 #' @param y A vector with values of dependent variable (outcome).
 #' @param scale A logical variable, indicates wheither or 
 #' not scaling should be performed.
+#' @param cumvar.threshold A threshold value for explained variance.
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
-preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE) {
+preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE, cumvar.threshold=75) {
     
     if(scale){
         data.scaled <- scale(data, center = TRUE)
@@ -100,51 +102,82 @@ preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE) {
       data.scaled <- data
     }
     
-    numcomp <- ifelse(dim(data.scaled)[2] < 10, dim(data.scaled)[2], NA)
+    npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
+    numcomp <- ifelse(dim(data.scaled)[2] < 10, dim(data.scaled)[2], npred)
     model <- try(opls(x = data.scaled, y=as.factor(y), predI=numcomp, 
         plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
         silent = TRUE)
     
-    if(inherits(model, "try-error") &&
-        substr(unclass(attr(model, "condition"))$message, 1, 85) == 
-"No model was built because the first predictive component was already not significant") {
-        model <- opls(x = data.scaled, y=as.factor(y), predI=1, plotL = FALSE, 
-            log10L=FALSE, algoC = "nipals", silent = TRUE)
+    if(inherits(model, "try-error")) {
+        for(i in 2:6) {
+            cumvar.threshold <- cumvar.threshold/i
+            npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
+            model <- opls(x = data.scaled, y=as.factor(y), predI=npred2, plotL = FALSE, 
+                log10L=FALSE, algoC = "nipals", silent = TRUE)
+            if(!inherits(model, "try-error")) {
+              break
+            }
+        }
     }
     #print(model)
     return(list(S=model@scoreMN))
 }
 
-#' Preprocess input data with Partial Linear Square Regregression 
-#' method (PLS)
-#' @param data An input matrix with values of 
-#' independent variables (predictors).
+#' Preprocess input data with Partial Linear Square 
+#' Regregression method (PLS)
+#' @param data An input matrix with values of independent 
+#' variables (predictors).
 #' @param y A vector with values of dependent variable (outcome).
+#' @param scale A logical variable, indicates wheither or 
+#' not scaling should be performed.
 #' @param cumvar.threshold A threshold value for explained variance.
 #' @param verbose Indicates verbosing output. Default: FALSE.
-#' @return A list of one: "S" - a data frame of predictors.
-preprocess.pls <- function(data, y, cumvar.threshold, verbose=FALSE) {
-    inpdata <- data.frame("y"=y, data)
-    res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
-    numcomp <- 1
-    for(i in 1:res.pls.tmp$ncomp) {
-        if(sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > 
-            cumvar.threshold/100) {
-            numcomp <- i
-            break
-        } else if(i == res.pls.tmp$ncomp) {
-            numcomp <- res.pls.tmp$ncomp
-        }
+#' @return A list of one: "S" - a data frame of predictor values.
+preprocess.pls <- function(data, y, scale=FALSE, verbose=FALSE, cumvar.threshold=75) {
+    if(scale){
+        data.scaled <- scale(data, center = TRUE)
+    } else {
+        data.scaled <- data
     }
   
-    res.pls <- plsr(y ~ ., ncomp=numcomp, 
-        data = inpdata, validation = "LOO")
-    #d.plsr <- cbind(y=inpdata$y, res.pls$scores)
-    S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2],
-        nrow=dim(res.pls$scores)[1], byrow=TRUE))
+    npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
+    numcomp <- ifelse(dim(data.scaled)[2] < 10, dim(data.scaled)[2], npred)
+    model <- try(opls(x = data.scaled, y=y, predI=numcomp, 
+                    plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
+               silent = TRUE)
   
-    return(list(S=S))
+    if(inherits(model, "try-error")) {
+        cumvar.threshold <- cumvar.threshold/2
+        npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
+        model <- opls(x = data.scaled, y=as.factor(y), predI=npred2, plotL = FALSE, 
+                  log10L=FALSE, algoC = "nipals", silent = TRUE)
+    }
+    #print(model)
+    return(list(S=model@scoreMN))
 }
+
+#preprocess.pls <- function(data, y, cumvar.threshold, verbose=FALSE) {
+#    inpdata <- data.frame("y"=y, data)
+#    res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
+#    numcomp <- 1
+#    for(i in 1:res.pls.tmp$ncomp) {
+#        if(sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > 
+#            cumvar.threshold/100) {
+#            numcomp <- i
+#            break
+#        } else if(i == res.pls.tmp$ncomp) {
+#            numcomp <- res.pls.tmp$ncomp
+#        }
+#    }
+#  
+#    res.pls <- plsr(y ~ ., ncomp=numcomp, 
+#        data = inpdata, validation = "LOO")
+#    #d.plsr <- cbind(y=inpdata$y, res.pls$scores)
+#    S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2],
+#        nrow=dim(res.pls$scores)[1], byrow=TRUE))
+#  
+#    return(list(S=S))
+#}
 
 #' Preprocess input data with LASSO/Ridge regregression method
 #' @param data An input matrix with values of 
@@ -169,8 +202,10 @@ preprocess.lasso.ridge <- function(data, y, reg.family, method,
                 y=y, family=reg.family)
         }
     } , error=function(e) {
-        stop(print(e))
+        #stop(print(e))
+        print(e)
     })
+    
     return(list(fit=fit))
 } 
 
@@ -191,7 +226,7 @@ simple.multvar.reg <- function(null.model, Z, verbose=FALSE) {
     } else {
         S <- Z
     }
-    return(list(S=S, fit=fit))
+    return(list(S=S, fit=fit, na.S=na.S))
 }
 
 #' Applies linear of logistic regregression to the data.
@@ -207,10 +242,10 @@ build.null.model <- function(y, x, reg.family, verbose=FALSE) {
         if(length(x) != 0) {
             fit <- try(glm(y ~ ., data=data.frame(x), 
                            na.action=na.exclude,
-                         family = binomial(link=logit)),TRUE)
+                         family = binomial),TRUE) #family = binomial(link=logit)),TRUE)
         } else {
             fit <- try(glm(y ~ 1, na.action=na.exclude,
-                         family = binomial(link=logit)),TRUE)
+                         family = binomial),TRUE) #family = binomial(link=logit)),TRUE)
         }
     } else if(reg.family == "gaussian") {
         if(length(x) != 0) {

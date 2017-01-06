@@ -9,6 +9,7 @@
 #' @import methods
 #' @import metap
 #' @import SummarizedExperiment
+#' @import car
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
 #' @importFrom stats qbeta qchisq qgamma

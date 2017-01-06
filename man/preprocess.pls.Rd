@@ -2,26 +2,30 @@
 % Please edit documentation in R/preprocess.R
 \name{preprocess.pls}
 \alias{preprocess.pls}
-\title{Preprocess input data with Partial Linear Square Regregression 
-method (PLS)}
+\title{Preprocess input data with Partial Linear Square 
+Regregression method (PLS)}
 \usage{
-preprocess.pls(data, y, cumvar.threshold, verbose = FALSE)
+preprocess.pls(data, y, scale = FALSE, verbose = FALSE,
+  cumvar.threshold = 75)
 }
 \arguments{
-\item{data}{An input matrix with values of 
-independent variables (predictors).}
+\item{data}{An input matrix with values of independent 
+variables (predictors).}
 
 \item{y}{A vector with values of dependent variable (outcome).}
 
-\item{cumvar.threshold}{A threshold value for explained variance.}
+\item{scale}{A logical variable, indicates wheither or 
+not scaling should be performed.}
 
 \item{verbose}{Indicates verbosing output. Default: FALSE.}
+
+\item{cumvar.threshold}{A threshold value for explained variance.}
 }
 \value{
-A list of one: "S" - a data frame of predictors.
+A list of one: "S" - a data frame of predictor values.
 }
 \description{
-Preprocess input data with Partial Linear Square Regregression 
-method (PLS)
+Preprocess input data with Partial Linear Square 
+Regregression method (PLS)
 }
 
