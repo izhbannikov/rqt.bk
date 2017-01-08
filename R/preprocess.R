@@ -112,14 +112,17 @@ preprocess.plsda <- function(data, y, scale=FALSE, verbose=FALSE, cumvar.thresho
         for(i in 2:6) {
             cumvar.threshold <- cumvar.threshold/i
             npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
-            model <- opls(x = data.scaled, y=as.factor(y), predI=npred2, plotL = FALSE, 
-                log10L=FALSE, algoC = "nipals", silent = TRUE)
+           
+            model <- opls(x = data.scaled, y=as.factor(y), predI=npred, 
+                          plotL = FALSE, 
+                          log10L=FALSE, algoC = "nipals", silent = TRUE)
+  
             if(!inherits(model, "try-error")) {
               break
             }
         }
     }
-    #print(model)
+    
     return(list(S=model@scoreMN))
 }
 
@@ -149,7 +152,7 @@ preprocess.pls <- function(data, y, scale=FALSE, verbose=FALSE, cumvar.threshold
     if(inherits(model, "try-error")) {
         cumvar.threshold <- cumvar.threshold/2
         npred <- round(dim(data.scaled)[2]*(cumvar.threshold/100))
-        model <- opls(x = data.scaled, y=as.factor(y), predI=npred2, plotL = FALSE, 
+        model <- opls(x = data.scaled, y=as.factor(y), predI=npred, plotL = FALSE, 
                   log10L=FALSE, algoC = "nipals", silent = TRUE)
     }
     #print(model)
