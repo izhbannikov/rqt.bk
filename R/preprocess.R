@@ -67,10 +67,13 @@ prerocess.pca <- function(data, scale, cumvar.threshold, verbose=FALSE) {
         cumvar.threshold <- eig.decathlon2.active$cumvar[1]
     }
     
-    S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
-        cumvar.threshold)] %*% 
-    t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
-        cumvar.threshold)])
+    #S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
+    #    cumvar.threshold)] %*% 
+    #t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
+    #    cumvar.threshold)])
+    
+    S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= cumvar.threshold)]
+    
   
     ########## And add the center (and re-scale) back to data ###########
     #if(scale){
