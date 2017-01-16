@@ -103,7 +103,11 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 alpha <- 1/(se1^2)
                 alpha <- alpha/sum(1/(se1^2))
                 
-                mean.vif <- mean(vif(fit), na.rm=TRUE)
+                if(length(coef(fit)) > 2) {
+                  mean.vif <- mean(vif(fit), na.rm=TRUE)
+                } else {
+                  mean.vif <- summary(fit)$coefficients[2,2]
+                }
                 
             } else {
                 
@@ -291,7 +295,13 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             
             res <- simple.multvar.reg(null.model=null.model, Z=genotype)
             reg.coef <- coef(summary(res$fit))
-            mean.vif <- mean(vif(res$fit), na.rm=TRUE)
+            
+            if(length(coef(res$fit)) > 2) {
+              mean.vif <- mean(vif(res$fit), na.rm=TRUE)
+            } else {
+              mean.vif <- summary(res$fit)$coefficients[2,2]
+            }
+            
             if(dim(reg.coef)[1] == 2) {
                 rslt <- list(Qstatistic=data.frame(Q1=reg.coef[2,3], 
                                 Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
