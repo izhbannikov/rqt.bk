@@ -9,7 +9,7 @@
 rQTest(x, ...)
 
 \S4method{rQTest}{rqt}(x, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 75, out.type = "D", method = "pls", scale = FALSE,
+  cumvar.threshold = 75, out.type = "D", method = "pca", scale = FALSE,
   asym.pval = FALSE, verbose = FALSE)
 }
 \arguments{

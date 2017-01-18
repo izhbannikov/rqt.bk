@@ -30,7 +30,7 @@ get.reg.family <- function(out.type) {
 }
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
-    cumvar.threshold=75, method="pls", out.type="D", scale=FALSE, verbose=FALSE) {
+    cumvar.threshold=75, method="pca", out.type="D", scale=FALSE, verbose=FALSE) {
     
     reg.family <- get.reg.family(out.type)
 

@@ -45,7 +45,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 setMethod("rQTest", signature="rqt", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=75, out.type="D", 
-            method="pls", scale=FALSE, asym.pval=FALSE,
+            method="pca", scale=FALSE, asym.pval=FALSE,
             verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
