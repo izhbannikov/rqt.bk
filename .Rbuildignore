@@ -1,5 +1,5 @@
-*.DS_Store
-*.Rhistory
+.DS_Store
+.Rhistory
 vignettes/*.dvi
 vignettes/*.tex
 vignettes/*.gz
