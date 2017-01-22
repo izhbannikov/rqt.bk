@@ -4,7 +4,7 @@
 \alias{build.null.model}
 \title{Applies linear of logistic regregression to the data.}
 \usage{
-build.null.model(y, x, reg.family, verbose = FALSE)
+build.null.model(y, x, reg.family = "binomial", verbose = FALSE)
 }
 \arguments{
 \item{y}{A vector with values of dependent variable (outcome).}

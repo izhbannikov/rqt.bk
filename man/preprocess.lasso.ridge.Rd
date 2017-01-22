@@ -4,7 +4,8 @@
 \alias{preprocess.lasso.ridge}
 \title{Preprocess input data with LASSO/Ridge regregression method}
 \usage{
-preprocess.lasso.ridge(data, y, reg.family, method, verbose = FALSE)
+preprocess.lasso.ridge(data, y, reg.family = "binomial", method = "lasso",
+  verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of 

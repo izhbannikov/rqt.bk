@@ -6,19 +6,19 @@
 #' @param STT Numeric indicating soft truncation threshold (STT) to convert 
 #' to gamma parameter (must be <= 0.4).
 #' @return a TODO
-get.a <- function(L,STT) {
+get.a <- function(L,STT=0.2) {
     aa <- diff <- seq(0,1,length=200)
     diff <- sapply(1:length(aa), function(i) { abs(get.stt(L,aa[i], STT) - STT) } )
     return(aa[which.min(diff)])
 }
 
-get.stt <- function(L,a,STT){
+get.stt <- function(L,a,STT=0.2){
     ans <- 1-pgamma(L*qgamma(1-STT,a,1),L*a,1)
     return(ans)
 }
 
 
-get.reg.family <- function(out.type) {
+get.reg.family <- function(out.type="D") {
     if(out.type == "D") {
         reg.family="binomial"
     } else if(out.type == "C") {
@@ -46,34 +46,20 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             # Removing constant columns #
             preddata <- data.frame(genotype[,apply(genotype, 2, var, na.rm=TRUE) != 0])
             
-            # Removing highly correlated columns #
+            indexes <- NA
+            ### Dimensionality reduction and account for LD ###
             if(method != "none") {
                 tmp <- cor(preddata)
                 tmp[upper.tri(tmp)] <- 0
                 diag(tmp) <- 0
                 preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
-            }
-            
-            ### Dimensionality reduction and account for LD ###
-            indexes <- NA
-            if(method == "pca") {
-                res <- prerocess.pca(data=preddata, scale=scale, 
-                    cumvar.threshold=cumvar.threshold, verbose=verbose)
-            } else if(method == "pls") {
-                if(out.type == "D") {
-                    ##### PLSDA #####
-                    res <- preprocess.plsda(data=preddata, y=phenotype, 
-                        scale=scale, verbose=verbose, 
-                        cumvar.threshold=cumvar.threshold)
-                } else if(out.type == "C"){
-                    ##### PLS #####
-                    res <- preprocess.pls(data=preddata, y=phenotype, 
-                        cumvar.threshold=cumvar.threshold, 
-                        verbose=verbose, scale=scale)
-                }
-            } else if(method == "lasso" | method == "ridge") {
-                res <- preprocess.lasso.ridge(data=preddata, y=phenotype, 
-                    reg.family=reg.family, method=method, verbose=verbose)
+                res <- preprocess(data=preddata, 
+                                 y=phenotype, method=method,
+                                 reg.family=reg.family, 
+                                 scale=scale, 
+                                 cumvar.threshold=cumvar.threshold, 
+                                 out.type=out.type,
+                                 verbose=verbose)
             } else {
                 res[["S"]] <- preddata
             }
