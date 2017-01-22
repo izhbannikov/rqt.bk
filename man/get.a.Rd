@@ -4,7 +4,7 @@
 \alias{get.a}
 \title{Get a given STT}
 \usage{
-get.a(L, STT)
+get.a(L, STT = 0.2)
 }
 \arguments{
 \item{L}{TODO}
