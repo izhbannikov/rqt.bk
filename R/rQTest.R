@@ -50,12 +50,10 @@ setMethod("rQTest", signature="rqt",
             # Prepare test: load distribution table and prepare #
             # some other information #
         if(cumvar.threshold > 100) {
-            cat("Warning: cumvar.threshold > 100 and will be set to 100.")
+            warning("Warning: cumvar.threshold > 100 and will be set to 100.")
             cumvar.threshold <- 100
         }
       
-        rQTtest.prepare()
-        #num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
         # Load data #
         phenotype <- x@phenotype
         genotype <- assays(x@genotype)[[1]]
@@ -71,15 +69,14 @@ setMethod("rQTest", signature="rqt",
         
         # Start the tests #
         if(perm==0){
-            rslt0 <- try(QTest.one(phenotype=phenotype, 
-                genotype=genotype, 
-                covariates=covariates, 
-                STT=STT, 
-                weight=weight,
-                cumvar.threshold=cumvar.threshold, 
-                out.type=out.type, method=method, 
-                scale = scale, verbose=verbose),
-                TRUE)
+            rslt0 <- QTest.one(phenotype=phenotype, 
+                    genotype=genotype, 
+                    covariates=covariates, 
+                    STT=STT, 
+                    weight=weight,
+                    cumvar.threshold=cumvar.threshold, 
+                    out.type=out.type, method=method, 
+                    scale = scale, verbose=verbose)
             
             if(asym.pval) {
                 rsltMC <- do.call(rbind, lapply(1:dim(genotype)[1], function(k){
@@ -137,13 +134,13 @@ setMethod("rQTest", signature="rqt",
                 pv <- t.res$p.value
             }))
               
-            rslt0 <- try(as.numeric(QTest.one(phenotype=phenotype, 
+            rslt0 <- as.numeric(QTest.one(phenotype=phenotype, 
                 genotype=genotype, 
                 covariates=covariates, 
                 STT=STT, weight=weight, 
                 cumvar.threshold=cumvar.threshold, 
                 out.type=out.type, method=method, 
-                scale = scale)),TRUE)
+                scale = scale))
               
             if(!is.na(rslt0)) {
                 rslt <- list(Qstatistic= data.frame(Q1=NA, Q2=NA, Q3=NA),
