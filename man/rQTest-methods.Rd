@@ -9,8 +9,8 @@
 rQTest(x, ...)
 
 \S4method{rQTest}{rqt}(x, perm = 0, STT = 0.2, weight = FALSE,
-  cumvar.threshold = 75, out.type = "D", method = "pca", scale = FALSE,
-  asym.pval = FALSE, verbose = FALSE)
+  cumvar.threshold = 75, out.type = "D", method = "pca",
+  scaleData = FALSE, asym.pval = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{Object of class rqt}
@@ -39,7 +39,7 @@ Possible values: \code{D} (dichotomous or binary),
 \item{method}{Method used to reduce multicollinerity and account for LD. 
 Default: PLS-DA.}
 
-\item{scale}{A logic parameter (TRUE/FALSE) indicating scaling of 
+\item{scaleData}{A logic parameter (TRUE/FALSE) indicating scaling of 
 the genotype dataset.}
 
 \item{asym.pval}{Indicates Monte Carlo approximation for p-values. Default: FALSE.}

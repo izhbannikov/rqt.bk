@@ -16,7 +16,9 @@ ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   k <- dim(xs)[2]
   sigma_sq <- sum((y - yhat)^2)/ (n-k)
   lam <- my_mod$lambda.min
-  if(is.null(my_mod$lambda.min)==TRUE){lam <- 0}
+  if(is.null(my_mod$lambda.min)) {
+    lam <- 0
+  }
   i_lams <- Matrix(diag(x=1,nrow=k,ncol=k),sparse=TRUE)
   xpx <- t(xs) %*% xs
   xpxinvplam <- solve(xpx + lam*i_lams)
@@ -54,7 +56,7 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 #' Default: \code{pca}.
 #' @param reg.family A regression family. 
 #' Default: \code{"binomial"}.
-#' @param scale A logical variable, indicates wheither or 
+#' @param scaleData A logical variable, indicates wheither or 
 #' not scaling should be performed. Default: \code{FALSE}.
 #' @param cumvar.threshold A threshold value for explained variance.
 #' Default: \code{75}
@@ -65,7 +67,7 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 preprocess <- function(data, y=NULL,
                        method="pca",
                        reg.family="binomial", 
-                       scale=FALSE, 
+                       scaleData=FALSE, 
                        cumvar.threshold=75,
                        out.type="D",
                        verbose=FALSE) {
@@ -74,7 +76,7 @@ preprocess <- function(data, y=NULL,
     switch(method, 
         pca={
             ct <- cumvar.threshold
-            res.pca <- prcomp(data, scale=scale)
+            res.pca <- prcomp(data, scale=scaleData)
             # Eigenvalues
             eig <- (res.pca$sdev)^2
             # Variances in percentage
@@ -86,7 +88,7 @@ preprocess <- function(data, y=NULL,
                                     cumvariance = cumvar)
           
             ######### Filtering by threshold ##############
-            if(length(which(eig.table$cumvar <= ct)) == 0) {
+            if(length(eig.table$cumvar[eig.table$cumvar <= ct]) == 0) {
                 if(verbose) {  
                     print("Warning: cumvar.threshold is too low and will be set to")
                     print(paste("first component of cumulative variance:", 
@@ -117,7 +119,7 @@ preprocess <- function(data, y=NULL,
           
             ct <- cumvar.threshold/100
             
-            if(scale){
+            if(scaleData){
                 data.scaled <- scale(data, center = TRUE)
             } else {
                 data.scaled <- data
@@ -213,12 +215,12 @@ preprocess <- function(data, y=NULL,
 #' - an object returned by "glm" function.
 simple.multvar.reg <- function(null.model, Z, verbose=FALSE) {
     # Fit regression according to provided null model #
-    fit <- try(glm(null.model ~ ., data=data.frame(Z)),TRUE)
-    na.S <- try(which(is.na(coef(fit)[-1]) == TRUE),TRUE)
+    fit <- glm(null.model ~ ., data=data.frame(Z))
+    na.S <- which(is.na(coef(fit)[-1]) == TRUE)
 
     if( length(na.S) > 0 & (dim(data.frame(Z))[2] > 1) ){
-        S <- try(as.matrix(Z[,-na.S]),TRUE)
-        fit <- try(glm(null.model ~ . ,data=data.frame(S)),TRUE)
+        S <- as.matrix(Z[,-na.S])
+        fit <- glm(null.model ~ . ,data=data.frame(S))
     } else {
         S <- Z
     }
@@ -236,22 +238,22 @@ simple.multvar.reg <- function(null.model, Z, verbose=FALSE) {
 build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
     if(reg.family == "binomial") {
         if(length(x) != 0) {
-            fit <- try(glm(y ~ ., data=data.frame(x), 
+            fit <- glm(y ~ ., data=data.frame(x), 
                            na.action=na.exclude,
-                         family = binomial),TRUE) #family = binomial(link=logit)),TRUE)
+                         family = binomial) #family = binomial(link=logit)),TRUE)
         } else {
-            fit <- try(glm(y ~ 1, na.action=na.exclude,
-                         family = binomial),TRUE) #family = binomial(link=logit)),TRUE)
+            fit <- glm(y ~ 1, na.action=na.exclude,
+                         family = binomial) #family = binomial(link=logit)),TRUE)
         }
     } else if(reg.family == "gaussian") {
         if(length(x) != 0) {
-            fit <- try(glm(y ~ x, data=data.frame(x), 
+            fit <- glm(y ~ x, data=data.frame(x), 
                    na.action=na.exclude,
-                   family = reg.family),TRUE)
+                   family = reg.family)
         } else {
-            fit <- try(glm(y ~ 1, 
+            fit <- glm(y ~ 1, 
                      na.action=na.exclude,
-                     family = reg.family),TRUE)
+                     family = reg.family)
         }
     } else {
         stop(paste("Unknown reg.family:", reg.family))

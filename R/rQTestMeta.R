@@ -30,7 +30,7 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 #' @param out.type Character, indicating a type of phenotype. 
 #' Possible values: D (dichotomous or binary), 
 #' C (continous or qualitative).
-#' @param scale A logic parameter (TRUE/FALSE) indicating 
+#' @param scaleData A logic parameter (TRUE/FALSE) indicating 
 #' scaling of the genotype dataset.
 #' @param asym.pval Indicates Monte Carlo approximation for p-values. 
 #' Default: FALSE.
@@ -67,7 +67,7 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 setMethod("rQTestMeta", signature="list", 
     function(x, perm=0, STT=0.2, weight=FALSE, 
         cumvar.threshold=75, out.type="D", 
-        method="pca", scale=FALSE, asym.pval=FALSE,
+        method="pca", scaleData=FALSE, asym.pval=FALSE,
         comb.test="wilkinson",
         verbose=FALSE) {
             
@@ -80,8 +80,9 @@ setMethod("rQTestMeta", signature="list",
             stop("x must be a list with rqt class objects!")
         }
         ### Meta-analysis ###
-        pv <- c()
-        for(i in 1:length(x)) {
+        numStudies <- length(x)
+        pv <- rep(NA_real_, numStudies) 
+        for(i in 1:numStudies) {
             res <- rQTest(x[[i]],
                 STT=STT, 
                 weight=weight, 
@@ -89,13 +90,14 @@ setMethod("rQTestMeta", signature="list",
                 out.type=out.type, 
                 method=method, 
                 perm = perm, 
-                scale=scale,
+                scaleData=scaleData,
                 asym.pval=asym.pval,
                 verbose=verbose)
               
-            if(length(res@results) != 0) {
-                pv <- c(pv, res@results$p.value$p.Q3)
+            if(length(results(res)) != 0) {
+                pv[i] <- results(res)$p.value$p.Q3
             }
+            
         }
             
         ### Combining p-values via some comb.test ###
@@ -106,7 +108,7 @@ setMethod("rQTestMeta", signature="list",
                },
                fisher={
                    # Fisher
-                   chi.comb <- sum(-2*log(pv[which(!is.na(pv))]))
+                   chi.comb <- sum(-2*log(pv[!is.na(pv)]))
                    df <- 2*length(pv)
                    final.pvalue <- 1-pchisq(q=chi.comb, df=df)
                },
