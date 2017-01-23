@@ -79,7 +79,9 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 
                 S <- res[["S"]]
                 fit <- res[["fit"]]
-                coef <- try(coef(summary(fit))[-1,1:2],TRUE)
+                if(dim(coef(summary(fit)))[2] >= 2) {
+                    coef <- coef(summary(fit))[-1,1:2]
+                }
                 
                 if(mode(fit)=="character"){ length(coef) <-0 }
                 if(length(coef) != 2) { beta1 <- coef[,1];se1 <- coef[,2] }
@@ -108,14 +110,15 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     
                     
                     # Build null model #
-                    
                     null.model <- build.null.model(y=phenotype, x=covariates,
                                                  reg.family=reg.family)
                     
                     res <- simple.multvar.reg(null.model=null.model, Z=S)
                     S <- res$S
                     fit <- res$fit
-                    coef <- try(coef(summary(fit))[-1,1:2],TRUE)
+                    if(dim(coef(summary(fit)))[2] >= 2) {
+                        coef <- coef(summary(fit))[-1,1:2]
+                    }
                     
                     if(mode(fit)=="character"){length(coef) <-0 }
                     if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
@@ -217,7 +220,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     
                     if(length(na.l3) > 0) {l3<-l3[-na.l3];U3<-U3[,-na.l3]}
                     
-                    #L3 <- try(diag(l3), TRUE)
+                    #L3 <- diag(l3)
                     #if(length(l3)==1){L3<-l3}
                     
                     q2.proj <- (t(U3) %*% b.star)^2/l3
@@ -268,9 +271,10 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             }
   
             if(length(coef)==0) { 
-                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
-                             beta=NA, var.pooled=NA, mean.vif=NA)
+                #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                #             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
+                #             beta=NA, var.pooled=NA, mean.vif=NA)
+                rslt <- NA
             }
         } else {
             # Simple regression:
@@ -297,24 +301,27 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         var.pooled=reg.coef[2,2],
                         mean.vif=mean.vif)
             } else {
-              rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                           p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                           beta=NA, var.pooled=NA, mean.vif=NA)
+                #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                #             p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                #             beta=NA, var.pooled=NA, mean.vif=NA)
+                rslt <- NA
             }
             
             
         }
     },error=function(e) {
         print(e)
-        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                    p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                    beta=NA, var.pooled=NA, mean.vif=NA)
+        #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+        #            p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+        #            beta=NA, var.pooled=NA, mean.vif=NA)
+        rslt <- NA
     }, finally=rslt)
 
     if(is.na(rslt$p.value$p.Q3)) {
-        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                     p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                     beta=NA, var.pooled=NA, mean.vif=NA)
+        #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+        #             p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+        #             beta=NA, var.pooled=NA, mean.vif=NA)
+        rslt <- NA
     }
   
     return(rslt)
