@@ -1,7 +1,7 @@
 Package: rqt
 Type: Package
 Title: rqt: utilities for gene-level meta-analysis
-Version: 0.99.41
+Version: 0.99.42
 Date: 2016-01-23
 Author: I. Y. Zhbannikov, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
