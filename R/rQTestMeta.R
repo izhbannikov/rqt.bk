@@ -11,7 +11,6 @@
 #' @rdname rQTestMeta-methods
 setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 
-
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
 #' @param perm Integer indicating the number of permutations 

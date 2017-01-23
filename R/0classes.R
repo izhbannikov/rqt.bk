@@ -77,9 +77,63 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
     new("rqt", phenotype=phenotype, genotype=genotype, covariates=covariates, results=results)
 }
 
+setGeneric("phenotype", function(x) standardGeneric("phenotype"))
+setGeneric("genotype", function(x) standardGeneric("genotype"))
+setGeneric("covariates", function(x) standardGeneric("covariates"))
+setGeneric("results", function(x) standardGeneric("results"))
+setGeneric("results<-", function(x, val) standardGeneric("results<-"))
+
+#' @rdname rqt-methods
+#' @aliases phenotype.rqt
+#' @return pheotype returns the phenotype
+#' @docType methods
+#' @export
+setMethod("phenotype", "rqt", function(x) {
+  return(x@phenotype)
+})
+
+#' @rdname rqt-methods
+#' @aliases genotype.rqt
+#' @return genotype returns the genotype
+#' @docType methods
+#' @export
+setMethod("genotype", "rqt", function(x) {
+  return(x@genotype)
+})
+
+#' @rdname rqt-methods
+#' @aliases covariates.rqt
+#' @return covariates returns the covariates
+#' @docType methods
+#' @export
+setMethod("covariates", "rqt", function(x) {
+  return(x@covariates)
+})
+
+#' @rdname rqt-methods
+#' @aliases results.rqt
+#' @return results returns the results
+#' @docType methods
+#' @export
+setMethod("results", "rqt", function(x) {
+    return(x@results)
+})
+
+#' @rdname rqt-methods
+#' @aliases results.rqt
+#' @return results returns the results
+#' @docType methods
+#' @export
+setMethod("results<-", "rqt", function(x, val) {
+    x@results <- val
+    x
+})
+
+
 #' Basic methods for class rqt
 #' 
 #' This document lists a series of basic methods for the class rqt
+#' 
 #'
 #' @rdname rqt-methods
 #' @param x An object of \code{rqt} class
