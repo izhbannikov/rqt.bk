@@ -160,7 +160,7 @@ preprocess <- function(data, y=NULL,
                 }
             }
           
-            S <- scoreMN(model)
+            S <- model@scoreMN
             return(list(S = S))
         },
         lasso={
