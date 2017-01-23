@@ -90,16 +90,16 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
 #' @docType methods
 setMethod("print", "rqt", function(x) {
     cat("Phenotype:\n")
-    print(head(x@phenotype))
+    print(head(phenotype(x)))
     cat("...\n\n")
     cat("Genotype:\n")
-    print(head(assays(x@genotype)[[1]]))
+    print(head(assays(genotype(x))[[1]]))
     cat("...\n\n")
     cat("Covariates:\n")
-    print(head(x@covariates))
+    print(head(covariates(x)))
     cat("\n\n")
     cat("Results:\n\n")
-    print(x@results)
+    print(results(x))
 })
 
 #' @rdname rqt-methods
@@ -118,14 +118,14 @@ setMethod("show", "rqt", function(object) {
 #' @export
 setMethod("summary", "rqt", function(object) {
     cat("Phenotype:\n")
-    print(summary(object@phenotype))
+    print(summary(phenotype(object)))
     cat("...\n\n")
     cat("Genotype:\n")
-    print(summary(assays(object@genotype)[[1]]))
+    print(summary(assays(genotype(object))[[1]]))
     cat("...\n\n")
     cat("Covariates:\n")
-    cat(summary(object@covariates))
+    cat(summary(covariates(object)))
     cat("\n\n")
     cat("Results:\n\n")
-    print(summary(object@results))
+    print(summary(results(object)))
 })

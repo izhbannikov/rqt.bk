@@ -160,7 +160,7 @@ preprocess <- function(data, y=NULL,
                 }
             }
           
-            S <- model@scoreMN
+            S <- scoreMN(model)
             return(list(S = S))
         },
         lasso={
@@ -204,61 +204,6 @@ preprocess <- function(data, y=NULL,
   )
 }
 
-
-#preprocess.pls <- function(data, y, cumvar.threshold, verbose=FALSE) {
-#    inpdata <- data.frame("y"=y, data)
-#    res.pls.tmp <- plsr(y ~ ., data = inpdata, validation = "LOO")
-#    numcomp <- 1
-#    for(i in 1:res.pls.tmp$ncomp) {
-#        if(sum(res.pls.tmp$Xvar[1:i])/res.pls.tmp$Xtotvar > 
-#            cumvar.threshold/100) {
-#            numcomp <- i
-#            break
-#        } else if(i == res.pls.tmp$ncomp) {
-#            numcomp <- res.pls.tmp$ncomp
-#        }
-#    }
-#  
-#    res.pls <- plsr(y ~ ., ncomp=numcomp, 
-#        data = inpdata, validation = "LOO")
-#    #d.plsr <- cbind(y=inpdata$y, res.pls$scores)
-#    S <- data.frame(matrix(res.pls$scores, ncol = dim(res.pls$scores)[2],
-#        nrow=dim(res.pls$scores)[1], byrow=TRUE))
-#  
-#    return(list(S=S))
-#}
-
-#' Preprocess input data with LASSO/Ridge regregression method
-#' @param data An input matrix with values of 
-#' independent variables (predictors).
-#' @param y A vector with values of dependent variable (outcome).
-#' @param reg.family A regression family. 
-#' Can be either "binomial" or "gaussian."
-#' @param method A method. Can be either "lasso" or "ridge."
-#' @param verbose Indicates verbosing output. Default: FALSE.
-#' @return fit An object returned by "cv.glmnet" function.
-preprocess.lasso.ridge <- function(data, y, 
-                                   reg.family="binomial", 
-                                   method="lasso", 
-                                   verbose=FALSE) {
-    #### LASSO/Ridge ####
-    tryCatch({
-        if(reg.family == "binomial") {
-            fit <- cv.glmnet(x=as.matrix(data),
-                alpha=ifelse(method=="lasso", 1, 0),
-                y=as.factor(y), family=reg.family)
-        } else {
-            fit <- cv.glmnet(x=as.matrix(data),
-                alpha=ifelse(method=="lasso", 1, 0),
-                y=y, family=reg.family)
-        }
-    } , error=function(e) {
-        #stop(print(e))
-        print(e)
-    })
-    
-    return(list(fit=fit))
-} 
 
 #' Applies linear of logistic regregression to the data.
 #' @param null.model A fitted null model

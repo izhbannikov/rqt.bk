@@ -69,7 +69,7 @@ setMethod("rQTestMeta", signature="list",
     function(x, perm=0, STT=0.2, weight=FALSE, 
         cumvar.threshold=75, out.type="D", 
         method="pca", scale=FALSE, asym.pval=FALSE,
-        comb.test = "wilkinson",
+        comb.test="wilkinson",
         verbose=FALSE) {
             
         if(cumvar.threshold > 100) {

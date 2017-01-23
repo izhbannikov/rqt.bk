@@ -55,9 +55,9 @@ setMethod("rQTest", signature="rqt",
         }
       
         # Load data #
-        phenotype <- x@phenotype
-        genotype <- assays(x@genotype)[[1]]
-        covariates <- x@covariates
+        phenotype <- phenotype(x)
+        genotype <- assays(genotype(x))[[1]]
+        covariates <- covariates(x)
         
         if((weight == TRUE) & (scale == TRUE)) {
           if(verbose) {
@@ -157,6 +157,6 @@ setMethod("rQTest", signature="rqt",
             }
         }
         
-        x@results <- rslt
+        results(x) <- rslt
         return(x)
 })
