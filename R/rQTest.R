@@ -157,6 +157,6 @@ setMethod("rQTest", signature="rqt",
             }
         }
         
-        x@results <- rslt
+        results(x) <- rslt
         return(x)
 })

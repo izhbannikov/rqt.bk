@@ -81,7 +81,7 @@ setGeneric("phenotype", function(x) standardGeneric("phenotype"))
 setGeneric("genotype", function(x) standardGeneric("genotype"))
 setGeneric("covariates", function(x) standardGeneric("covariates"))
 setGeneric("results", function(x) standardGeneric("results"))
-setGeneric("results<-", function(x, val) standardGeneric("results<-"))
+setGeneric("results<-", function(x, value) standardGeneric("results<-"))
 
 #' @rdname rqt-methods
 #' @aliases phenotype.rqt
@@ -89,7 +89,7 @@ setGeneric("results<-", function(x, val) standardGeneric("results<-"))
 #' @docType methods
 #' @export
 setMethod("phenotype", "rqt", function(x) {
-  return(x@phenotype)
+  return(slot(x, "phenotype"))
 })
 
 #' @rdname rqt-methods
@@ -98,7 +98,7 @@ setMethod("phenotype", "rqt", function(x) {
 #' @docType methods
 #' @export
 setMethod("genotype", "rqt", function(x) {
-  return(x@genotype)
+  return(slot(x, "genotype"))
 })
 
 #' @rdname rqt-methods
@@ -107,7 +107,7 @@ setMethod("genotype", "rqt", function(x) {
 #' @docType methods
 #' @export
 setMethod("covariates", "rqt", function(x) {
-  return(x@covariates)
+  return(slot(x, "covariates"))
 })
 
 #' @rdname rqt-methods
@@ -116,16 +116,15 @@ setMethod("covariates", "rqt", function(x) {
 #' @docType methods
 #' @export
 setMethod("results", "rqt", function(x) {
-    return(x@results)
+    return(slot(x, "results"))
 })
 
 #' @rdname rqt-methods
-#' @aliases results.rqt
-#' @return results returns the results
+#' @aliases results<-.rqt
 #' @docType methods
 #' @export
-setMethod("results<-", "rqt", function(x, val) {
-    x@results <- val
+setMethod("results<-", "rqt", function(x, value) {
+    slot(x, "results") <- value
     x
 })
 

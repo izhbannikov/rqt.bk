@@ -13,6 +13,7 @@
 \alias{results,rqt-method}
 \alias{results.rqt}
 \alias{results<-,rqt-method}
+\alias{results<-.rqt}
 \alias{show,rqt-method}
 \alias{show.rqt}
 \alias{summary,rqt-method}
@@ -27,7 +28,7 @@
 
 \S4method{results}{rqt}(x)
 
-\S4method{results}{rqt}(x, val) <- value
+\S4method{results}{rqt}(x) <- value
 
 \S4method{print}{rqt}(x)
 
@@ -46,8 +47,6 @@ pheotype returns the phenotype
 genotype returns the genotype
 
 covariates returns the covariates
-
-results returns the results
 
 results returns the results
 
