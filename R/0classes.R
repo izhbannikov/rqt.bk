@@ -89,7 +89,7 @@ setGeneric("results<-", function(x, value) standardGeneric("results<-"))
 #' @docType methods
 #' @export
 setMethod("phenotype", "rqt", function(x) {
-  return(slot(x, "phenotype"))
+    return(slot(x, "phenotype"))
 })
 
 #' @rdname rqt-methods
@@ -98,7 +98,7 @@ setMethod("phenotype", "rqt", function(x) {
 #' @docType methods
 #' @export
 setMethod("genotype", "rqt", function(x) {
-  return(slot(x, "genotype"))
+    return(slot(x, "genotype"))
 })
 
 #' @rdname rqt-methods
@@ -107,7 +107,7 @@ setMethod("genotype", "rqt", function(x) {
 #' @docType methods
 #' @export
 setMethod("covariates", "rqt", function(x) {
-  return(slot(x, "covariates"))
+    return(slot(x, "covariates"))
 })
 
 #' @rdname rqt-methods
@@ -136,7 +136,6 @@ setMethod("results<-", "rqt", function(x, value) {
 #'
 #' @rdname rqt-methods
 #' @param x An object of \code{rqt} class
-#' @param object An object of \code{rqt} class
 #' @return print returns summary information about the rqt object
 #' @rdname rqt-methods
 #' @aliases print.rqt

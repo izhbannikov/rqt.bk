@@ -38,8 +38,6 @@
 }
 \arguments{
 \item{x}{An object of \code{rqt} class}
-
-\item{object}{An object of \code{rqt} class}
 }
 \value{
 pheotype returns the phenotype
