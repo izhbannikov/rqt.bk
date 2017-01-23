@@ -8,7 +8,8 @@
 #' @return a TODO
 get.a <- function(L,STT=0.2) {
     aa <- diff <- seq(0,1,length=200)
-    diff <- sapply(1:length(aa), function(i) { abs(get.stt(L,aa[i], STT) - STT) } )
+    asize <- length(aa)
+    diff <- sapply(1:asize, function(i) { abs(get.stt(L,aa[i], STT) - STT) } )
     return(aa[which.min(diff)])
 }
 
@@ -30,7 +31,7 @@ get.reg.family <- function(out.type="D") {
 }
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
-    cumvar.threshold=75, method="pca", out.type="D", scale=FALSE, verbose=FALSE) {
+    cumvar.threshold=75, method="pca", out.type="D", scaleData=FALSE, verbose=FALSE) {
     
     reg.family <- get.reg.family(out.type)
 
@@ -56,7 +57,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 res <- preprocess(data=preddata, 
                                  y=phenotype, method=method,
                                  reg.family=reg.family, 
-                                 scale=scale, 
+                                 scaleData=scaleData, 
                                  cumvar.threshold=cumvar.threshold, 
                                  out.type=out.type,
                                  verbose=verbose)
@@ -84,8 +85,14 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 }
                 
                 if(mode(fit)=="character"){ length(coef) <-0 }
-                if(length(coef) != 2) { beta1 <- coef[,1];se1 <- coef[,2] }
-                if(length(coef) == 2) { beta1 <- coef[1];se1 <- coef[2] }
+                if(length(coef) != 2) { 
+                    beta1 <- coef[,1]
+                    se1 <- coef[,2] 
+                }
+                if(length(coef) == 2) { 
+                    beta1 <- coef[1]
+                    se1 <- coef[2] 
+                }
           
                 vv <- vcov(fit)[-1,-1]
                 alpha <- 1/(se1^2)
@@ -99,7 +106,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 
             } else {
                 
-                fit <- res$fit
+                fit <- res[["fit"]]
                 coef <- coef(fit)[-1]
                 S <- preddata
                 
@@ -115,22 +122,27 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     
                     res <- simple.multvar.reg(null.model=null.model, Z=S)
                     S <- res$S
-                    fit <- res$fit
+                    fit <- res[["fit"]]
                     if(dim(coef(summary(fit)))[2] >= 2) {
                         coef <- coef(summary(fit))[-1,1:2]
                     }
                     
                     if(mode(fit)=="character"){length(coef) <-0 }
-                    if(length(coef)!=2){beta1<-coef[,1];se1 <- coef[,2]}
-                    if(length(coef)==2){beta1<-coef[1];se1 <- coef[2]}
+                    if(length(coef)!=2){
+                        beta1<-coef[,1]
+                        se1 <- coef[,2]
+                    }
+                    if(length(coef)==2){
+                        beta1<-coef[1]
+                        se1 <- coef[2]
+                    }
                     vv <- vcov(fit)[-1,-1]
                 } else {
                     
-                    beta1 <- coef[which(coef != 0)]
+                    beta1 <- coef[coef != 0L]
                     vv <- vcov_rigde(x=as.matrix(preddata), 
                         y=phenotype, 
-                        rmod=fit)$vcov[which(coef != 0), 
-                                       which(coef != 0)]
+                        rmod=fit)$vcov[coef != 0L, coef != 0L]
                     
                     if(class(vv)[1] == "dgeMatrix") {
                         se1 <- sqrt(diag(vv))
@@ -218,7 +230,10 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     l3 <- Q3.eigen$values
                     na.l3 <- which(l3/mean(l3) < 0.001)
                     
-                    if(length(na.l3) > 0) {l3<-l3[-na.l3];U3<-U3[,-na.l3]}
+                    if(length(na.l3) > 0) {
+                        l3<-l3[-na.l3]
+                        U3<-U3[,-na.l3]
+                    }
                     
                     #L3 <- diag(l3)
                     #if(length(l3)==1){L3<-l3}
@@ -229,7 +244,9 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     Q2.proj <- sum(2*qgamma(p2.1,a,1,lower.tail=FALSE))
                     p.Q2.proj <- pchisq(Q2.proj,df=2*a*length(l3),
                         lower.tail=FALSE)
-                    if(p.Q2.proj == 0) {p.Q2.proj <- 1e-8}
+                    if(p.Q2.proj == 0) {
+                      p.Q2.proj <- 1e-8
+                    }
                     Q2.1 <- qchisq(p.Q2.proj,df=1,lower.tail=FALSE)
                     #print(paste(Q2.1, p2.1, Q2.proj, p.Q2.proj, a))
                     pi0 <- seq(0,1,by=0.1)
@@ -244,7 +261,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         p.Q3.can[h] <- davies(Q3[h],
                             c(pi0[h],(1-pi0[h])),
                             c(1,1))$Qq
-                        if(p.Q3.can[h]<=0|p.Q3.can[h]>1) {
+                        if(p.Q3.can[h] <= 0 | p.Q3.can[h] > 1) {
                             p.Q3.can[h] <- imhof(Q3[h],
                                 c(pi0[h],(1-pi0[h])),
                                 c(1,1))$Qq
@@ -261,12 +278,15 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         (sum(null.dist.Q3[,2])+1)
                 }
                 
-                if(length(beta1)==1){p.Q3<-p.Q1; Q3final<-Q1}
+                if(length(beta1)==1){
+                    p.Q3 <- p.Q1
+                    Q3final <- Q1
+                }
                 
                 rslt <- list(Qstatistic=data.frame(Q1, Q2, Q3=Q3final), 
                           p.value=data.frame(p.Q1,p.Q2,p.Q3),
-                          beta=ifelse(weight==TRUE, beta.pool, beta.pool0),
-                          var.pooled=ifelse(weight==TRUE, var.pool, var.pool0),
+                          beta=ifelse(weight, beta.pool, beta.pool0),
+                          var.pooled=ifelse(weight, var.pool, var.pool0),
                           mean.vif=mean.vif)
             }
   
@@ -284,12 +304,12 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                                          reg.family=reg.family)
             
             res <- simple.multvar.reg(null.model=null.model, Z=genotype)
-            reg.coef <- coef(summary(res$fit))
+            reg.coef <- coef(summary(res[["fit"]]))
             
-            if(length(coef(res$fit)) > 2) {
-              mean.vif <- mean(vif(res$fit), na.rm=TRUE)
+            if(length(coef(res[["fit"]])) > 2) {
+                mean.vif <- mean(vif(res[["fit"]]), na.rm=TRUE)
             } else {
-              mean.vif <- summary(res$fit)$coefficients[2,2]
+                mean.vif <- summary(res[["fit"]])$coefficients[2,2]
             }
             
             if(dim(reg.coef)[1] == 2) {

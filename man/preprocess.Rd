@@ -5,7 +5,8 @@
 \title{Preprocess input data with Principal Component Analysis method (PCA)}
 \usage{
 preprocess(data, y = NULL, method = "pca", reg.family = "binomial",
-  scale = FALSE, cumvar.threshold = 75, out.type = "D", verbose = FALSE)
+  scaleData = FALSE, cumvar.threshold = 75, out.type = "D",
+  verbose = FALSE)
 }
 \arguments{
 \item{data}{An input matrix with values of 
@@ -20,7 +21,7 @@ Default: \code{pca}.}
 \item{reg.family}{A regression family. 
 Default: \code{"binomial"}.}
 
-\item{scale}{A logical variable, indicates wheither or 
+\item{scaleData}{A logical variable, indicates wheither or 
 not scaling should be performed. Default: \code{FALSE}.}
 
 \item{cumvar.threshold}{A threshold value for explained variance.
