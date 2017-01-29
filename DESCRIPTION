@@ -1,7 +1,7 @@
 Package: rqt
 Type: Package
 Title: rqt: utilities for gene-level meta-analysis
-Version: 0.99.45
+Version: 0.99.46
 Date: 2016-01-28
 Author: I. Y. Zhbannikov, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
@@ -17,7 +17,7 @@ RoxygenNote: 5.0.1
 Suggests: BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
 Imports:
-	stats,CCP,CompQuadForm,parallel,Matrix,metap,glmnet,pls,plyr,ropls,methods,car
+	stats,CCP,CompQuadForm,parallel,Matrix,metap,glmnet,pls,plyr,ropls,methods,car,RUnit
 Depends:
     R (>= 3.3),SummarizedExperiment
 Encoding: UTF-8
