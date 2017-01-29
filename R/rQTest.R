@@ -186,6 +186,16 @@ setGeneric("phenotype", function(x) standardGeneric("phenotype"))
 #' @description A genotype accessor
 #' @param x An object of \code{rqt} class.
 #' @return phenotype returns the genotype
+#' @examples 
+#'\dontrun{
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' phenotype(obj)
+#' }
 #' @rdname rQTest-phenotype
 #' @export
 setMethod("phenotype", "rqt", function(x) {
@@ -204,6 +214,16 @@ setGeneric("genotype", function(x) standardGeneric("genotype"))
 #' @description A genotype accessor
 #' @param x An object of \code{rqt} class.
 #' @return genotype returns the genotype
+#' @examples 
+#'\dontrun{
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' genotype(obj)
+#' }
 #' @rdname rQTest-genotype
 #' @export
 setMethod("genotype", "rqt", function(x) {
@@ -222,6 +242,16 @@ setGeneric("covariates", function(x) standardGeneric("covariates"))
 #' @description An accessor to covariates
 #' @param x An object of \code{rqt} class.
 #' @return covariates returns the covariates
+#' @examples 
+#'\dontrun{
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' covariates(obj)
+#' }
 #' @rdname rQTest-covariates
 #' @export
 setMethod("covariates", "rqt", function(x) {
@@ -240,6 +270,17 @@ setGeneric("results", function(x) standardGeneric("results"))
 #' @description An accessor to results
 #' @param x An object of \code{rqt} class.
 #' @return results returns the results
+#' @examples 
+#'\dontrun{
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' res <- rQTest(obj, method="pca", out.type = "D")
+#' results(res)
+#' }
 #' @rdname rQTest-results
 #' @export
 setMethod("results", "rqt", function(x) {
