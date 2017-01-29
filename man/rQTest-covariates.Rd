@@ -22,7 +22,6 @@ This function performs an access to covariates
 An accessor to covariates
 }
 \examples{
-\dontrun{
 data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
 pheno <- data[,1]
 geno <- data[, 2:dim(data)[2]]
@@ -30,6 +29,5 @@ colnames(geno) <- paste(seq(1, dim(geno)[2]))
 geno.obj <- SummarizedExperiment(geno)
 obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
 covariates(obj)
-}
 }
 
