@@ -10,6 +10,6 @@ test_rQTest <- function() {
     # Analysis #
     res <- rQTest(obj, method="pca", out.type = "D")
     checkEqualsNumeric(results(res)$Qstatistic$Q1, 0.3798991, tolerance=1.0e-4)
-    checkEqualsNumeric(results(res)$Qstatistic$Q1, 13.83897, tolerance=1.0e-4)
-    checkEqualsNumeric(results(res)$Qstatistic$Q1, 0.3798991, tolerance=1.0e-4)
+    checkEqualsNumeric(results(res)$Qstatistic$Q2, 13.83897, tolerance=1.0e-4)
+    checkEqualsNumeric(results(res)$Qstatistic$Q3, 0.3798991, tolerance=1.0e-4)
 }
