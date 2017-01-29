@@ -1,6 +1,5 @@
 #' @import plyr
 #' @import CCP
-#' @import Matrix
 #' @import CompQuadForm
 #' @import pls
 #' @import glmnet
