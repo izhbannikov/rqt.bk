@@ -9,7 +9,6 @@
 setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 
 #' This function performs a gene-level test based on combined effect sizes.
-#' 
 #' @param perm Integer indicating the number of permutations 
 #' to compute p-values. Default: 0.
 #' @param STT Numeric indicating soft truncation threshold (STT) 
@@ -156,4 +155,132 @@ setMethod("rQTest", signature="rqt",
         
         results(x) <- rslt
         return(x)
+})
+
+#' Common methods for class rqt
+#' 
+#' @name rQTest-general
+#' @rdname rQTest-general
+#'
+#' @aliases show.rqt
+#' @aliases summary.rqt
+#' @aliases print.rqt
+#' 
+#' @title General functions of \code{rqt} 
+#' such as accessors and printing.
+#' 
+#' @description Common methods for class rqt. 
+#' This document lists a series of basic methods for the class rqt
+#' 
+NULL
+
+
+#' This function performs an access to phenotype
+#' 
+#' @rdname rQTest-phenotype
+#' @export
+setGeneric("phenotype", function(x) standardGeneric("phenotype"))
+
+#' This function performs an access to phenotype
+#' 
+#' @description A genotype accessor
+#' @param x An object of \code{rqt} class.
+#' @return phenotype returns the genotype
+#' @rdname rQTest-phenotype
+#' @export
+setMethod("phenotype", "rqt", function(x) {
+  return(slot(x, "phenotype"))
+})
+
+
+#' This function performs an access to genotype.
+#' 
+#' @rdname rQTest-genotype
+#' @export
+setGeneric("genotype", function(x) standardGeneric("genotype"))
+
+#' This function performs an access to genotype.
+#' 
+#' @description A genotype accessor
+#' @param x An object of \code{rqt} class.
+#' @return genotype returns the genotype
+#' @rdname rQTest-genotype
+#' @export
+setMethod("genotype", "rqt", function(x) {
+  return(slot(x, "genotype"))
+})
+
+
+#' This function performs an access to covariates
+#' 
+#' @rdname rQTest-covariates
+#' @export
+setGeneric("covariates", function(x) standardGeneric("covariates"))
+
+#' This function performs an access to covariates
+#' 
+#' @description An accessor to covariates
+#' @param x An object of \code{rqt} class.
+#' @return covariates returns the covariates
+#' @rdname rQTest-covariates
+#' @export
+setMethod("covariates", "rqt", function(x) {
+  return(slot(x, "covariates"))
+})
+
+#' This function performs an access to covariates
+#' 
+#' @rdname rQTest-results
+#' @export
+setGeneric("results", function(x) standardGeneric("results"))
+
+
+#' This function performs an access to covariates
+#' 
+#' @description An accessor to results
+#' @param x An object of \code{rqt} class.
+#' @return results returns the results
+#' @rdname rQTest-results
+#' @export
+setMethod("results", "rqt", function(x) {
+  return(slot(x, "results"))
+})
+
+setGeneric("results<-", function(x, value) standardGeneric("results<-"))
+
+setMethod("results<-", "rqt", function(x, value) {
+  slot(x, "results") <- value
+  x
+})
+
+setMethod("print", "rqt", function(x) {
+  cat("Phenotype:\n")
+  print(head(phenotype(x)))
+  cat("...\n\n")
+  cat("Genotype:\n")
+  print(head(assays(genotype(x))[[1]]))
+  cat("...\n\n")
+  cat("Covariates:\n")
+  print(head(covariates(x)))
+  cat("\n\n")
+  cat("Results:\n\n")
+  print(results(x))
+})
+
+setMethod("show", "rqt", function(object) {
+  print(object)
+})
+
+setMethod("summary", "rqt", function(object) {
+  cat("Phenotype:\n")
+  print(summary(phenotype(object)))
+  cat("...\n\n")
+  cat("Genotype:\n")
+  print(summary(assays(genotype(object))[[1]]))
+  cat("...\n\n")
+  cat("Covariates:\n")
+  cat(summary(covariates(object)))
+  cat("\n\n")
+  cat("Results:\n\n")
+  print(summary(results(object)))
 })
