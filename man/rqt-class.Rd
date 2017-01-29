@@ -35,9 +35,6 @@ This class stores parameters and results of the rtq algorithms
 
 This function generates rqt class objects
 }
-\details{
-see \code{\link[=print.rqt]{rqt-methods} for related methods}
-}
 \section{Slots}{
 
    \describe{
