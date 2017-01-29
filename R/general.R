@@ -9,7 +9,7 @@
 #' @import SummarizedExperiment
 #' @import car
 #' @import RUnit
-#' @import BiocGenerics
+#' @importFrom BiocGenerics testPackage
 #' @importFrom Matrix which colSums rowSums
 #' @importFrom Matrix colMeans rowMeans
 #' @importFrom stats binomial cor glm
