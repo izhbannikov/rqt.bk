@@ -11,6 +11,7 @@
 #' @import SummarizedExperiment
 #' @import car
 #' @import RUnit
+#' @import BiocGenerics
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
 #' @importFrom stats qbeta qchisq qgamma
