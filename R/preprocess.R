@@ -90,8 +90,8 @@ preprocess <- function(data, y=NULL,
             ######### Filtering by threshold ##############
             if(length(eig.table$cumvar[eig.table$cumvar <= ct]) == 0) {
                 if(verbose) {  
-                    print("Warning: cumvar.threshold is too low and will be set to")
-                    print(paste("first component of cumulative variance:", 
+                    print("Warning: cumvar.threshold will be set to")
+                    print(paste("the first component of cum. var.:", 
                           eig.table$cumvar[1]))
                 }
                 cumvar.threshold <- eig.table$cumvar[1]
@@ -104,7 +104,7 @@ preprocess <- function(data, y=NULL,
           
             S <- res.pca$x[,which(eig.table$cumvar <= ct)]
           
-            ########## And add the center (and re-scale) back to data ###########
+            ### And add the center (and re-scale) back to data ###
             #if(scale){
             #   S <- scale(S, center = FALSE , scale=1/res.pca$scale)
             #}
@@ -125,12 +125,16 @@ preprocess <- function(data, y=NULL,
                 data.scaled <- data
             }
             
-            npred <- round(dim(data.scaled)[2]*ct)
-            numcomp <- ifelse(dim(data.scaled)[2] < 10, dim(data.scaled)[2], npred)
+            n.snp <- dim(data.scaled)[2]
+            npred <- round(n.snp*ct)
+            numcomp <- ifelse(n.snp < 10, n.snp, npred)
             
             if(out.type == "D") { # PLS-DA
-                model <- try(opls(x = data.scaled, y=as.factor(y), predI=numcomp, 
-                            plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
+                model <- try(opls(x = data.scaled, y=as.factor(y), 
+                                  predI=numcomp, 
+                                  plotL = FALSE, 
+                                  log10L=FALSE, 
+                                  algoC = "nipals"), 
                        silent = TRUE)
           
                 if(inherits(model, "try-error")) {
@@ -138,9 +142,12 @@ preprocess <- function(data, y=NULL,
                         ct <- ct/i
                         npred <- round(dim(data.scaled)[2]*ct)
               
-                        model <- opls(x = data.scaled, y=as.factor(y), predI=npred, 
-                                plotL = FALSE, 
-                                log10L=FALSE, algoC = "nipals", silent = TRUE)
+                        model <- opls(x = data.scaled, y=as.factor(y), 
+                                      predI=npred, 
+                                      plotL = FALSE, 
+                                      log10L=FALSE, 
+                                      algoC = "nipals", 
+                                      silent = TRUE)
               
                         if(!inherits(model, "try-error")) {
                             break
@@ -148,9 +155,12 @@ preprocess <- function(data, y=NULL,
                     }
                 }
             } else if(out.type == "C") { # PLS
-                model <- try(opls(x = data.scaled, y=y, predI=numcomp, 
-                                plotL = FALSE, log10L=FALSE, algoC = "nipals"), 
-                           silent = TRUE)
+                model <- opls(x = data.scaled, y=y, 
+                              predI=numcomp, 
+                              plotL = FALSE, 
+                              log10L=FALSE, 
+                              algoC = "nipals", 
+                              silent = TRUE)
               
                 if(inherits(model, "try-error")) {
                     cumvar.threshold <- cumvar.threshold/2
@@ -240,10 +250,12 @@ build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
         if(length(x) != 0) {
             fit <- glm(y ~ ., data=data.frame(x), 
                            na.action=na.exclude,
-                         family = binomial) #family = binomial(link=logit)),TRUE)
+                         family = binomial) 
+            #family = binomial(link=logit)),TRUE)
         } else {
             fit <- glm(y ~ 1, na.action=na.exclude,
-                         family = binomial) #family = binomial(link=logit)),TRUE)
+                         family = binomial) 
+            #family = binomial(link=logit)),TRUE)
         }
     } else if(reg.family == "gaussian") {
         if(length(x) != 0) {
@@ -261,6 +273,4 @@ build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
   
     return(resid(fit))
 }
-
-
 

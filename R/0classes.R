@@ -21,7 +21,10 @@
 #'      p-values (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
 #'}
 #'@rdname rqt-class
-setClass("rqt", slots=c(phenotype="vector", genotype="SummarizedExperiment", covariates="data.frame", results="list"))
+setClass("rqt", slots=c(phenotype="vector", 
+                        genotype="SummarizedExperiment", 
+                        covariates="data.frame", 
+                        results="list"))
 
 #' The rqt class constructor
 #' 
@@ -73,5 +76,8 @@ rqtClass <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
         results <- list()
     }
 
-    new("rqt", phenotype=phenotype, genotype=genotype, covariates=covariates, results=results)
+    new("rqt", phenotype=phenotype, 
+        genotype=genotype, 
+        covariates=covariates, 
+        results=results)
 }

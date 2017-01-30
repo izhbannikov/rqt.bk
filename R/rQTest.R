@@ -82,8 +82,11 @@ setMethod("rQTest", signature="rqt",
                     scaleData = scaleData, verbose=verbose)
             
             if(asym.pval) {
-                rsltMC <- do.call(rbind, lapply(1:dim(genotype)[1], function(k){
-                    yP <- phenotype[sample(1:phenoSize, phenoSize, replace=FALSE)]
+                rsltMC <- do.call(rbind, 
+                                  lapply(1:dim(genotype)[1], 
+                                         function(k){
+                    yP <- phenotype[sample(1:phenoSize, phenoSize, 
+                                           replace=FALSE)]
                     t.res <- QTest.one(phenotype=yP,genotype=genotype, 
                                  covariates=covariates,STT=STT,
                                  weight=weight,
@@ -99,16 +102,18 @@ setMethod("rQTest", signature="rqt",
                 }))
             
                 if(!is.na(rslt0)) {
-                    rslt <- list("Qstatistic"= data.frame(Q1=rslt0$Qstatistic$Q1, 
-                                                    Q2=rslt0$Qstatistic$Q2, 
-                                                    Q3=rslt0$Qstatistic$Q3),
+                    nn <- genoSize[1]+1
+                    rslt <- list("Qstatistic"= data.frame(
+                            Q1=rslt0$Qstatistic$Q1,
+                            Q2=rslt0$Qstatistic$Q2, 
+                            Q3=rslt0$Qstatistic$Q3),
                            "p.value" = data.frame(
                              p.Q1 = (length(rsltMC[,1][rsltMC[,1] >= 
-                                                    rslt0$Qstatistic$Q1])+1)/(genoSize[1]+1),
+                                            rslt0$Qstatistic$Q1])+1)/nn,
                              p.Q2 = (length(rsltMC[,2][rsltMC[,2] >= 
-                                                    rslt0$Qstatistic$Q2])+1)/(genoSize[1]+1),
+                                            rslt0$Qstatistic$Q2])+1)/nn,
                              p.Q3 = (length(rsltMC[,3][rsltMC[,3] >= 
-                                                    rslt0$Qstatistic$Q3])+1)/(genoSize[1]+1)),
+                                            rslt0$Qstatistic$Q3])+1)/nn),
                            beta = rslt0$beta)
                 } else {
                     rslt <- NA
@@ -144,9 +149,12 @@ setMethod("rQTest", signature="rqt",
             if(!is.na(rslt0)) {
                 rslt <- list(Qstatistic= data.frame(Q1=NA, Q2=NA, Q3=NA),
                     p.value = data.frame(
-                    p.Q1 = (length(rsltPP[,1][rsltPP[,1] < rslt0$p.value[1]])+1)/(perm+1),
-                    p.Q2 = (length(rsltPP[,2][rsltPP[,2] < rslt0$p.value[2]])+1)/(perm+1),
-                    p.Q3 = (length(rsltPP[,3][rsltPP[,3] < rslt0$p.value[3]])+1)/(perm+1)),
+                    p.Q1 = (length(rsltPP[,1][rsltPP[,1] < 
+                                              rslt0$p.value[1]])+1)/(perm+1),
+                    p.Q2 = (length(rsltPP[,2][rsltPP[,2] < 
+                                              rslt0$p.value[2]])+1)/(perm+1),
+                    p.Q3 = (length(rsltPP[,3][rsltPP[,3] < 
+                                              rslt0$p.value[3]])+1)/(perm+1)),
                     beta = rslt0$beta)
             } else {
                 rslt <- NA
@@ -187,7 +195,8 @@ setGeneric("phenotype", function(x) standardGeneric("phenotype"))
 #' @param x An object of \code{rqt} class.
 #' @return phenotype returns the genotype
 #' @examples 
-#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
+#' package="rqt"), header=TRUE))
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
@@ -213,7 +222,8 @@ setGeneric("genotype", function(x) standardGeneric("genotype"))
 #' @param x An object of \code{rqt} class.
 #' @return genotype returns the genotype
 #' @examples 
-#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
+#' package="rqt"), header=TRUE))
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
@@ -239,7 +249,8 @@ setGeneric("covariates", function(x) standardGeneric("covariates"))
 #' @param x An object of \code{rqt} class.
 #' @return covariates returns the covariates
 #' @examples 
-#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
+#' package="rqt"), header=TRUE))
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
@@ -265,7 +276,8 @@ setGeneric("results", function(x) standardGeneric("results"))
 #' @param x An object of \code{rqt} class.
 #' @return results returns the results
 #' @examples 
-#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", package="rqt"), header=TRUE))
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
+#' package="rqt"), header=TRUE))
 #' pheno <- data[,1]
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
