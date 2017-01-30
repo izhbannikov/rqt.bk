@@ -1,8 +1,7 @@
 Package: rqt
 Type: Package
 Title: rqt: utilities for gene-level meta-analysis
-Version: 0.99.56
-Date: 2016-01-29
+Version: 0.99.57
 Author: I. Y. Zhbannikov, K. G. Arbeev, A. I. Yashin.
 Maintainer: Ilya Y. Zhbannikov <ilya.zhbannikov@duke.edu>
 Description: Despite the recent advances of modern GWAS methods, it still remains an important 
@@ -12,12 +11,14 @@ Description: Despite the recent advances of modern GWAS methods, it still remain
 			"Gene-set association tests for next-generation sequencing data" by Lee et al (2016),
 			Bioinformatics, 32(17), 
 			i611-i619, <doi:10.1093/bioinformatics/btw429>.
+URL: https://github.com/izhbannikov/rqt 
+BugReports: https://github.com/izhbannikov/rqt/issues
 License: GPL
 RoxygenNote: 5.0.1
 Suggests: BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
 Imports:
-	stats,CCP,CompQuadForm,Matrix,metap,glmnet,pls,plyr,ropls,methods,car,RUnit,BiocGenerics
+	stats,Matrix,ropls,methods,car,RUnit,metap,CompQuadForm,glmnet,BiocGenerics
 Depends:
     R (>= 3.3),SummarizedExperiment
 Encoding: UTF-8

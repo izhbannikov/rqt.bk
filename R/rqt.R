@@ -9,7 +9,10 @@
 get.a <- function(L,STT=0.2) {
     aa <- diff <- seq(0,1,length=200)
     asize <- length(aa)
-    diff <- sapply(1:asize, function(i) { abs(get.stt(L,aa[i], STT) - STT) } )
+    diff <- unlist(lapply(1:asize, 
+                          function(i) { 
+                               abs(get.stt(L,aa[i], STT) - STT) 
+                            } ))
     return(aa[which.min(diff)])
 }
 
@@ -21,9 +24,9 @@ get.stt <- function(L,a,STT=0.2){
 
 get.reg.family <- function(out.type="D") {
     if(out.type == "D") {
-        reg.family="binomial"
+        reg.family <- "binomial"
     } else if(out.type == "C") {
-        reg.family="gaussian"
+        reg.family <- "gaussian"
     } else {
         stop(paste("Unknown out.type:", out.type))
     }
@@ -31,7 +34,8 @@ get.reg.family <- function(out.type="D") {
 }
 
 QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
-    cumvar.threshold=75, method="pca", out.type="D", scaleData=FALSE, verbose=FALSE) {
+    cumvar.threshold=75, method="pca", out.type="D", 
+    scaleData=FALSE, verbose=FALSE) {
     
     reg.family <- get.reg.family(out.type)
 
@@ -45,7 +49,8 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         if(dim(genotype)[2] > 1) {
           
             # Removing constant columns #
-            preddata <- data.frame(genotype[,apply(genotype, 2, var, na.rm=TRUE) != 0])
+            preddata <- data.frame(genotype[,apply(genotype, 2, 
+                                                  var, na.rm=TRUE) != 0])
             
             indexes <- NA
             ### Dimensionality reduction and account for LD ###
@@ -178,7 +183,8 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     if(!(method %in% c("pca", "pls"))) {
                         maf.S <- apply(S,2, function(v)mean(na.omit(v))/2)
                     } else {
-                        maf.S <- apply(S,2, function(v) mean(na.omit(abs(v)))/2 )
+                        maf.S <- apply(S,2, 
+                                       function(v) mean(na.omit(abs(v)))/2 )
                     }
                     
                     w.S0 <- qbeta(maf.S,1,25,lower.tail=FALSE)
