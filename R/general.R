@@ -16,7 +16,5 @@
 #' @importFrom stats resid var vcov
 #' @importFrom stats na.exclude na.omit
 #' @importFrom stats var
-#' @importFrom Matrix colSums rowSums
-#' @importFrom Matrix colMeans rowMeans
 #' @importFrom Matrix Matrix
 NULL
