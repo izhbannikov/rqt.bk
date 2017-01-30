@@ -1,15 +1,6 @@
 #### Dimensionality reduction methods ####
 
-#' Calculates a standard error (SE) from glmnet.
-#'@param xs A matrix of predictors.
-#'@param y A vector of outputs (dependent variable).
-#'@param yhat A vector of predicted values
-#'from \code{glmnet.predict(...)}.
-#'@param my_mod An object returned from glmnet.
-#'@param verbose Indicates verbosing output,
-#'FALSE by default.
-#'@return A list of two: variance-covariance matrix, 
-#'standard deviations of coefficients.
+
 ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   # Note, you can't estimate an intercept here
   n <- dim(xs)[1]
