@@ -1,4 +1,3 @@
-#' @import BiocGenerics
 #' @importFrom methods new slot slot<-
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
@@ -19,4 +18,5 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom SummarizedExperiment assay assays
 #' @importFrom RUnit checkEqualsNumeric
+#' @import BiocGenerics
 NULL
