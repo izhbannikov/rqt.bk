@@ -6,12 +6,12 @@
 \alias{genotype,rqt-method}
 \title{This function performs an access to genotype.}
 \usage{
-genotype(x)
+genotype(obj)
 
-\S4method{genotype}{rqt}(x)
+\S4method{genotype}{rqt}(obj)
 }
 \arguments{
-\item{x}{An object of \code{rqt} class.}
+\item{obj}{An object of \code{rqt} class.}
 }
 \value{
 genotype returns the genotype

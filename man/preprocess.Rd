@@ -4,7 +4,7 @@
 \alias{preprocess}
 \title{Preprocess input data with Principal Component Analysis method (PCA)}
 \usage{
-preprocess(data, y = NULL, method = "pca", reg.family = "binomial",
+preprocess(data, pheno = NULL, method = "pca", reg.family = "binomial",
   scaleData = FALSE, cumvar.threshold = 75, out.type = "D",
   verbose = FALSE)
 }
@@ -12,7 +12,7 @@ preprocess(data, y = NULL, method = "pca", reg.family = "binomial",
 \item{data}{An input matrix with values of 
 independent variables (predictors).}
 
-\item{y}{A phenotype - column-vector, needed for LASSO/ridge and 
+\item{pheno}{A phenotype - column-vector, needed for LASSO/ridge and 
 \code{NULL} by default.}
 
 \item{method}{A dimensionality reduction method.

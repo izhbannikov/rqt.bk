@@ -6,12 +6,12 @@
 \alias{results,rqt-method}
 \title{This function performs an access to covariates}
 \usage{
-results(x)
+results(obj)
 
-\S4method{results}{rqt}(x)
+\S4method{results}{rqt}(obj)
 }
 \arguments{
-\item{x}{An object of \code{rqt} class.}
+\item{obj}{An object of \code{rqt} class.}
 }
 \value{
 results returns the results
