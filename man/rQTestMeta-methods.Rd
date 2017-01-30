@@ -7,15 +7,15 @@
 \title{This function performs a gene-level meta-analysis based on 
 combined effect sizes.}
 \usage{
-rQTestMeta(x, ...)
+rQTestMeta(objects, ...)
 
-\S4method{rQTestMeta}{list}(x, perm = 0, STT = 0.2, weight = FALSE,
+\S4method{rQTestMeta}{list}(objects, perm = 0, STT = 0.2, weight = FALSE,
   cumvar.threshold = 75, out.type = "D", method = "pca",
   scaleData = FALSE, asym.pval = FALSE, comb.test = "wilkinson",
   verbose = FALSE)
 }
 \arguments{
-\item{x}{List of objects of class rqt}
+\item{objects}{List of objects of class rqt}
 
 \item{...}{Additional parameters to pass to the function}
 

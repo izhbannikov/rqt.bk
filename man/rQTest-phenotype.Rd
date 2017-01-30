@@ -6,12 +6,12 @@
 \alias{phenotype,rqt-method}
 \title{This function performs an access to phenotype}
 \usage{
-phenotype(x)
+phenotype(obj)
 
-\S4method{phenotype}{rqt}(x)
+\S4method{phenotype}{rqt}(obj)
 }
 \arguments{
-\item{x}{An object of \code{rqt} class.}
+\item{obj}{An object of \code{rqt} class.}
 }
 \value{
 phenotype returns the genotype

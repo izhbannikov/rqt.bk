@@ -1,12 +1,12 @@
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
-#' @param x Object of class rqt
+#' @param obj Object of class rqt
 #' @param ... Additional parameters to pass to the function
 #' @return Updated rqt object with result slot
 #' @export
 #' @docType methods
 #' @rdname rQTest-methods
-setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
+setGeneric("rQTest", function(obj, ...) standardGeneric("rQTest"))
 
 #' This function performs a gene-level test based on combined effect sizes.
 #' @param perm Integer indicating the number of permutations 
@@ -42,7 +42,7 @@ setGeneric("rQTest", function(x, ...) standardGeneric("rQTest"))
 #' @rdname rQTest-methods
 #' @export
 setMethod("rQTest", signature="rqt", 
-    function(x, perm=0, STT=0.2, weight=FALSE, 
+    function(obj, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=75, out.type="D", 
             method="pca", scaleData=FALSE, asym.pval=FALSE,
             verbose=FALSE) {
@@ -54,9 +54,9 @@ setMethod("rQTest", signature="rqt",
         }
       
         # Load data #
-        phenotype <- phenotype(x)
-        genotype <- assays(genotype(x))[[1]]
-        covariates <- covariates(x)
+        phenotype <- phenotype(obj)
+        genotype <- assays(genotype(obj))[[1]]
+        covariates <- covariates(obj)
         
         # Dimensions
         phenoSize <- length(phenotype)
@@ -161,8 +161,8 @@ setMethod("rQTest", signature="rqt",
             }
         }
         
-        results(x) <- rslt
-        return(x)
+        results(obj) <- rslt
+        return(obj)
 })
 
 #' Common methods for class rqt
@@ -187,12 +187,12 @@ NULL
 #' 
 #' @rdname rQTest-phenotype
 #' @export
-setGeneric("phenotype", function(x) standardGeneric("phenotype"))
+setGeneric("phenotype", function(obj) standardGeneric("phenotype"))
 
 #' This function performs an access to phenotype
 #' 
 #' @description A genotype accessor
-#' @param x An object of \code{rqt} class.
+#' @param obj An object of \code{rqt} class.
 #' @return phenotype returns the genotype
 #' @examples 
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
@@ -205,8 +205,8 @@ setGeneric("phenotype", function(x) standardGeneric("phenotype"))
 #' phenotype(obj)
 #' @rdname rQTest-phenotype
 #' @export
-setMethod("phenotype", "rqt", function(x) {
-  return(slot(x, "phenotype"))
+setMethod("phenotype", "rqt", function(obj) {
+  return(slot(obj, "phenotype"))
 })
 
 
@@ -214,12 +214,12 @@ setMethod("phenotype", "rqt", function(x) {
 #' 
 #' @rdname rQTest-genotype
 #' @export
-setGeneric("genotype", function(x) standardGeneric("genotype"))
+setGeneric("genotype", function(obj) standardGeneric("genotype"))
 
 #' This function performs an access to genotype.
 #' 
 #' @description A genotype accessor
-#' @param x An object of \code{rqt} class.
+#' @param obj An object of \code{rqt} class.
 #' @return genotype returns the genotype
 #' @examples 
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
@@ -232,8 +232,8 @@ setGeneric("genotype", function(x) standardGeneric("genotype"))
 #' genotype(obj)
 #' @rdname rQTest-genotype
 #' @export
-setMethod("genotype", "rqt", function(x) {
-  return(slot(x, "genotype"))
+setMethod("genotype", "rqt", function(obj) {
+  return(slot(obj, "genotype"))
 })
 
 
@@ -241,12 +241,12 @@ setMethod("genotype", "rqt", function(x) {
 #' 
 #' @rdname rQTest-covariates
 #' @export
-setGeneric("covariates", function(x) standardGeneric("covariates"))
+setGeneric("covariates", function(obj) standardGeneric("covariates"))
 
 #' This function performs an access to covariates
 #' 
 #' @description An accessor to covariates
-#' @param x An object of \code{rqt} class.
+#' @param obj An object of \code{rqt} class.
 #' @return covariates returns the covariates
 #' @examples 
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
@@ -259,21 +259,21 @@ setGeneric("covariates", function(x) standardGeneric("covariates"))
 #' covariates(obj)
 #' @rdname rQTest-covariates
 #' @export
-setMethod("covariates", "rqt", function(x) {
-  return(slot(x, "covariates"))
+setMethod("covariates", "rqt", function(obj) {
+  return(slot(obj, "covariates"))
 })
 
 #' This function performs an access to covariates
 #' 
 #' @rdname rQTest-results
 #' @export
-setGeneric("results", function(x) standardGeneric("results"))
+setGeneric("results", function(obj) standardGeneric("results"))
 
 
 #' This function performs an access to covariates
 #' 
 #' @description An accessor to results
-#' @param x An object of \code{rqt} class.
+#' @param obj An object of \code{rqt} class.
 #' @return results returns the results
 #' @examples 
 #' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat", 
@@ -287,15 +287,15 @@ setGeneric("results", function(x) standardGeneric("results"))
 #' results(res)
 #' @rdname rQTest-results
 #' @export
-setMethod("results", "rqt", function(x) {
-  return(slot(x, "results"))
+setMethod("results", "rqt", function(obj) {
+  return(slot(obj, "results"))
 })
 
-setGeneric("results<-", function(x, value) standardGeneric("results<-"))
+setGeneric("results<-", function(obj, value) standardGeneric("results<-"))
 
-setMethod("results<-", "rqt", function(x, value) {
-  slot(x, "results") <- value
-  x
+setMethod("results<-", "rqt", function(obj, value) {
+  slot(obj, "results") <- value
+  obj
 })
 
 setMethod("print", "rqt", function(x) {

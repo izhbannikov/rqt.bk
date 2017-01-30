@@ -22,13 +22,6 @@ ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   return(list(vcov=var_cov, se=se_bs))
 }
 
-#' Calculates variance-covariance matrix for LASSO/ridge regression.
-#'@param x A matrix of predictors.
-#'@param y A vector of outputs (dependent variable).
-#'@param rmod An object returned from glmnet.
-#'@param verbose Indicates verbosing output. Default: FALSE.
-#'@return A list of two: variance-covariance matrix, 
-#'standard deviations of coefficients.
 vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
     # Predictions
     r_yhat   <- predict(rmod,newx=x,s='lambda.min')
@@ -41,7 +34,7 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 #' Preprocess input data with Principal Component Analysis method (PCA)
 #' @param data An input matrix with values of 
 #' independent variables (predictors).
-#' @param y A phenotype - column-vector, needed for LASSO/ridge and 
+#' @param pheno A phenotype - column-vector, needed for LASSO/ridge and 
 #' \code{NULL} by default.
 #' @param method A dimensionality reduction method.
 #' Default: \code{pca}.
@@ -55,7 +48,7 @@ vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
 #' @param out.type An output (phenotype) type. 
 #' Default: \code{"D"}.
 #' @return A list of one: "S" - a data frame of predictor values.
-preprocess <- function(data, y=NULL,
+preprocess <- function(data, pheno=NULL,
                        method="pca",
                        reg.family="binomial", 
                        scaleData=FALSE, 
@@ -121,7 +114,7 @@ preprocess <- function(data, y=NULL,
             numcomp <- ifelse(n.snp < 10, n.snp, npred)
             
             if(out.type == "D") { # PLS-DA
-                model <- try(opls(x = data.scaled, y=as.factor(y), 
+                model <- try(opls(x = data.scaled, y=as.factor(pheno), 
                                   predI=numcomp, 
                                   plotL = FALSE, 
                                   log10L=FALSE, 
@@ -133,7 +126,7 @@ preprocess <- function(data, y=NULL,
                         ct <- ct/i
                         npred <- round(dim(data.scaled)[2]*ct)
               
-                        model <- opls(x = data.scaled, y=as.factor(y), 
+                        model <- opls(x = data.scaled, y=as.factor(pheno), 
                                       predI=npred, 
                                       plotL = FALSE, 
                                       log10L=FALSE, 
@@ -146,7 +139,7 @@ preprocess <- function(data, y=NULL,
                     }
                 }
             } else if(out.type == "C") { # PLS
-                model <- opls(x = data.scaled, y=y, 
+                model <- opls(x = data.scaled, y=pheno, 
                               predI=numcomp, 
                               plotL = FALSE, 
                               log10L=FALSE, 
@@ -156,7 +149,7 @@ preprocess <- function(data, y=NULL,
                 if(inherits(model, "try-error")) {
                     cumvar.threshold <- cumvar.threshold/2
                     npred <- round(dim(data.scaled)[2]*ct)
-                    model <- opls(x = data.scaled, y=as.factor(y), 
+                    model <- opls(x = data.scaled, y=as.factor(pheno), 
                               predI=npred, plotL = FALSE, 
                               log10L=FALSE, algoC = "nipals", 
                               silent = TRUE)
@@ -172,11 +165,11 @@ preprocess <- function(data, y=NULL,
                 if(reg.family == "binomial") {
                   fit <- cv.glmnet(x=as.matrix(data),
                                alpha=ifelse(method=="lasso", 1, 0),
-                               y=as.factor(y), family=reg.family)
+                               y=as.factor(pheno), family=reg.family)
                 } else {
                   fit <- cv.glmnet(x=as.matrix(data),
                                alpha=ifelse(method=="lasso", 1, 0),
-                               y=y, family=reg.family)
+                               y=pheno, family=reg.family)
                 }
             } , error=function(e) {
                 print(e)
@@ -189,11 +182,11 @@ preprocess <- function(data, y=NULL,
                 if(reg.family == "binomial") {
                     fit <- cv.glmnet(x=as.matrix(data),
                              alpha=ifelse(method=="lasso", 1, 0),
-                             y=as.factor(y), family=reg.family)
+                             y=as.factor(pheno), family=reg.family)
                 } else {
                     fit <- cv.glmnet(x=as.matrix(data),
                              alpha=ifelse(method=="lasso", 1, 0),
-                             y=y, family=reg.family)
+                             y=pheno, family=reg.family)
                 }
             } , error=function(e) {
                 print(e)

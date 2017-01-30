@@ -60,7 +60,7 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 diag(tmp) <- 0
                 preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
                 res <- preprocess(data=preddata, 
-                                 y=phenotype, method=method,
+                                 pheno=phenotype, method=method,
                                  reg.family=reg.family, 
                                  scaleData=scaleData, 
                                  cumvar.threshold=cumvar.threshold, 

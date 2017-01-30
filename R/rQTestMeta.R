@@ -1,7 +1,7 @@
 #' This function performs a gene-level meta-analysis based on 
 #' combined effect sizes.
 #' 
-#' @param x List of objects of class rqt
+#' @param objects List of objects of class rqt
 #' @param ... Additional parameters to pass to the function
 #' @return A list of two: (i) final.pvalue - 
 #' a final p-value across all studies; 
@@ -9,7 +9,7 @@
 #' @export
 #' @docType methods
 #' @rdname rQTestMeta-methods
-setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
+setGeneric("rQTestMeta", function(objects, ...) standardGeneric("rQTestMeta"))
 
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
@@ -65,7 +65,7 @@ setGeneric("rQTestMeta", function(x, ...) standardGeneric("rQTestMeta"))
 #'res.meta <- rQTestMeta(list(obj1, obj2, obj3))
 #'print(res.meta)
 setMethod("rQTestMeta", signature="list", 
-    function(x, perm=0, STT=0.2, weight=FALSE, 
+    function(objects, perm=0, STT=0.2, weight=FALSE, 
         cumvar.threshold=75, out.type="D", 
         method="pca", scaleData=FALSE, asym.pval=FALSE,
         comb.test="wilkinson",
@@ -76,14 +76,14 @@ setMethod("rQTestMeta", signature="list",
                        and will be set to 100.")
             cumvar.threshold <- 100
         }
-        if(class(x) != "list") {
-            stop("x must be a list with rqt class objects!")
+        if(class(objects) != "list") {
+            stop("objects must be a list of rqt class objects!")
         }
         ### Meta-analysis ###
-        numStudies <- length(x)
+        numStudies <- length(objects)
         pv <- rep(NA_real_, numStudies) 
         for(i in 1:numStudies) {
-            res <- rQTest(x[[i]],
+            res <- rQTest(objects[[i]],
                 STT=STT, 
                 weight=weight, 
                 cumvar.threshold=cumvar.threshold, 
