@@ -13,8 +13,7 @@
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
 #' @importFrom stats qbeta qchisq qgamma
-#' @importFrom stats resid var vcov
+#' @importFrom stats resid vcov
 #' @importFrom stats na.exclude na.omit
-#' @importFrom stats var
 #' @importFrom Matrix Matrix
 NULL
