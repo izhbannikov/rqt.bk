@@ -18,7 +18,7 @@ RoxygenNote: 5.0.1
 Suggests: BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
 Imports:
-	stats,Matrix,ropls,methods,car,RUnit,metap,CompQuadForm,glmnet,BiocGenerics,utils
+	stats,Matrix,ropls,methods,car,RUnit,metap,CompQuadForm,glmnet,utils
 Depends:
     R (>= 3.3),SummarizedExperiment
 Encoding: UTF-8

@@ -18,5 +18,4 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom SummarizedExperiment assay assays
 #' @importFrom RUnit checkEqualsNumeric
-#' @import BiocGenerics
 NULL
