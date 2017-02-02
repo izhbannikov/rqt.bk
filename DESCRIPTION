@@ -20,7 +20,7 @@ VignetteBuilder: knitr
 Imports:
 	stats,Matrix,ropls,methods,car,RUnit,metap,CompQuadForm,glmnet,utils
 Depends:
-    R (>= 3.3), SummarizedExperiment
+    R (>= 3.4), SummarizedExperiment
 Encoding: UTF-8
 biocViews: GenomeWideAssociation, Regression, Survival,
         PrincipalComponent, StatisticalMethod, Sequencing
