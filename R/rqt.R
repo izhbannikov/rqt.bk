@@ -1,5 +1,8 @@
 # A basic function for gene-level association test #
-
+# Some parts of this code were adopted from the 
+# supplementary code provided by Lee et al 2016 
+# "Gene-set association tests for next-generation sequencing data"
+#
 
 #' Get a given STT
 #' @param L TODO
