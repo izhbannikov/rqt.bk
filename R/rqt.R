@@ -89,22 +89,21 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 S <- res[["S"]]
                 fit <- res[["fit"]]
                 if(dim(coef(summary(fit)))[2] >= 2) {
-                    coef <- coef(summary(fit))[-1,1:2]
+                    coef.multivar <- coef(summary(fit))[-1,1:2]
                 }
                 
-                if(mode(fit)=="character"){ length(coef) <-0 }
-                if(length(coef) != 2) { 
-                    beta1 <- coef[,1]
-                    se1 <- coef[,2] 
+                if(length(coef.multivar) != 2) { 
+                    beta.multivar <- coef.multivar[,1]
+                    se.multivar <- coef.multivar[,2] 
                 }
-                if(length(coef) == 2) { 
-                    beta1 <- coef[1]
-                    se1 <- coef[2] 
+                if(length(coef.multivar) == 2) { 
+                    beta.multivar <- coef.multivar[1]
+                    se.multivar <- coef.multivar[2] 
                 }
           
-                vv <- vcov(fit)[-1,-1]
-                alpha <- 1/(se1^2)
-                alpha <- alpha/sum(1/(se1^2))
+                vMat <- vcov(fit)[-1,-1]
+                alpha <- 1/(se.multivar^2)
+                alpha <- alpha/sum(1/(se.multivar^2))
                 
                 if(length(coef(fit)) > 2) {
                   mean.vif <- mean(vif(fit), na.rm=TRUE)
@@ -115,10 +114,10 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             } else {
                 
                 fit <- res[["fit"]]
-                coef <- coef(fit)[-1]
+                coef.multivar <- coef(fit)[-1]
                 S <- preddata
                 
-                if(sum(coef) == 0) {
+                if(sum(coef.multivar) == 0) {
                     print("All coefficients in lasso/ridge regression 
                           are equal to 0. 
                           Trying ordinary regressing instead.")
@@ -132,36 +131,36 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     S <- res$S
                     fit <- res[["fit"]]
                     if(dim(coef(summary(fit)))[2] >= 2) {
-                        coef <- coef(summary(fit))[-1,1:2]
+                        coef.multivar <- coef(summary(fit))[-1,1:2]
                     }
                     
-                    if(mode(fit)=="character"){length(coef) <-0 }
-                    if(length(coef)!=2){
-                        beta1<-coef[,1]
-                        se1 <- coef[,2]
+                    
+                    if(length(coef.multivar)!=2){
+                        beta.multivar<-coef.multivar[,1]
+                        se.multivar <- coef.multivar[,2]
                     }
-                    if(length(coef)==2){
-                        beta1<-coef[1]
-                        se1 <- coef[2]
+                    if(length(coef.multivar)==2){
+                        beta.multivar<-coef.multivar[1]
+                        se.multivar <- coef.multivar[2]
                     }
-                    vv <- vcov(fit)[-1,-1]
+                    vMat <- vcov(fit)[-1,-1]
                 } else {
                     
-                    beta1 <- coef[coef != 0L]
-                    vv <- vcov_rigde(x=as.matrix(preddata), 
+                    beta.multivar <- coef.multivar[coef.multivar != 0L]
+                    vMat <- vcov_rigde(x=as.matrix(preddata), 
                         y=phenotype, 
-                        rmod=fit)$vcov[coef != 0L, coef != 0L]
+                        rmod=fit)$vcov[coef.multivar != 0L, coef.multivar != 0L]
                     
-                    if(class(vv)[1] == "dgeMatrix") {
-                        se1 <- sqrt(diag(vv))
+                    if(class(vMat)[1] == "dgeMatrix") {
+                        se.multivar <- sqrt(diag(vMat))
                     } else {
-                        se1 <- sqrt(vv)
+                        se.multivar <- sqrt(vMat)
                     }
-                    vv <- as.matrix(vv)
+                    vMat <- as.matrix(vMat)
                 }
           
-                alpha <- as.matrix((1/(se1^2)), ncol=1)
-                alpha <- alpha/sum(1/(se1^2))
+                alpha <- as.matrix((1/(se.multivar^2)), ncol=1)
+                alpha <- alpha/sum(1/(se.multivar^2))
                 
                 # Temporary disabled:
                 #mean.vif <- mean(vif(fit), na.rm=TRUE)
@@ -169,19 +168,19 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 mean.vif <- NA
             }
             
-            beta.pool0 <- 0
+            beta.pool.base <- 0
             beta.pool <- 0
             var.pool <- NA
-            var.pool0 <- NA
+            var.pool.base <- NA
             
-            if(length(coef) != 0) {
-                ###### QTest1 ######
+            if(length(coef.multivar) != 0) {
+                #=================== QTest1 ===================#
                 if(weight == FALSE) {
-                    var.pool0 <- t(alpha) %*% vv %*% alpha
-                    beta.pool0 <- t(alpha) %*% beta1
-                    z.score0 <- beta.pool0/sqrt(var.pool0)
-                    Q1 <- z.score0^2
-                    p.Q1 <- pchisq(Q1, df=1, lower.tail=FALSE)
+                    var.pool.base <- t(alpha) %*% vMat %*% alpha
+                    beta.pool.base <- t(alpha) %*% beta.multivar
+                    zScore.base <- beta.pool.base/sqrt(var.pool.base)
+                    QStat1 <- zScore.base^2
+                    p.Q1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
                 } else {
                     if(!(method %in% c("pca", "pls"))) {
                         maf.S <- apply(S,2, function(v)mean(na.omit(v))/2)
@@ -193,50 +192,50 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                     w.S0 <- qbeta(maf.S,1,25,lower.tail=FALSE)
                     
                     WS <- diag(w.S0)
-                    if(length(beta1)==1){
+                    if(length(beta.multivar)==1){
                         WS <- w.S0
                     }
                     
-                    var.pool <- t(alpha) %*% WS %*% vv %*% WS %*% alpha
-                    beta.pool <- t(alpha) %*% WS %*% beta1
+                    var.pool <- t(alpha) %*% WS %*% vMat %*% WS %*% alpha
+                    beta.pool <- t(alpha) %*% WS %*% beta.multivar
                     z.score <- beta.pool/sqrt(var.pool)
-                    Q1 <- z.score^2
-                    p.Q1 <- pchisq(Q1, df=1, lower.tail=FALSE)
+                    QStat1 <- z.score^2
+                    p.Q1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
                 }
                 
-                ### QTest2 ###
-                Q2.eigen <- eigen(vv)
-                U2 <- Q2.eigen$vectors
-                l2 <- Q2.eigen$values
+                #=================== QTest-2 ===================#
+                QStat2.eigen <- eigen(vMat)
+                U2 <- QStat2.eigen$vectors
+                l2 <- QStat2.eigen$values
                 na.l2 <- which(l2/mean(l2) < 0.01)
                 if(length(na.l2) > 0){
                     l2 <- l2[-na.l2]
                     U2 <- U2[,-na.l2]
                 }
                 
-                p2 <- pchisq((t(U2) %*% beta1)^2/l2, df=1, lower.tail=FALSE)
+                p2 <- pchisq((t(U2) %*% beta.multivar)^2/l2, df=1, lower.tail=FALSE)
                 a <- get.a(length(p2), STT)
                 q2 <- 2*(qgamma(p2, a, 1, lower.tail=FALSE))
-                Q2 <- sum(q2)
-                p.Q2 <- pchisq(Q2, df=2*a*length(q2), lower.tail=FALSE)
+                QStat2 <- sum(q2)
+                p.Q2 <- pchisq(QStat2, df=2*a*length(q2), lower.tail=FALSE)
                 
-                ######################## QTest3 ###########################
+                #=================== QTest-3 ===================#
                 
                 if(weight==FALSE){
-                    cov.beta <- c(t(alpha) %*% vv)
-                    b.star <- beta1 - beta.pool0*cov.beta/var.pool0[1]
-                    vv.star <- vv - (cov.beta%*%t(cov.beta))/var.pool0[1]
+                    cov.beta <- c(t(alpha) %*% vMat)
+                    b.star <- beta.multivar - beta.pool.base*cov.beta/var.pool.base[1]
+                    vMat.star <- vMat - (cov.beta%*%t(cov.beta))/var.pool.base[1]
                 } else {
-                    w.vv<-WS %*% vv %*% WS
-                    c(t(alpha)%*%w.vv)->cov.beta
-                    b.star <- WS %*% beta1 - beta.pool*cov.beta/var.pool[1]
-                    vv.star <- w.vv - (cov.beta%*%t(cov.beta))/var.pool[1]
+                    w.vMat<-WS %*% vMat %*% WS
+                    c(t(alpha)%*%w.vMat)->cov.beta
+                    b.star <- WS %*% beta.multivar - beta.pool*cov.beta/var.pool[1]
+                    vMat.star <- w.vMat - (cov.beta%*%t(cov.beta))/var.pool[1]
                 }
                 
-                if(length(beta1) !=1 ) {
-                    Q3.eigen <- eigen(vv.star)
-                    U3 <- Q3.eigen$vectors
-                    l3 <- Q3.eigen$values
+                if(length(beta.multivar) !=1 ) {
+                    QStat3.eigen <- eigen(vMat.star)
+                    U3 <- QStat3.eigen$vectors
+                    l3 <- QStat3.eigen$values
                     na.l3 <- which(l3/mean(l3) < 0.001)
                     
                     if(length(na.l3) > 0) {
@@ -244,62 +243,60 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         U3<-U3[,-na.l3]
                     }
                     
-                    #L3 <- diag(l3)
-                    #if(length(l3)==1){L3<-l3}
                     
                     q2.proj <- (t(U3) %*% b.star)^2/l3
                     p2.1 <- pchisq(q2.proj, df=1, lower.tail=FALSE)
                     a <- get.a(length(p2.1),STT)
-                    Q2.proj <- sum(2*qgamma(p2.1,a,1,lower.tail=FALSE))
-                    p.Q2.proj <- pchisq(Q2.proj,df=2*a*length(l3),
+                    QStat2.proj <- sum(2*qgamma(p2.1,a,1,lower.tail=FALSE))
+                    p.Q2.proj <- pchisq(QStat2.proj,df=2*a*length(l3),
                         lower.tail=FALSE)
                     if(p.Q2.proj == 0) {
                       p.Q2.proj <- 1e-8
                     }
-                    Q2.1 <- qchisq(p.Q2.proj,df=1,lower.tail=FALSE)
-                    #print(paste(Q2.1, p2.1, Q2.proj, p.Q2.proj, a))
+                    QStat2.1 <- qchisq(p.Q2.proj,df=1,lower.tail=FALSE)
+                    
                     pi0 <- seq(0,1,by=0.1)
-                    p.Q3.can <- Q3 <- rep(1,11)
+                    p.Q3.can <- QStat3 <- rep(1,11)
                     p.Q3.can[1] <- p.Q2.proj
-                    Q3[1] <- Q2.1
+                    QStat3[1] <- QStat2.1
                     p.Q3.can[11] <- p.Q1
-                    Q3[11] <- Q1
+                    QStat3[11] <- QStat1
                     
                     for(h in 2:10){
-                        Q3[h] <- pi0[h]*Q1 + (1-pi0[h])*Q2.1
-                        p.Q3.can[h] <- davies(Q3[h],
+                        QStat3[h] <- pi0[h]*QStat1 + (1-pi0[h])*QStat2.1
+                        p.Q3.can[h] <- davies(QStat3[h],
                             c(pi0[h],(1-pi0[h])),
                             c(1,1))$Qq
                         if(p.Q3.can[h] <= 0 | p.Q3.can[h] > 1) {
-                            p.Q3.can[h] <- imhof(Q3[h],
+                            p.Q3.can[h] <- imhof(QStat3[h],
                                 c(pi0[h],(1-pi0[h])),
                                 c(1,1))$Qq
                         }
                         if(p.Q3.can[h]<=0|p.Q3.can[h]>1){
-                            p.Q3.can[h]<-liu(Q3[h],c(pi0[h],
+                            p.Q3.can[h]<-liu(QStat3[h],c(pi0[h],
                                 (1-pi0[h])),c(1,1))[1]
                         }
                     }
                   
-                    Q3final <- Q3[which.min(p.Q3.can)]
+                    QStat3final <- QStat3[which.min(p.Q3.can)]
                     p.Q3 <- (sum(null.dist.Q3[null.dist.Q3[,1] > 
                         -log10(min(p.Q3.can)),2])+1) / 
                         (sum(null.dist.Q3[,2])+1)
                 }
                 
-                if(length(beta1)==1){
+                if(length(beta.multivar)==1){
                     p.Q3 <- p.Q1
-                    Q3final <- Q1
+                    QStat3final <- QStat1
                 }
                 
-                rslt <- list(Qstatistic=data.frame(Q1, Q2, Q3=Q3final), 
+                rslt <- list(Qstatistic=data.frame(Q1=QStat1, Q2=QStat2, Q3=QStat3final), 
                           p.value=data.frame(p.Q1,p.Q2,p.Q3),
-                          beta=ifelse(weight, beta.pool, beta.pool0),
-                          var.pooled=ifelse(weight, var.pool, var.pool0),
+                          beta=ifelse(weight, beta.pool, beta.pool.base),
+                          var.pooled=ifelse(weight, var.pool, var.pool.base),
                           mean.vif=mean.vif)
             }
   
-            if(length(coef)==0) { 
+            if(length(coef.multivar)==0) { 
                 #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                 #             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
                 #             beta=NA, var.pooled=NA, mean.vif=NA)
