@@ -116,7 +116,8 @@ setMethod("rQTest", signature="rqt",
                                             rslt0$Qstatistic$Q3])+1)/nn),
                            beta = rslt0$beta)
                 } else {
-                    rslt <- NA
+                    rslt <- list( Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA),
+                                p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
                 }
             } else {
                 rslt <- rslt0
@@ -157,7 +158,8 @@ setMethod("rQTest", signature="rqt",
                                               rslt0$p.value[3]])+1)/(perm+1)),
                     beta = rslt0$beta)
             } else {
-                rslt <- NA
+                rslt <- list( Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA),
+                            p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
             }
         }
         
