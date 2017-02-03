@@ -246,7 +246,6 @@ build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
             fit <- glm(y ~ ., data=data.frame(x), 
                    na.action=na.exclude,
                    family = reg.family)
-            print(length(x))
         } else {
             fit <- glm(y ~ 1, 
                      na.action=na.exclude,
