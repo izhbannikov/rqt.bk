@@ -169,6 +169,24 @@ res <- rQTest(obj, method="pca", out.type = "D")
 print(res)
 ```
 
+For continous phenotype:
+
+````{r, echo=TRUE, message=FALSE}
+library(rqt)
+
+data <- data.matrix(read.table(system.file("extdata/test.cont1.dat",
+                                           package="rqt"), header = TRUE))
+pheno <- data[,1]
+geno <- data[, 2:dim(data)[2]]
+colnames(geno) <- paste(seq(1, dim(geno)[2]))
+geno.obj <- SummarizedExperiment(geno)
+covars <- read.table(system.file("extdata/test.cova1.dat",package="rqt"), 
+    header=TRUE)
+obj <- rqtClass(phenotype=pheno, genotype=geno.obj, covariates = covars)
+res <- rQTest(obj, method="pca", out.type = "C")
+print(res)
+```
+
 ### Meta-analysis
 
 ```{r, echo=TRUE, message=FALSE}
