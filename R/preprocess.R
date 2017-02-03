@@ -243,7 +243,6 @@ build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
         }
     } else if(reg.family == "gaussian") {
         if(length(x) != 0) {
-            print(x)
             fit <- glm(y ~ ., data=data.frame(x), 
                    na.action=na.exclude,
                    family = reg.family)
