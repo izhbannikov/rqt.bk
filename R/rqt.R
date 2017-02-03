@@ -297,10 +297,10 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             }
   
             if(length(coef.multivar)==0) { 
-                #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                #             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
-                #             beta=NA, var.pooled=NA, mean.vif=NA)
-                rslt <- NA
+                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                             p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
+                             beta=NA, var.pooled=NA, mean.vif=NA)
+                #rslt <- NA
             }
         } else {
             # Simple regression:
@@ -327,27 +327,27 @@ QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         var.pooled=reg.coef[2,2],
                         mean.vif=mean.vif)
             } else {
-                #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                #             p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-                #             beta=NA, var.pooled=NA, mean.vif=NA)
-                rslt <- NA
+                rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                             p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                             beta=NA, var.pooled=NA, mean.vif=NA)
+                #rslt <- NA
             }
             
             
         }
     },error=function(e) {
         print(e)
-        #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-        #            p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-        #            beta=NA, var.pooled=NA, mean.vif=NA)
-        rslt <- NA
+        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                    p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                    beta=NA, var.pooled=NA, mean.vif=NA)
+        #rslt <- NA
     }, finally=rslt)
 
     if(is.na(rslt$p.value$p.Q3)) {
-        #rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-        #             p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
-        #             beta=NA, var.pooled=NA, mean.vif=NA)
-        rslt <- NA
+        rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                     p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                     beta=NA, var.pooled=NA, mean.vif=NA)
+        #rslt <- NA
     }
   
     return(rslt)
