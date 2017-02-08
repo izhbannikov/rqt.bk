@@ -59,140 +59,16 @@ preprocess <- function(data, pheno=NULL,
     
     switch(method, 
         pca={
-            ct <- cumvar.threshold
-            res.pca <- prcomp(data, scale=scaleData)
-            # Eigenvalues
-            eig <- (res.pca$sdev)^2
-            # Variances in percentage
-            variance <- eig*100/sum(eig)
-            # Cumulative variances
-            cumvar <- cumsum(variance)
-            eig.table <- data.frame(eig = eig, 
-                                    variance = variance, 
-                                    cumvariance = cumvar)
-          
-            ######### Filtering by threshold ##############
-            if(length(eig.table$cumvar[eig.table$cumvar <= ct]) == 0) {
-                if(verbose) {  
-                    print("Warning: cumvar.threshold will be set to")
-                    print(paste("the first component of cum. var.:", 
-                          eig.table$cumvar[1]))
-                }
-                cumvar.threshold <- eig.table$cumvar[1]
-            }
-          
-            #S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
-            #    cumvar.threshold)] %*% 
-            #t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
-            #    cumvar.threshold)])
-          
-            S <- res.pca$x[,which(eig.table$cumvar <= ct)]
-          
-            ### And add the center (and re-scale) back to data ###
-            #if(scale){
-            #   S <- scale(S, center = FALSE , scale=1/res.pca$scale)
-            #}
-            #if(center){
-            #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
-            #}
-            
-            indexes <- which(eig.table$cumvar <= ct)
-            return(list(S = S, indexes=indexes))
+            return(preprocessPCA(data, scaleData, cumvar.threshold, verbose))
         },
         pls={
-          
-            ct <- cumvar.threshold/100
-            
-            if(scaleData){
-                data.scaled <- scale(data, center = TRUE)
-            } else {
-                data.scaled <- data
-            }
-            
-            n.snp <- dim(data.scaled)[2]
-            npred <- round(n.snp*ct)
-            numcomp <- ifelse(n.snp < 10, n.snp, npred)
-            
-            if(out.type == "D") { # PLS-DA
-                model <- try(opls(x = data.scaled, y=as.factor(pheno), 
-                                  predI=numcomp, 
-                                  plotL = FALSE, 
-                                  log10L=FALSE, 
-                                  algoC = "nipals"), 
-                       silent = TRUE)
-          
-                if(inherits(model, "try-error")) {
-                    for(i in 2:6) {
-                        ct <- ct/i
-                        npred <- round(dim(data.scaled)[2]*ct)
-              
-                        model <- opls(x = data.scaled, y=as.factor(pheno), 
-                                      predI=npred, 
-                                      plotL = FALSE, 
-                                      log10L=FALSE, 
-                                      algoC = "nipals", 
-                                      silent = TRUE)
-              
-                        if(!inherits(model, "try-error")) {
-                            break
-                        }
-                    }
-                }
-            } else if(out.type == "C") { # PLS
-                model <- opls(x = data.scaled, y=pheno, 
-                              predI=numcomp, 
-                              plotL = FALSE, 
-                              log10L=FALSE, 
-                              algoC = "nipals", 
-                              silent = TRUE)
-              
-                if(inherits(model, "try-error")) {
-                    cumvar.threshold <- cumvar.threshold/2
-                    npred <- round(dim(data.scaled)[2]*ct)
-                    model <- opls(x = data.scaled, y=as.factor(pheno), 
-                              predI=npred, plotL = FALSE, 
-                              log10L=FALSE, algoC = "nipals", 
-                              silent = TRUE)
-                }
-            }
-          
-            S <- model@scoreMN
-            return(list(S = S))
+            return(preprocessPLS(data, pheno, scaleData, cumvar.threshold, out.type))
         },
         lasso={
-            #### LASSO/Ridge ####
-            tryCatch({
-                if(reg.family == "binomial") {
-                  fit <- cv.glmnet(x=as.matrix(data),
-                               alpha=ifelse(method=="lasso", 1, 0),
-                               y=as.factor(pheno), family=reg.family)
-                } else {
-                  fit <- cv.glmnet(x=as.matrix(data),
-                               alpha=ifelse(method=="lasso", 1, 0),
-                               y=pheno, family=reg.family)
-                }
-            } , error=function(e) {
-                print(e)
-            })
-          
-            return(list(fit=fit))
+            return(preprocessLASSO(data, pheno, reg.family))
         },
         ridge={
-            tryCatch({
-                if(reg.family == "binomial") {
-                    fit <- cv.glmnet(x=as.matrix(data),
-                             alpha=ifelse(method=="lasso", 1, 0),
-                             y=as.factor(pheno), family=reg.family)
-                } else {
-                    fit <- cv.glmnet(x=as.matrix(data),
-                             alpha=ifelse(method=="lasso", 1, 0),
-                             y=pheno, family=reg.family)
-                }
-            } , error=function(e) {
-                print(e)
-            })
-  
-            return(list(fit=fit))
+            return(preprocessRidge(data, pheno, reg.family))
         },
         {
             stop("Unknown method provided.")
@@ -258,3 +134,136 @@ build.null.model <- function(y, x, reg.family="binomial", verbose=FALSE) {
     return(resid(fit))
 }
 
+
+preprocessPCA <- function(data, scaleData, cumvar.threshold, verbose) {
+    ct <- cumvar.threshold
+    res.pca <- prcomp(data, scale=scaleData)
+    # Eigenvalues
+    eig <- (res.pca$sdev)^2
+    # Variances in percentage
+    variance <- eig*100/sum(eig)
+    # Cumulative variances
+    cumvar <- cumsum(variance)
+    eig.table <- data.frame(eig = eig, 
+                          variance = variance, 
+                          cumvariance = cumvar)
+  
+    ######### Filtering by threshold ##############
+    if(length(eig.table$cumvar[eig.table$cumvar <= ct]) == 0) {
+        if(verbose) {  
+            print("Warning: cumvar.threshold will be set to")
+            print(paste("the first component of cum. var.:", 
+                  eig.table$cumvar[1]))
+        }
+        cumvar.threshold <- eig.table$cumvar[1]
+    }
+  
+    #S <- res.pca$x[,which(eig.decathlon2.active$cumvar <= 
+    #    cumvar.threshold)] %*% 
+    #t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
+    #    cumvar.threshold)])
+  
+    S <- res.pca$x[,which(eig.table$cumvar <= ct)]
+  
+    ### And add the center (and re-scale) back to data ###
+    #if(scale){
+    #   S <- scale(S, center = FALSE , scale=1/res.pca$scale)
+    #}
+    #if(center){
+    #  S <- scale(S, center = -1 * res.pca$center, scale=FALSE)
+    #}
+  
+    indexes <- which(eig.table$cumvar <= ct)
+    
+    return(list(S = S, indexes=indexes))
+}
+
+
+preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
+  
+    ct <- cumvar.threshold/100
+  
+    if(scaleData){
+        data.scaled <- scale(data, center = TRUE)
+    } else {
+        data.scaled <- data
+    }
+  
+    n.snp <- dim(data.scaled)[2]
+    npred <- round(n.snp*ct)
+    numcomp <- ifelse(n.snp < 10, n.snp, npred)
+  
+    if(out.type == "D") { # PLS-DA
+        model <- try(opls(x = data.scaled, y=as.factor(pheno), 
+                          predI=numcomp, 
+                          plotL = FALSE, 
+                          log10L=FALSE, 
+                          algoC = "nipals"), 
+                          silent = TRUE)
+    
+        if(inherits(model, "try-error")) {
+            for(i in 2:6) {
+                ct <- ct/i
+                npred <- round(dim(data.scaled)[2]*ct)
+        
+                model <- opls(x = data.scaled, y=as.factor(pheno), 
+                              predI=npred, 
+                              plotL = FALSE, 
+                              log10L=FALSE, 
+                              algoC = "nipals", 
+                              silent = TRUE)
+        
+                if(!inherits(model, "try-error")) {
+                    break
+                }
+            }
+        }
+    } else if(out.type == "C") { # PLS
+        model <- opls(x = data.scaled, y=pheno, 
+                      predI=numcomp, 
+                      plotL = FALSE, 
+                      log10L=FALSE, 
+                      algoC = "nipals", 
+                      silent = TRUE)
+    
+        if(inherits(model, "try-error")) {
+            cumvar.threshold <- cumvar.threshold/2
+            npred <- round(dim(data.scaled)[2]*ct)
+            model <- opls(x = data.scaled, y=as.factor(pheno), 
+                          predI=npred, plotL = FALSE, 
+                          log10L=FALSE, algoC = "nipals", 
+                          silent = TRUE)
+        }
+    }
+  
+    S <- model@scoreMN
+    
+    return(list(S = S))
+}
+
+preprocessLASSO <- function(data, pheno, reg.family) {
+    #### LASSO ####
+    tryCatch({
+        fit <- cv.glmnet(x=as.matrix(data),
+                         alpha=1, # LASSO
+                         y=as.factor(pheno), 
+                         family=reg.family)
+    }, error=function(e) {
+        print(e)
+    })
+    
+    return(list(fit=fit))
+}
+
+preprocessRidge <- function(data, pheno, reg.family) {
+    tryCatch({
+        fit <- cv.glmnet(x=as.matrix(data),
+                         alpha=0, # Ridge
+                         y=as.factor(pheno), 
+                         family=reg.family)
+    }, error=function(e) {
+        print(e)
+    })
+  
+    return(list(fit=fit))
+}
