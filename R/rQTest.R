@@ -289,30 +289,30 @@ setGeneric("results", function(obj) standardGeneric("results"))
 #' results(res)
 #' @rdname rQTest-results
 #' @export
-setMethod("results", "rqt", function(self) {
-  return(slot(self, "results"))
+setMethod("results", "rqt", function(obj) {
+  return(slot(obj, "results"))
 })
 
-setGeneric("results<-", function(self, value) standardGeneric("results<-"))
+setGeneric("results<-", function(obj, value) standardGeneric("results<-"))
 setReplaceMethod("results", "rqt", 
-                 function(self, value) {
-                     slot(self, "results") <- value
-                     self
+                 function(obj, value) {
+                     slot(obj, "results") <- value
+                     obj
                  }
 )
 
-setMethod("show", "rqt", function(x) {
+setMethod("show", "rqt", function(object) {
   cat("Phenotype:\n")
-  print(head(phenotype(x)))
+  print(head(phenotype(object)))
   cat("...\n\n")
   cat("Genotype:\n")
-  print(head(assays(genotype(x))[[1]]))
+  print(head(assays(genotype(object))[[1]]))
   cat("...\n\n")
   cat("Covariates:\n")
-  print(head(covariates(x)))
+  print(head(covariates(object)))
   cat("\n\n")
   cat("Results:\n\n")
-  print(results(x))
+  print(results(object))
 })
 
 setMethod("summary", "rqt", function(object) {
