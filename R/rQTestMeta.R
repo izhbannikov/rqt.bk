@@ -101,48 +101,48 @@ setMethod("rQTestMeta", signature="list",
         }
             
         ### Combining p-values via some comb.test ###
+        comb.res <- list()
         switch(comb.test, 
                wilkinson={
                    # Wilkinson
-                   final.pvalue <- wilkinsonp(pv)$p
+                   comb.res <- wilkinsonp(pv)
                },
                fisher={
                    # Fisher
                    chi.comb <- sum(-2*log(pv[!is.na(pv)]))
                    df <- 2*length(pv)
-                   final.pvalue <- 1-pchisq(q=chi.comb, df=df)
+                   comb.res[["p"]] <- 1-pchisq(q=chi.comb, df=df)
                },
                minimump={
                    # minimump
-                   final.pvalue <- minimump(pv)$p
+                   comb.res <- minimump(pv)
                },
                sump={
                    # sump
-                   final.pvalue <- sump(pv)$p
+                   comb.res <- sump(pv)
                },
                sumlog={
                    # sumlog
-                   final.pvalue <- sumlog(pv)$p
+                   comb.res <- sumlog(pv)
                },
                meanp={
-                   final.pvalue <- meanp(pv)$p
+                   comb.res <- meanp(pv)
                },
                logitp={
-                   final.pvalue <- logitp(pv)$p
+                   comb.res <- logitp(pv)
                },
                votep={
-                   final.pvalue <- votep(pv)$p
+                   comb.res <- votep(pv)
                },
                {
                    # Wilkinson
-                   final.pvalue <- wilkinsonp(pv)$p
+                   comb.res <- wilkinsonp(pv)
                }
         )
         
-        
         #### End of combining p-values ####
         ### End of meta-analysis ###
-           
-        return(list(final.pvalue=final.pvalue, 
+        
+        return(list(final.pvalue=comb.res[["p"]], 
             pvalueList=pv))
 })
