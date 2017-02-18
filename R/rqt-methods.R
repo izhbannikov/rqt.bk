@@ -1,3 +1,8 @@
+setClass("rqt", slots=c(phenotype="vector", 
+                        genotype="SummarizedExperiment", 
+                        covariates="data.frame", 
+                        results="list"))
+
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
 #' @param obj Object of class \code{rqt}
@@ -72,7 +77,7 @@ setMethod("geneTest", signature = "rqt",
         
         # Start the tests #
         if(perm==0){
-            rslt0 <- QTest.one(phenotype=phenotype, 
+            rslt0 <- geneTestOne(phenotype=phenotype, 
                     genotype=genotype, 
                     covariates=covariates, 
                     STT=STT, 
@@ -87,7 +92,7 @@ setMethod("geneTest", signature = "rqt",
                                          function(k){
                     yP <- phenotype[sample(1:phenoSize, phenoSize, 
                                            replace=FALSE)]
-                    t.res <- QTest.one(phenotype=yP,genotype=genotype, 
+                    t.res <- geneTestOne(phenotype=yP,genotype=genotype, 
                                  covariates=covariates,STT=STT,
                                  weight=weight,
                                  cumvar.threshold=cumvar.threshold, 
@@ -125,7 +130,7 @@ setMethod("geneTest", signature = "rqt",
         } else {
             rsltPP <- do.call(rbind, lapply(1:perm, function(k){
                 yP <- phenotype[sample(1:phenoSize, phenoSize,replace=FALSE)]
-                t.res <- QTest.one(phenotype=yP,genotype=genotype, 
+                t.res <- geneTestOne(phenotype=yP,genotype=genotype, 
                     covariates=covariates,STT=STT,
                     weight=weight,
                     cumvar.threshold=cumvar.threshold, 
@@ -139,7 +144,7 @@ setMethod("geneTest", signature = "rqt",
                 pv <- t.res$p.value
             }))
               
-            rslt0 <- as.numeric(QTest.one(phenotype=phenotype, 
+            rslt0 <- as.numeric(geneTestOne(phenotype=phenotype, 
                 genotype=genotype, 
                 covariates=covariates, 
                 STT=STT, weight=weight, 

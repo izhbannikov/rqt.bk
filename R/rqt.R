@@ -50,7 +50,7 @@ setClass("rqt", slots=c(phenotype="vector",
 #' geno.obj <- SummarizedExperiment(geno)
 #' obj <- rqt(phenotype=pheno, genotype=geno.obj)
 #' print(obj)
-#' @rdname rqt-class
+#' @rdname rqt-methods
 #' @aliases rqt
 #' @export
 rqt <- function(phenotype=NULL, genotype=NULL, covariates=NULL, 
@@ -80,15 +80,6 @@ rqt <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
       results=results)
 }
 
-
-
-
-
-# A basic function for gene-level association test #
-# Some parts of this code were adopted from the 
-# supplementary code provided by Lee et al 2016 
-# "Gene-set association tests for next-generation sequencing data"
-#
 
 #' Get a given STT
 #' @param L TODO
@@ -122,7 +113,13 @@ get.reg.family <- function(out.type="D") {
     return(reg.family)
 }
 
-QTest.one <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
+# geneTestOne: the basic function for 
+# gene-level association test
+# Some parts of this code were adopted from the 
+# supplementary code provided by Lee et al 2016 
+# "Gene-set association tests for next-generation sequencing data"
+#
+geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
     cumvar.threshold=75, method="pca", out.type="D", 
     scaleData=FALSE, verbose=FALSE) {
     
