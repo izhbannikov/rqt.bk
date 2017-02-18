@@ -1,4 +1,6 @@
-New for version 0.99.76
+New for version 0.99.77
 ======================
 * Version released
+* rQTest replaced with geneTest
+* rQTestMeta replaced with geneTestMeta
 

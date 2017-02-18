@@ -1,3 +1,89 @@
+#'The rqt class
+#'
+#'This class stores parameters and results of the rtq algorithms
+#'
+#'@section Slots:
+#'    \describe{
+#'    \item{\code{phenotype}:}{Phenotype (a vector of length 
+#'        \code{N}, where \code{N} - number of individuals).}
+#'      \item{\code{genotype}:}{Genotype - an object of class 
+#'      \code{SummarizedExperiment}. Should contain one assay 
+#'      (matrix, \code{N} 
+#'      by \code{M} where \code{N} - number of individuals, \code{M}
+#'       - number of genetic variants).}
+#'      \item{\code{covariates}:}{data frame \code{N} 
+#'      by \code{K} where \code{N} - number of individuals, \code{K}
+#'       - number of covariates)}
+#'      \item{\code{results}:}{A list of two: 
+#'      test statistics (\code{Q1}, \code{Q2}, \code{Q3}), 
+#'      p-values (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})}
+#'}
+#'@rdname rqt-class
+setClass("rqt", slots=c(phenotype="vector", 
+                        genotype="SummarizedExperiment", 
+                        covariates="data.frame", 
+                        results="list"))
+
+#' The rqt class constructor
+#' 
+#' This function generates rqt class objects
+#' @param  phenotype Phenotype (a vector of length 
+#'        \code{N}, where \code{N} - number of individuals).
+#' @param genotype Genotype - an object of class 
+#'      \code{SummarizedExperiment}. Should contain one assay 
+#'      (matrix, \code{N} 
+#'      by \code{M} where \code{N} - number of individuals, \code{M}
+#'       - number of genetic variants).
+#' @param covariates Covariates, a data frame \code{N} 
+#'      by \code{K} where \code{N} - number of individuals, \code{K}
+#'       - number of covariates
+#' @param results A list of two: test statistics: 
+#' (\code{Q1}, \code{Q2}, \code{Q3}), 
+#' p-values: (\code{p1.Q1}, \code{p2.Q2}, \code{p3.Q3})
+#' @return Object of class \code{rqt}
+#' @examples
+#' data <- data.matrix(read.table(system.file("extdata/test.bin1.dat",
+#' package="rqt"), header=TRUE))
+#' pheno <- data[,1]
+#' geno <- data[, 2:dim(data)[2]]
+#' colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#' geno.obj <- SummarizedExperiment(geno)
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
+#' print(obj)
+#' @rdname rqt-class
+#' @aliases rqt
+#' @export
+rqt <- function(phenotype=NULL, genotype=NULL, covariates=NULL, 
+                results=NULL) {
+  
+  if(is.null(phenotype)) {
+    phenotype <- c()
+  }
+  
+  if(is.null(genotype)) {
+    genotype <- matrix()
+    colnames(genotype) <- "geno"
+    genotype <- SummarizedExperiment(genotype)
+  } 
+  
+  if(is.null(covariates)) {
+    covariates <- data.frame()
+  }
+  
+  if(is.null(results)) {
+    results <- list()
+  }
+  
+  new("rqt", phenotype=phenotype, 
+      genotype=genotype, 
+      covariates=covariates, 
+      results=results)
+}
+
+
+
+
+
 # A basic function for gene-level association test #
 # Some parts of this code were adopted from the 
 # supplementary code provided by Lee et al 2016 

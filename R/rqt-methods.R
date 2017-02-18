@@ -1,12 +1,12 @@
 #' This function performs a gene-level test based on combined effect sizes.
 #' 
-#' @param obj Object of class rqt
+#' @param obj Object of class \code{rqt}
 #' @param ... Additional parameters to pass to the function
 #' @return Updated rqt object with result slot
 #' @export
 #' @docType methods
-#' @rdname rQTest-methods
-setGeneric("rQTest", function(obj, ...) standardGeneric("rQTest"))
+#' @rdname rqt-geneTest
+setGeneric("geneTest", function(obj, ...) standardGeneric("geneTest"))
 
 #' This function performs a gene-level test based on combined effect sizes.
 #' @param perm Integer indicating the number of permutations 
@@ -36,12 +36,12 @@ setGeneric("rQTest", function(obj, ...) standardGeneric("rQTest"))
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
 #' geno.obj <- SummarizedExperiment(geno)
-#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
-#' res <- rQTest(obj, method="pca", out.type = "D")
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
+#' res <- geneTest(obj, method="pca", out.type = "D")
 #' print(res)
-#' @rdname rQTest-methods
+#' @rdname rqt-geneTest
 #' @export
-setMethod("rQTest", signature="rqt", 
+setMethod("geneTest", signature = "rqt", 
     function(obj, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=75, out.type="D", 
             method="pca", scaleData=FALSE, asym.pval=FALSE,
@@ -167,10 +167,160 @@ setMethod("rQTest", signature="rqt",
         return(obj)
 })
 
+#' This function performs a gene-level meta-analysis based on 
+#' combined effect sizes.
+#' 
+#' @param objects List of objects of class rqt
+#' @param ... Additional parameters to pass to the function
+#' @return A list of two: (i) final.pvalue - 
+#' a final p-value across all studies; 
+#' (ii) pvalueList - p-values for each study; 
+#' @export
+#' @docType methods
+#' @rdname rqt-geneTestMeta
+setGeneric("geneTestMeta", function(objects, ...) standardGeneric("geneTestMeta"))
+
+#' This function performs a gene-level test based on combined effect sizes.
+#' 
+#' @param perm Integer indicating the number of permutations 
+#' to compute p-values. Default: 0.
+#' @param STT Numeric indicating soft truncation threshold (STT) 
+#' to convert to gamma parameter (must be <= 0.4). 
+#' Needed for an optimal parameter a in Gamma-distribution. Default: 0.2. 
+#' See, for example, Fridley, et al 2013: "Soft truncation thresholding 
+#' for gene set analysis of RNA-seq data: Application to a vaccine study".
+#' @param weight Logical value. 
+#' Indicates using weights (see Lee et al 2016). 
+#' Default: FALSE.
+#' @param cumvar.threshold Numeric value indicating the explained 
+#' variance threshold for PCA-like methods. Default: 90.
+#' @param method Method used to reduce multicollinerity and account 
+#' for LD. Default: PCA.
+#' @param out.type Character, indicating a type of phenotype. 
+#' Possible values: D (dichotomous or binary), 
+#' C (continous or qualitative).
+#' @param scaleData A logic parameter (TRUE/FALSE) indicating 
+#' scaling of the genotype dataset.
+#' @param asym.pval Indicates Monte Carlo approximation for p-values. 
+#' Default: FALSE.
+#' @param comb.test Statistical test for combining p-values.
+#' @param verbose Indicates verbosing output. Default: FALSE.
+#' @rdname rqt-geneTestMeta
+#' @examples
+#'data1 <- data.matrix(read.table(system.file("extdata/phengen2.dat",
+#'                                            package="rqt"), skip=1))
+#'pheno <- data1[,1]
+#'geno <- data1[, 2:dim(data1)[2]]
+#'colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#'geno.obj <- SummarizedExperiment(geno)
+#'obj1 <- rqt(phenotype=pheno, genotype=geno.obj)
+#'
+#'data2 <- data.matrix(read.table(system.file("extdata/phengen3.dat",
+#'                                            package="rqt"), skip=1))
+#'pheno <- data2[,1]
+#'geno <- data2[, 2:dim(data2)[2]]
+#'colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#'geno.obj <- SummarizedExperiment(geno)
+#'obj2 <- rqt(phenotype=pheno, genotype=geno.obj)
+#'
+#'data3 <- data.matrix(read.table(system.file("extdata/phengen.dat",
+#'                                            package="rqt"), skip=1))
+#'pheno <- data3[,1]
+#'geno <- data3[, 2:dim(data3)[2]]
+#'colnames(geno) <- paste(seq(1, dim(geno)[2]))
+#'geno.obj <- SummarizedExperiment(geno)
+#'obj3 <- rqt(phenotype=pheno, genotype=geno.obj)
+#'
+#'res.meta <- geneTestMeta(list(obj1, obj2, obj3))
+#'print(res.meta)
+setMethod("geneTestMeta", signature="list", 
+          function(objects, perm=0, STT=0.2, weight=FALSE, 
+                   cumvar.threshold=75, out.type="D", 
+                   method="pca", scaleData=FALSE, asym.pval=FALSE,
+                   comb.test="wilkinson",
+                   verbose=FALSE) {
+            
+            if(cumvar.threshold > 100) {
+              warning("Warning: cumvar.threshold > 100 
+                      and will be set to 100.")
+              cumvar.threshold <- 100
+            }
+            if(class(objects) != "list") {
+              stop("objects must be a list of rqt class objects!")
+            }
+            ### Meta-analysis ###
+            numStudies <- length(objects)
+            pv <- rep(NA_real_, numStudies) 
+            for(i in 1:numStudies) {
+              res <- geneTest(objects[[i]],
+                              STT=STT, 
+                              weight=weight, 
+                              cumvar.threshold=cumvar.threshold, 
+                              out.type=out.type, 
+                              method=method, 
+                              perm = perm, 
+                              scaleData=scaleData,
+                              asym.pval=asym.pval,
+                              verbose=verbose)
+              
+              if(length(results(res)) != 0) {
+                pv[i] <- results(res)$p.value$p.Q3
+              }
+              
+            }
+            
+            ### Combining p-values via some comb.test ###
+            comb.res <- list()
+            switch(comb.test, 
+                   wilkinson={
+                     # Wilkinson
+                     comb.res <- wilkinsonp(pv)
+                   },
+                   fisher={
+                     # Fisher
+                     chi.comb <- sum(-2*log(pv[!is.na(pv)]))
+                     df <- 2*length(pv)
+                     comb.res[["p"]] <- 1-pchisq(q=chi.comb, df=df)
+                   },
+                   minimump={
+                     # minimump
+                     comb.res <- minimump(pv)
+                   },
+                   sump={
+                     # sump
+                     comb.res <- sump(pv)
+                   },
+                   sumlog={
+                     # sumlog
+                     comb.res <- sumlog(pv)
+                   },
+                   meanp={
+                     comb.res <- meanp(pv)
+                   },
+                   logitp={
+                     comb.res <- logitp(pv)
+                   },
+                   votep={
+                     comb.res <- votep(pv)
+                   },
+                   {
+                     # Wilkinson
+                     comb.res <- wilkinsonp(pv)
+                   }
+            )
+            
+            #### End of combining p-values ####
+            ### End of meta-analysis ###
+            
+            return(list(final.pvalue=comb.res[["p"]], 
+                        pvalueList=pv))
+          })
+
+
 #' Common methods for class rqt
 #' 
-#' @name rQTest-general
-#' @rdname rQTest-general
+#' @name rqt-general
+#' @rdname rqt-general
 #'
 #' @aliases show.rqt
 #' @aliases summary.rqt
@@ -187,7 +337,7 @@ NULL
 
 #' This function performs an access to phenotype
 #' 
-#' @rdname rQTest-phenotype
+#' @rdname rqt-phenotype
 #' @export
 setGeneric("phenotype", function(obj) standardGeneric("phenotype"))
 
@@ -203,18 +353,18 @@ setGeneric("phenotype", function(obj) standardGeneric("phenotype"))
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
 #' geno.obj <- SummarizedExperiment(geno)
-#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
 #' phenotype(obj)
-#' @rdname rQTest-phenotype
+#' @rdname rqt-phenotype
 #' @export
-setMethod("phenotype", "rqt", function(obj) {
+setMethod("phenotype", signature(obj = "rqt"), function(obj) {
   return(slot(obj, "phenotype"))
 })
 
 
 #' This function performs an access to genotype.
 #' 
-#' @rdname rQTest-genotype
+#' @rdname rqt-genotype
 #' @export
 setGeneric("genotype", function(obj) standardGeneric("genotype"))
 
@@ -230,18 +380,18 @@ setGeneric("genotype", function(obj) standardGeneric("genotype"))
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
 #' geno.obj <- SummarizedExperiment(geno)
-#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
 #' genotype(obj)
-#' @rdname rQTest-genotype
+#' @rdname rqt-genotype
 #' @export
-setMethod("genotype", "rqt", function(obj) {
+setMethod("genotype", signature(obj = "rqt"), function(obj) {
   return(slot(obj, "genotype"))
 })
 
 
 #' This function performs an access to covariates
 #' 
-#' @rdname rQTest-covariates
+#' @rdname rqt-covariates
 #' @export
 setGeneric("covariates", function(obj) standardGeneric("covariates"))
 
@@ -257,17 +407,17 @@ setGeneric("covariates", function(obj) standardGeneric("covariates"))
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
 #' geno.obj <- SummarizedExperiment(geno)
-#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
 #' covariates(obj)
-#' @rdname rQTest-covariates
+#' @rdname rqt-covariates
 #' @export
-setMethod("covariates", "rqt", function(obj) {
+setMethod("covariates", signature(obj = "rqt"), function(obj) {
   return(slot(obj, "covariates"))
 })
 
 #' This function performs an access to covariates
 #' 
-#' @rdname rQTest-results
+#' @rdname rqt-results
 #' @export
 setGeneric("results", function(obj) standardGeneric("results"))
 
@@ -284,24 +434,24 @@ setGeneric("results", function(obj) standardGeneric("results"))
 #' geno <- data[, 2:dim(data)[2]]
 #' colnames(geno) <- paste(seq(1, dim(geno)[2]))
 #' geno.obj <- SummarizedExperiment(geno)
-#' obj <- rqtClass(phenotype=pheno, genotype=geno.obj)
-#' res <- rQTest(obj, method="pca", out.type = "D")
+#' obj <- rqt(phenotype=pheno, genotype=geno.obj)
+#' res <- geneTest(obj, method="pca", out.type = "D")
 #' results(res)
-#' @rdname rQTest-results
+#' @rdname rqt-results
 #' @export
-setMethod("results", "rqt", function(obj) {
+setMethod("results", signature(obj = "rqt"), function(obj) {
   return(slot(obj, "results"))
 })
 
 setGeneric("results<-", function(obj, value) standardGeneric("results<-"))
-setReplaceMethod("results", "rqt", 
+setReplaceMethod("results", signature(obj = "rqt"), 
                  function(obj, value) {
                      slot(obj, "results") <- value
                      obj
                  }
 )
 
-setMethod("show", "rqt", function(object) {
+setMethod("show", signature(object = "rqt"), function(object) {
   cat("Phenotype:\n")
   print(head(phenotype(object)))
   cat("...\n\n")
@@ -315,7 +465,7 @@ setMethod("show", "rqt", function(object) {
   print(results(object))
 })
 
-setMethod("summary", "rqt", function(object) {
+setMethod("summary", signature(object = "rqt"), function(object) {
   cat("Phenotype:\n")
   print(summary(phenotype(object)))
   cat("...\n\n")
