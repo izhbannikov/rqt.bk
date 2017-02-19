@@ -1,4 +1,3 @@
-#' @exportClass rqt
 #' @importFrom methods new slot slot<-
 #' @importFrom stats binomial cor glm
 #' @importFrom stats pchisq pgamma prcomp 
