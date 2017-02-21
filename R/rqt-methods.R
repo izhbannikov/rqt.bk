@@ -143,8 +143,8 @@ setMethod("geneTest", signature = "rqt",
                                  scaleData = scaleData)
                     if(is.na(t.res)) {
                         t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                               data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
-                        names(t.res) <- c("Qstatistic", "p.value")
+                               data.frame(pVal1=1,pVal2=1,pVal3=1) )
+                        names(t.res) <- c("Qstatistic", "pValue")
                     }
                     tt.res <- t.res$Qstatistic
                 }))
@@ -155,17 +155,17 @@ setMethod("geneTest", signature = "rqt",
                             Q1=rslt0$Qstatistic$Q1,
                             Q2=rslt0$Qstatistic$Q2, 
                             Q3=rslt0$Qstatistic$Q3),
-                           "p.value" = data.frame(
-                             p.Q1 = (length(rsltMC[,1][rsltMC[,1] >= 
+                           "pValue" = data.frame(
+                             pVal1 = (length(rsltMC[,1][rsltMC[,1] >= 
                                             rslt0$Qstatistic$Q1])+1)/nn,
-                             p.Q2 = (length(rsltMC[,2][rsltMC[,2] >= 
+                             pVal2 = (length(rsltMC[,2][rsltMC[,2] >= 
                                             rslt0$Qstatistic$Q2])+1)/nn,
-                             p.Q3 = (length(rsltMC[,3][rsltMC[,3] >= 
+                             pVal3 = (length(rsltMC[,3][rsltMC[,3] >= 
                                             rslt0$Qstatistic$Q3])+1)/nn),
                            beta = rslt0$beta)
                 } else {
                     rslt <- list( Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA),
-                                p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                                pValue=data.frame(pVal1=1,pVal2=1,pVal3=1) )
                 }
             } else {
                 rslt <- rslt0
@@ -181,10 +181,10 @@ setMethod("geneTest", signature = "rqt",
                     scaleData = scaleData, verbose=verbose)
                 if(is.na(t.res)) {
                     t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                        data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
-                    names(t.res) <- c("Qstatistic", "p.value")
+                        data.frame(pVal1=1,pVal2=1,pVal3=1) )
+                    names(t.res) <- c("Qstatistic", "pValue")
                 }
-                pv <- t.res$p.value
+                pv <- t.res$pValue
             }))
               
             rslt0 <- as.numeric(geneTestOne(phenotype=phenotype, 
@@ -197,17 +197,17 @@ setMethod("geneTest", signature = "rqt",
               
             if(!is.na(rslt0)) {
                 rslt <- list(Qstatistic= data.frame(Q1=NA, Q2=NA, Q3=NA),
-                    p.value = data.frame(
-                    p.Q1 = (length(rsltPP[,1][rsltPP[,1] < 
-                                              rslt0$p.value[1]])+1)/(perm+1),
-                    p.Q2 = (length(rsltPP[,2][rsltPP[,2] < 
-                                              rslt0$p.value[2]])+1)/(perm+1),
-                    p.Q3 = (length(rsltPP[,3][rsltPP[,3] < 
-                                              rslt0$p.value[3]])+1)/(perm+1)),
+                    pValue = data.frame(
+                    pVal1 = (length(rsltPP[,1][rsltPP[,1] < 
+                                              rslt0$pValue[1]])+1)/(perm+1),
+                    pVal2 = (length(rsltPP[,2][rsltPP[,2] < 
+                                              rslt0$pValue[2]])+1)/(perm+1),
+                    pVal3 = (length(rsltPP[,3][rsltPP[,3] < 
+                                              rslt0$pValue[3]])+1)/(perm+1)),
                     beta = rslt0$beta)
             } else {
                 rslt <- list( Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA),
-                            p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1) )
+                            pValue=data.frame(pVal1=1,pVal2=1,pVal3=1) )
             }
         }
         
@@ -304,7 +304,7 @@ setMethod("geneTestMeta", signature="list",
                               verbose=verbose)
               
               if(length(results(res)) != 0) {
-                pv[i] <- results(res)$p.value$p.Q3
+                pv[i] <- results(res)$pValue$pVal3
               }
               
             }
@@ -402,7 +402,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
   reg.family <- get.reg.family(out.type)
   
   rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-               p.value=data.frame(p.Q1=NA, p.Q2=NA, p.Q3=NA), 
+               pValue=data.frame(pVal1=NA, pVal2=NA, pVal3=NA), 
                beta=NA)
   
   res <- list()
@@ -539,7 +539,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           beta.pool.base <- t(alpha) %*% beta.multivar
           zScore.base <- beta.pool.base/sqrt(var.pool.base)
           QStat1 <- zScore.base^2
-          p.Q1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
+          pVal1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
         } else {
           if(!(method %in% c("pca", "pls"))) {
             maf.S <- apply(S,2, function(v)mean(na.omit(v))/2)
@@ -559,7 +559,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
           beta.pool <- t(alpha) %*% WS %*% beta.multivar
           z.score <- beta.pool/sqrt(var.pool)
           QStat1 <- z.score^2
-          p.Q1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
+          pVal1 <- pchisq(QStat1, df=1, lower.tail=FALSE)
         }
         
         #=================== QTest-2 ===================#
@@ -576,80 +576,80 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         a <- get.a(length(p2), STT)
         q2 <- 2*(qgamma(p2, a, 1, lower.tail=FALSE))
         QStat2 <- sum(q2)
-        p.Q2 <- pchisq(QStat2, df=2*a*length(q2), lower.tail=FALSE)
+        pVal2 <- pchisq(QStat2, df=2*a*length(q2), lower.tail=FALSE)
         
         #=================== QTest-3 ===================#
         
         if(weight==FALSE){
-          cov.beta <- c(t(alpha) %*% vMat)
-          b.star <- beta.multivar - beta.pool.base*cov.beta/var.pool.base[1]
-          vMat.star <- vMat - (cov.beta%*%t(cov.beta))/var.pool.base[1]
+            cov.beta <- c(t(alpha) %*% vMat)
+            b.star <- beta.multivar - beta.pool.base*cov.beta/var.pool.base[1]
+            vMat.star <- vMat - (cov.beta%*%t(cov.beta))/var.pool.base[1]
         } else {
-          w.vMat<-WS %*% vMat %*% WS
-          c(t(alpha)%*%w.vMat)->cov.beta
-          b.star <- WS %*% beta.multivar - beta.pool*cov.beta/var.pool[1]
-          vMat.star <- w.vMat - (cov.beta%*%t(cov.beta))/var.pool[1]
+            w.vMat<-WS %*% vMat %*% WS
+            cov.beta <- c(t(alpha)%*%w.vMat)
+            b.star <- WS %*% beta.multivar - beta.pool*cov.beta/var.pool[1]
+            vMat.star <- w.vMat - (cov.beta%*%t(cov.beta))/var.pool[1]
         }
         
         if(length(beta.multivar) !=1 ) {
-          QStat3.eigen <- eigen(vMat.star)
-          U3 <- QStat3.eigen$vectors
-          l3 <- QStat3.eigen$values
-          na.l3 <- which(l3/mean(l3) < 0.001)
+            QStat3.eigen <- eigen(vMat.star)
+            U3 <- QStat3.eigen$vectors
+            l3 <- QStat3.eigen$values
+            na.l3 <- which(l3/mean(l3) < 0.001)
           
-          if(length(na.l3) > 0) {
-            l3<-l3[-na.l3]
-            U3<-U3[,-na.l3]
-          }
+            if(length(na.l3) > 0) {
+                l3<-l3[-na.l3]
+                U3<-U3[,-na.l3]
+            }
           
           
           q2.proj <- (t(U3) %*% b.star)^2/l3
           p2.1 <- pchisq(q2.proj, df=1, lower.tail=FALSE)
           a <- get.a(length(p2.1),STT)
           QStat2.proj <- sum(2*qgamma(p2.1,a,1,lower.tail=FALSE))
-          p.Q2.proj <- pchisq(QStat2.proj,df=2*a*length(l3),
+          pVal2.proj <- pchisq(QStat2.proj,df=2*a*length(l3),
                               lower.tail=FALSE)
-          if(p.Q2.proj == 0) {
-            p.Q2.proj <- 1e-8
+          if(pVal2.proj == 0) {
+            pVal2.proj <- 1e-8
           }
-          QStat2.1 <- qchisq(p.Q2.proj,df=1,lower.tail=FALSE)
+          QStat2.1 <- qchisq(pVal2.proj,df=1,lower.tail=FALSE)
           
           pi0 <- seq(0,1,by=0.1)
-          p.Q3.can <- QStat3 <- rep(1,11)
-          p.Q3.can[1] <- p.Q2.proj
+          pVal3.can <- QStat3 <- rep(1,11)
+          pVal3.can[1] <- pVal2.proj
           QStat3[1] <- QStat2.1
-          p.Q3.can[11] <- p.Q1
+          pVal3.can[11] <- pVal1
           QStat3[11] <- QStat1
           
           for(h in 2:10){
             QStat3[h] <- pi0[h]*QStat1 + (1-pi0[h])*QStat2.1
-            p.Q3.can[h] <- davies(QStat3[h],
+            pVal3.can[h] <- davies(QStat3[h],
                                   c(pi0[h],(1-pi0[h])),
                                   c(1,1))$Qq
-            if(p.Q3.can[h] <= 0 | p.Q3.can[h] > 1) {
-              p.Q3.can[h] <- imhof(QStat3[h],
+            if(pVal3.can[h] <= 0 | pVal3.can[h] > 1) {
+              pVal3.can[h] <- imhof(QStat3[h],
                                    c(pi0[h],(1-pi0[h])),
                                    c(1,1))$Qq
             }
-            if(p.Q3.can[h]<=0|p.Q3.can[h]>1){
-              p.Q3.can[h]<-liu(QStat3[h],c(pi0[h],
+            if(pVal3.can[h]<=0|pVal3.can[h]>1){
+              pVal3.can[h]<-liu(QStat3[h],c(pi0[h],
                                            (1-pi0[h])),c(1,1))[1]
             }
           }
           
-          QStat3final <- QStat3[which.min(p.Q3.can)]
-          p.Q3 <- (sum(null.dist.Q3[null.dist.Q3[,1] > 
-                                      -log10(min(p.Q3.can)),2])+1) / 
+          QStat3final <- QStat3[which.min(pVal3.can)]
+          pVal3 <- (sum(null.dist.Q3[null.dist.Q3[,1] > 
+                                      -log10(min(pVal3.can)),2])+1) / 
             (sum(null.dist.Q3[,2])+1)
         }
         
         if(length(beta.multivar)==1){
-          p.Q3 <- p.Q1
+          pVal3 <- pVal1
           QStat3final <- QStat1
         }
         
         rslt <- list(Qstatistic=data.frame(Q1=QStat1, Q2=QStat2, Q3=QStat3final), 
-                     p.value=data.frame(p.Q1,p.Q2,p.Q3),
+                     pValue=data.frame(pVal1,pVal2,pVal3),
                      beta=ifelse(weight, beta.pool, beta.pool.base),
                      var.pooled=ifelse(weight, var.pool, var.pool.base),
                      mean.vif=mean.vif)
@@ -657,7 +657,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
       
       if(length(coef.multivar)==0) { 
         rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                     p.value=data.frame(p.Q1=1,p.Q2=1,p.Q3=1),
+                     pValue=data.frame(pVal1=1,pVal2=1,pVal3=1),
                      beta=NA, var.pooled=NA, mean.vif=NA)
         #rslt <- NA
       }
@@ -680,14 +680,14 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
       if(dim(reg.coef)[1] == 2) {
         rslt <- list(Qstatistic=data.frame(Q1=reg.coef[2,3], 
                                            Q2=reg.coef[2,3], Q3=reg.coef[2,3]), 
-                     p.value=data.frame(p.Q1=reg.coef[2,4],
-                                        p.Q2=reg.coef[2,4],p.Q3=reg.coef[2,4]),
+                     pValue=data.frame(pVal1=reg.coef[2,4],
+                                        pVal2=reg.coef[2,4],pVal3=reg.coef[2,4]),
                      beta=reg.coef[2,1],
                      var.pooled=reg.coef[2,2],
                      mean.vif=mean.vif)
       } else {
         rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                     p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                     pValue=data.frame(pVal1=NA,pVal2=NA,pVal3=NA), 
                      beta=NA, var.pooled=NA, mean.vif=NA)
         #rslt <- NA
       }
@@ -697,14 +697,14 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
   },error=function(e) {
     print(e)
     rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                 p.value=data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                 pValue=data.frame(pVal1=NA,pVal2=NA,pVal3=NA), 
                  beta=NA, var.pooled=NA, mean.vif=NA)
     #rslt <- NA
   }, finally=rslt)
   
-  if(is.na(rslt$p.value$p.Q3)) {
+  if(is.na(rslt$pValue$pVal3)) {
     rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                 p.value= data.frame(p.Q1=NA,p.Q2=NA,p.Q3=NA), 
+                 pValue= data.frame(pVal1=NA,pVal2=NA,pVal3=NA), 
                  beta=NA, var.pooled=NA, mean.vif=NA)
     #rslt <- NA
   }
