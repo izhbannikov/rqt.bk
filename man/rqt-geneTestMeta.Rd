@@ -94,4 +94,3 @@ obj3 <- rqt(phenotype=pheno, genotype=geno.obj)
 res.meta <- geneTestMeta(list(obj1, obj2, obj3))
 print(res.meta)
 }
-

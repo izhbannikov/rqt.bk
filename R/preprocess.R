@@ -1,6 +1,43 @@
+#' Importing required packages and functions
+#' 
+#' @importFrom methods new slot slot<-
+#' @importFrom stats binomial cor glm
+#' @importFrom stats pchisq pgamma prcomp 
+#' @importFrom stats qbeta qchisq qgamma
+#' @importFrom stats resid vcov var
+#' @importFrom stats na.exclude na.omit
+#' @importFrom stats prcomp
+#' @importFrom stats coef predict
+#' @importFrom utils head
+#' @importFrom glmnet cv.glmnet
+#' @importFrom ropls opls
+#' @importFrom Matrix Matrix
+#' @importFrom CompQuadForm davies imhof liu
+#' @importFrom metap wilkinsonp minimump sump
+#' @importFrom metap sumlog meanp logitp
+#' @importFrom metap votep wilkinsonp
+#' @importFrom car vif
+#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom SummarizedExperiment assay assays
+#' @importFrom RUnit checkEqualsNumeric
+#'
+NULL
+
 #### Dimensionality reduction methods ####
 
-
+#'ridge_se Returns variance-covariance matrix and 
+#'standard deviation from ridge and LASSO
+#'regression fit.
+#'
+#' @param xs Genotype matrix
+#' @param y Phenotype
+#' @param yhat Predicted output
+#' @param my_mod Ridge/LASSO fit
+#' @param verbose Indicates verbosing output.
+#' Default: FALSE.
+#' @return list(vcov, se). 
+#' vcov: variance-covariance matrix;
+#' se: standard deviation
 ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   # Note, you can't estimate an intercept here
   n <- dim(xs)[1]
@@ -22,6 +59,17 @@ ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   return(list(vcov=var_cov, se=se_bs))
 }
 
+#' vcov_ridge: returns variance-covariance 
+#' matrix and standard deviation
+#' for ridge/LASSO regression object
+#' @param x Genotype matrix
+#' @param y Phenotype
+#' @param rmod Ridge/LASSO regression object
+#' @param verbose Indicates verbosing output,
+#' Default: FALSE.
+#' @return list(vcov, se). 
+#' vcov: variance-covariance matrix;
+#' se: standard deviation
 vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
     # Predictions
     r_yhat   <- predict(rmod,newx=x,s='lambda.min')

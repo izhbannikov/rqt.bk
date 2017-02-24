@@ -1,6 +1,5 @@
-New for version 0.99.80
+New for version 0.99.81
 ======================
 * Version released
-* rQTest replaced with geneTest
-* rQTestMeta replaced with geneTestMeta
+* Merged files general.R and preprocess.R
 

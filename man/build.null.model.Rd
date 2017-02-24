@@ -23,4 +23,3 @@ A list of two: "S" - a dataframe with predictors and "fit"
 \description{
 Applies linear of logistic regregression to the data.
 }
-

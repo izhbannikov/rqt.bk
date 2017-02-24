@@ -38,4 +38,3 @@ A list of one: "S" - a data frame of predictor values.
 \description{
 Preprocess input data with Principal Component Analysis method (PCA)
 }
-

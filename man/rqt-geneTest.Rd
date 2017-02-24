@@ -66,4 +66,3 @@ obj <- rqt(phenotype=pheno, genotype=geno.obj)
 res <- geneTest(obj, method="pca", out.type = "D")
 print(res)
 }
-
