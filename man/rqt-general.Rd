@@ -12,4 +12,3 @@ This document lists a series of basic methods for the class rqt
 \details{
 Common methods for class rqt
 }
-

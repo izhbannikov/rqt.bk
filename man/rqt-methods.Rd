@@ -41,4 +41,3 @@ geno.obj <- SummarizedExperiment(geno)
 obj <- rqt(phenotype=pheno, genotype=geno.obj)
 print(obj)
 }
-
