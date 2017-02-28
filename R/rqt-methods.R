@@ -506,7 +506,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         } else {
           
           beta.multivar <- coef.multivar[coef.multivar != 0L]
-          vMat <- vcov_rigde(x=as.matrix(preddata), 
+          vMat <- vcov_ridge(x=as.matrix(preddata), 
                              y=phenotype, 
                              rmod=fit)$vcov[coef.multivar != 0L, coef.multivar != 0L]
           

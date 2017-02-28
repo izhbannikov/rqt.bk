@@ -70,7 +70,7 @@ ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
 #' @return list(vcov, se). 
 #' vcov: variance-covariance matrix;
 #' se: standard deviation
-vcov_rigde <- function(x, y,  rmod, verbose=FALSE) {
+vcov_ridge <- function(x, y,  rmod, verbose=FALSE) {
     # Predictions
     r_yhat   <- predict(rmod,newx=x,s='lambda.min')
     ro_yhat  <- predict(rmod,newx=x)
