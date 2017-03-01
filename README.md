@@ -19,7 +19,7 @@ The last version of rqt that is compatible with the current version of R (3.3),
 which can be downloaded using devtools:
 
 ```
-devtools::install_github("izhbannikov/rqt@develop", buildVignette=TRUE)
+devtools::install_github("izhbannikov/rqt@devel", buildVignette=TRUE)
 ```
 
 There are no significant changes to functionality (except R >=3.3).
