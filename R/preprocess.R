@@ -24,20 +24,8 @@
 NULL
 
 #### Dimensionality reduction methods ####
+NULL
 
-#'ridge_se Returns variance-covariance matrix and 
-#'standard deviation from ridge and LASSO
-#'regression fit.
-#'
-#' @param xs Genotype matrix
-#' @param y Phenotype
-#' @param yhat Predicted output
-#' @param my_mod Ridge/LASSO fit
-#' @param verbose Indicates verbosing output.
-#' Default: FALSE.
-#' @return list(vcov, se). 
-#' vcov: variance-covariance matrix;
-#' se: standard deviation
 ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   # Note, you can't estimate an intercept here
   n <- dim(xs)[1]
