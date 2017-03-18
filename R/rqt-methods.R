@@ -582,7 +582,7 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         
         if(weight==FALSE){
             cov.beta <- c(t(alpha) %*% vMat)
-            b.star <- beta.multivar - beta.pool.base*cov.beta/var.pool.base[1]
+            b.star <- beta.multivar - as.vector(beta.pool.base)*cov.beta/var.pool.base[1]
             vMat.star <- vMat - (cov.beta%*%t(cov.beta))/var.pool.base[1]
         } else {
             w.vMat<-WS %*% vMat %*% WS
