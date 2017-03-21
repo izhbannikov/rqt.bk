@@ -98,7 +98,7 @@ setMethod("geneTest", signature = "rqt",
             # Prepare test: load distribution table and prepare #
             # some other information #
         
-        avail.methods <- c("pca", "lasso", "ridge", "pls")
+        avail.methods <- c("pca", "lasso", "ridge", "pls", "none")
         
         if(!(method %in% avail.methods)) {
             stop(paste("Unknown method:", method))
