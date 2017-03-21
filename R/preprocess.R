@@ -23,8 +23,6 @@
 #'
 NULL
 
-#### Dimensionality reduction methods ####
-NULL
 
 ridge_se <- function(xs,y,yhat,my_mod, verbose=FALSE){
   # Note, you can't estimate an intercept here
@@ -198,7 +196,7 @@ preprocessPCA <- function(data, scaleData, cumvar.threshold, verbose) {
     #    cumvar.threshold)] %*% 
     #t(res.pca$rotation[,which(eig.decathlon2.active$cumvar <= 
     #    cumvar.threshold)])
-  
+    ct <- cumvar.threshold
     S <- res.pca$x[,which(eig.table$cumvar <= ct)]
   
     ### And add the center (and re-scale) back to data ###
@@ -230,11 +228,11 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
     numcomp <- ifelse(n.snp < 10, n.snp, npred)
   
     if(out.type == "D") { # PLS-DA
-        model <- try(opls(x = data.scaled, y=as.factor(pheno), 
+        model <- opls(x = data.scaled, y=as.factor(pheno), 
                           predI=numcomp, 
                           plotL = FALSE, 
                           log10L=FALSE, 
-                          algoC = "nipals"), 
+                          algoC = "nipals", 
                           silent = TRUE)
     
         if(inherits(model, "try-error")) {
@@ -272,9 +270,10 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
         }
     }
   
-    S <- model@scoreMN
+    S <- model@scoreMN %*% t(model@loadingMN)
+    Y <- model@uMN %*% t(model@cMN)
     
-    return(list(S = S))
+    return(list(S = S, Y = Y))
 }
 
 preprocessLASSO <- function(data, pheno, reg.family) {

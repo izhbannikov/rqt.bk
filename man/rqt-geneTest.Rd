@@ -37,7 +37,8 @@ Possible values: \code{D} (dichotomous or binary),
 \code{C} (continous or quantitative).}
 
 \item{method}{Method used to reduce multicollinerity and account for LD. 
-Default: PLS-DA.}
+Default: \code{pca}. 
+Another methods available: \code{lasso}, \code{ridge}, \code{pls}.}
 
 \item{scaleData}{A logic parameter (TRUE/FALSE) indicating scaling of 
 the genotype dataset.}

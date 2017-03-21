@@ -69,7 +69,8 @@ rqt <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
 #' @param cumvar.threshold Numeric value indicating 
 #' the explained variance threshold for PCA-like methods. Default: 75
 #' @param method Method used to reduce multicollinerity and account for LD. 
-#' Default: PLS-DA.
+#' Default: \code{pca}. 
+#' Another methods available: \code{lasso}, \code{ridge}, \code{pls}.
 #' @param out.type Character, indicating a type of phenotype. 
 #' Possible values: \code{D} (dichotomous or binary), 
 #' \code{C} (continous or quantitative).
@@ -96,6 +97,13 @@ setMethod("geneTest", signature = "rqt",
             verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
+        
+        avail.methods <- c("pca", "lasso", "ridge", "pls")
+        
+        if(!(method %in% avail.methods)) {
+            stop(paste("Unknown method:", method))
+        }
+      
         if(cumvar.threshold > 100) {
             warning("Warning: cumvar.threshold > 100 and will be set to 100.")
             cumvar.threshold <- 100
@@ -231,7 +239,8 @@ setMethod("geneTest", signature = "rqt",
 #' @param cumvar.threshold Numeric value indicating 
 #' the explained variance threshold for PCA-like methods. Default: 75
 #' @param method Method used to reduce multicollinerity and account for LD. 
-#' Default: PLS-DA.
+#' Default: \code{pca}. 
+#' Another methods available: \code{lasso}, \code{ridge}, \code{pls}.
 #' @param out.type Character, indicating a type of phenotype. 
 #' Possible values: \code{D} (dichotomous or binary), 
 #' \code{C} (continous or quantitative).
@@ -428,6 +437,10 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                           cumvar.threshold=cumvar.threshold, 
                           out.type=out.type,
                           verbose=verbose)
+        if(method == "pls") {
+            phenotype <- res[["Y"]]
+            reg.family <- get.reg.family("C")
+        }
       } else {
         res[["S"]] <- preddata
       }
