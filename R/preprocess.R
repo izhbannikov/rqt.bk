@@ -270,7 +270,7 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
         }
     }
   
-    S <- model@scoreMN %*% t(model@loadingMN)
+    S <- model@scoreMN #%*% t(model@loadingMN)
     Y <- model@uMN %*% t(model@cMN)
     
     return(list(S = S, Y = Y))
