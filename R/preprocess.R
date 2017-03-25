@@ -279,9 +279,12 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
 preprocessLASSO <- function(data, pheno, reg.family) {
     #### LASSO ####
     tryCatch({
+        if(reg.family == "binomial") {
+            pheno <- as.factor(pheno)
+        }
         fit <- cv.glmnet(x=as.matrix(data),
                          alpha=1, # LASSO
-                         y=as.factor(pheno), 
+                         y=pheno, 
                          family=reg.family)
     }, error=function(e) {
         print(e)
@@ -292,9 +295,12 @@ preprocessLASSO <- function(data, pheno, reg.family) {
 
 preprocessRidge <- function(data, pheno, reg.family) {
     tryCatch({
+        if(reg.family == "binomial") {
+            pheno <- as.factor(pheno)
+        }
         fit <- cv.glmnet(x=as.matrix(data),
                          alpha=0, # Ridge
-                         y=as.factor(pheno), 
+                         y=pheno, 
                          family=reg.family)
     }, error=function(e) {
         print(e)
