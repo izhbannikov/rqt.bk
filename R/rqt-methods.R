@@ -497,6 +497,13 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         
       } else {
         
+        res.preproc <- preprocess(data=preddata, 
+                          pheno=phenotype, method=method,
+                          reg.family=reg.family, 
+                          scaleData=scaleData, 
+                          cumvar.threshold=cumvar.threshold, 
+                          out.type=out.type,
+                          verbose=verbose)
         fit <- res.preproc[["fit"]]
         coef.multivar <- coef(fit)[-1]
         S <- preddata
@@ -506,7 +513,6 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                 are equal to 0. 
                 Trying simple multivariable 
                 regression instead.")
-          
           
             # Build null model #
             null.model <- build.null.model(y=phenotype, x=covariates,
@@ -534,16 +540,21 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         } else {
           
             beta.multivar <- coef.multivar[coef.multivar != 0L]
+            
             vMat <- vcov_ridge(x=as.matrix(preddata), 
                              y=phenotype, 
                              rmod=fit)$vcov[coef.multivar != 0L, coef.multivar != 0L]
-          
-            if(class(vMat)[1] == "dgeMatrix") {
-                se.multivar <- sqrt(diag(vMat))
-            } else {
-                se.multivar <- sqrt(vMat)
-            }
+            
+            #if(class(vMat)[1] == "dgeMatrix") {
+            #    se.multivar <- sqrt(diag(vMat))
+            #    print(se.multivar)
+            #} else {
+            #    se.multivar <- sqrt(vMat)
+            #}
+            
+            se.multivar <- sqrt(diag(vMat))
             vMat <- as.matrix(vMat)
+            
         }
         
         alpha <- as.matrix((1/(se.multivar^2)), ncol=1)
