@@ -497,13 +497,6 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         
       } else {
         
-        res.preproc <- preprocess(data=preddata, 
-                          pheno=phenotype, method=method,
-                          reg.family=reg.family, 
-                          scaleData=scaleData, 
-                          cumvar.threshold=cumvar.threshold, 
-                          out.type=out.type,
-                          verbose=verbose)
         fit <- res.preproc[["fit"]]
         coef.multivar <- coef(fit)[-1]
         S <- preddata
