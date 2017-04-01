@@ -503,33 +503,17 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
         
         if(sum(coef.multivar) == 0) {
             print("All coefficients in LASSO/ridge regression 
-                are equal to 0. 
-                Trying simple multivariable 
-                regression instead.")
+                are equal to 0. No relationships between predictors 
+                and outcome were discovered.
+                P-values will be set to 1.")
           
-            # Build null model #
-            null.model <- build.null.model(y=phenotype, x=covariates,
-                                         reg.family=reg.family)
-          
-            res <- simple.multvar.reg(null.model=null.model, Z=S)
-            S <- res[["S"]]
-            fit <- res[["fit"]]
-            if(dim(coef(summary(fit)))[2] >= 2) {
-                coef.multivar <- coef(summary(fit))[-1,1:2]
-            }
-          
-          
-            if(length(coef.multivar)!=2){
-                beta.multivar<-coef.multivar[,1]
-                se.multivar <- coef.multivar[,2]
-            }
-            if(length(coef.multivar)==2){
-                beta.multivar<-coef.multivar[1]
-                se.multivar <- coef.multivar[2]
-            }
-            vMat <- vcov(fit)[-1,-1]
+            rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+                       pValue= data.frame(pVal1=1,pVal2=1,pVal3=1), 
+                       beta=NA, var.pooled=NA, mean.vif=NA, 
+                       model=res.preproc[["model"]])
             
-            mean.vif <- mean(vif(fit), na.rm=TRUE)
+            return(rslt)
+            
         } else {
           
             beta.multivar <- coef.multivar[coef.multivar != 0L]
@@ -544,9 +528,9 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
             #} else {
             #    se.multivar <- sqrt(vMat)
             #}
-            
+            nl <- length(which(coef.multivar != 0L))
+            vMat <- as.matrix(vMat, nrow=nl, ncol=nl, byrow=TRUE)
             se.multivar <- sqrt(diag(vMat))
-            vMat <- as.matrix(vMat)
             
         }
         
@@ -730,6 +714,8 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
     }
   },error=function(e) {
     print(e)
+    print(alpha)
+    print(vMat)
     rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
                  pValue=data.frame(pVal1=NA,pVal2=NA,pVal3=NA), 
                  beta=NA, var.pooled=NA, mean.vif=NA, 
