@@ -20,6 +20,7 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom SummarizedExperiment assay assays
 #' @importFrom RUnit checkEqualsNumeric
+#' @importFrom pls plsr cppls explvar selectNcomp
 #'
 NULL
 
@@ -215,7 +216,7 @@ preprocessPCA <- function(data, scaleData, cumvar.threshold, verbose) {
 
 preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
   
-    ct <- cumvar.threshold/100
+    
   
     if(scaleData){
         data.scaled <- scale(data, center = TRUE)
@@ -224,54 +225,108 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
     }
   
     n.snp <- dim(data.scaled)[2]
-    npred <- round(n.snp*ct)
-    numcomp <- ifelse(n.snp < 10, n.snp, npred)
+    
+    #if(!is.null(cumvar.threshold)) {
+    #    ct <- cumvar.threshold/100
+    #    npred <- round(n.snp*ct)
+    #    numcomp <- ifelse(n.snp < 10, n.snp, npred)
+    #}
   
     if(out.type == "D") { # PLS-DA
-        model <- opls(x = data.scaled, y=as.factor(pheno), 
-                          predI=numcomp, 
-                          plotL = FALSE, 
-                          log10L=FALSE, 
-                          algoC = "nipals", 
-                          silent = TRUE)
-    
-        if(inherits(model, "try-error")) {
-            for(i in 2:6) {
-                ct <- ct/i
-                npred <- round(dim(data.scaled)[2]*ct)
+        stop("Sorry, PLS for dichotomous trait is not yet supported.")
+        ## Uncomment the code below if you want to use ropls and PLS-DA ##
+        #model <- opls(x = data.scaled, y=as.factor(pheno), 
+        #                  predI=numcomp, 
+        #                  plotL = FALSE, 
+        #                  log10L=FALSE, 
+        #                  algoC = "nipals", 
+        #                  silent = TRUE)
+        #
+        #if(inherits(model, "try-error")) {
+        #    for(i in 2:6) {
+        #        ct <- ct/i
+        #        npred <- round(dim(data.scaled)[2]*ct)
+        #
+        #        model <- opls(x = data.scaled, y=as.factor(pheno), 
+        #                      predI=npred, 
+        #                      plotL = FALSE, 
+        #                      log10L=FALSE, 
+        #                      algoC = "nipals", 
+        #                      silent = TRUE)
+        #
+        #        if(!inherits(model, "try-error")) {
+        #            break
+        #        }
+        #    }
+        #}
         
-                model <- opls(x = data.scaled, y=as.factor(pheno), 
-                              predI=npred, 
-                              plotL = FALSE, 
-                              log10L=FALSE, 
-                              algoC = "nipals", 
-                              silent = TRUE)
+        #S <- model@scoreMN #%*% t(model@loadingMN)
+        #Y <- model@uMN %*% t(model@cMN)
         
-                if(!inherits(model, "try-error")) {
-                    break
-                }
-            }
-        }
     } else if(out.type == "C") { # PLS
-        model <- opls(x = data.scaled, y=pheno, 
-                      predI=numcomp, 
-                      plotL = FALSE, 
-                      log10L=FALSE, 
-                      algoC = "nipals", 
-                      silent = TRUE)
+        #model <- opls(x = data.scaled, y=pheno, 
+        #              predI=numcomp, 
+        #              plotL = FALSE, 
+        #              log10L=FALSE, 
+        #              algoC = "nipals", 
+        #              silent = TRUE)
     
-        if(inherits(model, "try-error")) {
-            cumvar.threshold <- cumvar.threshold/2
-            npred <- round(dim(data.scaled)[2]*ct)
-            model <- opls(x = data.scaled, y=as.factor(pheno), 
-                          predI=npred, plotL = FALSE, 
-                          log10L=FALSE, algoC = "nipals", 
-                          silent = TRUE)
+        #if(inherits(model, "try-error")) {
+        #    cumvar.threshold <- cumvar.threshold/2
+        #    npred <- round(dim(data.scaled)[2]*ct)
+        #    model <- opls(x = data.scaled, y=as.factor(pheno), 
+        #                  predI=npred, plotL = FALSE, 
+        #                  log10L=FALSE, algoC = "nipals", 
+        #                  silent = TRUE)
+        #}
+        
+        dd <- cbind(pheno, data.scaled)
+        temp.model <- plsr(pheno ~ ., data=dd, validation = "CV")
+        if(is.null(cumvar.threshold)) {
+            numcomp <- selectNcomp(temp.model)
+            if(numcomp == 0) numcomp <- 1
+        } else {
+            ct <- cumvar.threshold/100
+            numcomp <- round(n.snp*ct)
+            
+            #bbb <- sort(explvar(temp.model), decreasing = TRUE)
+            #tt <- bbb[1]
+            #if(tt >= cumvar.threshold) {
+            #    numcomp = 1
+            #} else {
+            #    for(i in 2:length(bbb)) {
+            #        tt <- tt + bbb[i]
+            #        if(tt >= cumvar.threshold) {
+            #            numcomp <- i
+            #            break
+            #        }
+            #    }
+            #    numcomp <- i
+            #}
+            
         }
+        
+        if(numcomp == 1) numcomp <- 2
+        
+        model <- plsr(pheno ~ ., numcomp, data=dd, validation = "none")
+        
+        # X
+        nrow.scores <- dim(model[["scores"]])[1]
+        ncol.scores <- dim(model[["scores"]])[2]
+        nrow.loadings <- dim(model[["loadings"]])[1]
+        ncol.loadings <- dim(model[["loadings"]])[2]
+        # Y
+        nrow.yscores <- dim(model[["Yscores"]])[1]
+        ncol.yscores <- dim(model[["Yscores"]])[2]
+        nrow.yloadings <- dim(model[["Yloadings"]])[1]
+        ncol.yloadings <- dim(model[["Yloadings"]])[2]
+        # , byrow = TRUE
+        S <- matrix(model[["scores"]], nrow=nrow.scores, ncol=ncol.scores) #%*% t(matrix(model[["loadings"]], nrow=nrow.loadings, ncol=ncol.loadings))
+        Y <- matrix(model[["Yscores"]], nrow=nrow.yscores, ncol=ncol.yscores) %*% t(matrix(model[["Yloadings"]], nrow=nrow.yloadings, ncol=ncol.yloadings))
+        
     }
   
-    S <- model@scoreMN #%*% t(model@loadingMN)
-    Y <- model@uMN %*% t(model@cMN)
+    
     
     return(list(S = S, Y = Y, model=model))
 }
