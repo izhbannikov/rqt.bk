@@ -103,17 +103,18 @@ setMethod("geneTest", signature = "rqt",
         if(!(method %in% avail.methods)) {
             stop(paste("Unknown method:", method))
         }
-      
-        if(cumvar.threshold > 100) {
-            warning("Warning: cumvar.threshold > 100 and will be set to 100.")
-            cumvar.threshold <- 100
-        }
         
-        if(cumvar.threshold <= 0) {
-            warning("Warning: cumvar.threshold <= 0 and will be set to 1.")
-            cumvar.threshold <- 1
-        }
+        if(!is.null(cumvar.threshold)) {
+            if(cumvar.threshold > 100) {
+                warning("Warning: cumvar.threshold > 100 and will be set to 100.")
+                cumvar.threshold <- 100
+            }
         
+            if(cumvar.threshold <= 0) {
+                warning("Warning: cumvar.threshold <= 0 and will be set to 1.")
+                cumvar.threshold <- 1
+            }
+        }
         
       
         # Load data #
