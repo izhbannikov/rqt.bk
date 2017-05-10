@@ -77,6 +77,8 @@ rqt <- function(phenotype=NULL, genotype=NULL, covariates=NULL,
 #' @param scaleData A logic parameter (TRUE/FALSE) indicating scaling of 
 #' the genotype dataset.
 #' @param asym.pval Indicates Monte Carlo approximation for p-values. Default: FALSE.
+#' @param penalty A value of \code{penalty} parameter for LASSO/ridge regression.
+#' Default: 0.001
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @rdname rqt-geneTest
 #' @export
@@ -94,6 +96,7 @@ setMethod("geneTest", signature = "rqt",
     function(obj, perm=0, STT=0.2, weight=FALSE, 
             cumvar.threshold=75, out.type="D", 
             method="pca", scaleData=FALSE, asym.pval=FALSE,
+            penalty=0.001,
             verbose=FALSE) {
             # Prepare test: load distribution table and prepare #
             # some other information #
@@ -143,7 +146,7 @@ setMethod("geneTest", signature = "rqt",
                     weight=weight,
                     cumvar.threshold=cumvar.threshold, 
                     out.type=out.type, method=method, 
-                    scaleData = scaleData, verbose=verbose)
+                    scaleData = scaleData, penalty=penalty, verbose=verbose)
             
             if(asym.pval) {
                 rsltMC <- do.call(rbind, 
@@ -156,7 +159,8 @@ setMethod("geneTest", signature = "rqt",
                                  weight=weight,
                                  cumvar.threshold=cumvar.threshold, 
                                  out.type=out.type, method=method, 
-                                 scaleData = scaleData)
+                                 scaleData = scaleData,
+                                 penalty=penalty)
                     if(is.na(t.res)) {
                         t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
                                data.frame(pVal1=1,pVal2=1,pVal3=1) )
@@ -197,7 +201,7 @@ setMethod("geneTest", signature = "rqt",
                     weight=weight,
                     cumvar.threshold=cumvar.threshold, 
                     out.type=out.type, method=method, 
-                    scaleData = scaleData, verbose=verbose)
+                    scaleData = scaleData, penalty=penalty, verbose=verbose)
                 if(is.na(t.res)) {
                     t.res <- list( data.frame(Q1=NA, Q2=NA, Q3=NA), 
                         data.frame(pVal1=1,pVal2=1,pVal3=1) )
@@ -212,7 +216,7 @@ setMethod("geneTest", signature = "rqt",
                 STT=STT, weight=weight, 
                 cumvar.threshold=cumvar.threshold, 
                 out.type=out.type, method=method, 
-                scaleData = scaleData))
+                scaleData = scaleData, penalty=penalty))
               
             if(!is.na(rslt0)) {
                 rslt <- list(Qstatistic= data.frame(Q1=NA, Q2=NA, Q3=NA),
@@ -261,6 +265,8 @@ setMethod("geneTest", signature = "rqt",
 #' the genotype dataset.
 #' @param asym.pval Indicates Monte Carlo approximation for p-values. Default: FALSE.
 #' @param comb.test Statistical test for combining p-values.
+#' @param penalty Value of \code{penalty} parameter for LASSO/ridge regression.
+#' Default: 0.001
 #' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of two: (i) final.pvalue - 
 #' a final p-value across all studies; 
@@ -299,7 +305,7 @@ setMethod("geneTestMeta", signature="list",
           function(objects, perm=0, STT=0.2, weight=FALSE, 
                    cumvar.threshold=75, out.type="D", 
                    method="pca", scaleData=FALSE, asym.pval=FALSE,
-                   comb.test="wilkinson",
+                   comb.test="wilkinson", penalty=0.001,
                    verbose=FALSE) {
             
             if(cumvar.threshold > 100) {
@@ -323,6 +329,7 @@ setMethod("geneTestMeta", signature="list",
                               perm = perm, 
                               scaleData=scaleData,
                               asym.pval=asym.pval,
+                              penalty=penalty,
                               verbose=verbose)
               
               if(length(results(res)) != 0) {
@@ -419,7 +426,7 @@ get.reg.family <- function(out.type="D") {
 #
 geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
                         cumvar.threshold=75, method="pca", out.type="D", 
-                        scaleData=FALSE, verbose=FALSE) {
+                        scaleData=FALSE, penalty=0.001, verbose=FALSE) {
   
   reg.family <- get.reg.family(out.type)
   
@@ -439,109 +446,130 @@ geneTestOne <- function(phenotype, genotype, covariates, STT=0.2, weight=FALSE,
       indexes <- NA
       ### Dimensionality reduction and account for LD ###
       if(method != "none") {
-        tmp <- cor(preddata)
-        tmp[upper.tri(tmp)] <- 0
-        diag(tmp) <- 0
-        preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
-        res.preproc <- preprocess(data=preddata, 
+          tmp <- cor(preddata)
+          tmp[upper.tri(tmp)] <- 0
+          diag(tmp) <- 0
+          preddata <- preddata[,!apply(tmp,2,function(x) any(x > 0.99))]
+          res.preproc <- preprocess(data=preddata, 
                           pheno=phenotype, method=method,
                           reg.family=reg.family, 
                           scaleData=scaleData, 
                           cumvar.threshold=cumvar.threshold, 
                           out.type=out.type,
+                          penalty=penalty,
                           verbose=verbose)
-        if(method == "pls") {
-            phenotype <- res.preproc[["Y"]]
-            reg.family <- get.reg.family("C")
-        }
+          if(method == "pls") {
+              phenotype <- res.preproc[["Y"]]
+              reg.family <- get.reg.family("C")
+          }
       } else {
-        res.preproc[["S"]] <- preddata
-        res.preproc[["model"]] <- "none"
+          res.preproc[["S"]] <- preddata
+          res.preproc[["model"]] <- "none"
       }
       
       #### Regression after data preprocessing ####
-      if(!(method %in% c("lasso", "ridge"))) {
-        S <- res.preproc[["S"]]
-        if(method == "pca") {
-          indexes <- res.preproc[["indexes"]]
-        }
-        # Build null model #
-        null.model <- build.null.model(y=phenotype, x=covariates,
+      if(method %in% c("pca", "pls", "none")) {
+          S <- res.preproc[["S"]]
+          if(method == "pca") {
+              indexes <- res.preproc[["indexes"]]
+          }
+          # Build null model #
+          null.model <- build.null.model(y=phenotype, x=covariates,
                                        reg.family=reg.family)
         
-        res <- simple.multvar.reg(null.model=null.model, Z=S)
+          res <- simple.multvar.reg(null.model=null.model, Z=S)
         
-        S <- res[["S"]]
-        fit <- res[["fit"]]
-        if(dim(coef(summary(fit)))[2] >= 2) {
-          coef.multivar <- coef(summary(fit))[-1,1:2]
-        }
+          S <- res[["S"]]
+          fit <- res[["fit"]]
+          if(dim(coef(summary(fit)))[2] >= 2) {
+              coef.multivar <- coef(summary(fit))[-1,1:2]
+          }
         
-        if(length(coef.multivar) != 2) { 
-          beta.multivar <- coef.multivar[,1]
-          se.multivar <- coef.multivar[,2] 
-        }
-        if(length(coef.multivar) == 2) { 
-          beta.multivar <- coef.multivar[1]
-          se.multivar <- coef.multivar[2] 
-        }
+          if(length(coef.multivar) != 2) { 
+              beta.multivar <- coef.multivar[,1]
+              se.multivar <- coef.multivar[,2] 
+          }
+          if(length(coef.multivar) == 2) { 
+              beta.multivar <- coef.multivar[1]
+              se.multivar <- coef.multivar[2] 
+          }
         
-        vMat <- vcov(fit)[-1,-1]
-        alpha <- 1/(se.multivar^2)
-        alpha <- alpha/sum(1/(se.multivar^2))
+          vMat <- vcov(fit)[-1,-1]
+          alpha <- 1/(se.multivar^2)
+          alpha <- alpha/sum(1/(se.multivar^2))
         
-        if(length(coef(fit)) > 2) {
-          mean.vif <- mean(vif(fit), na.rm=TRUE)
-        } else {
-          mean.vif <- summary(fit)$coefficients[2,2]
-        }
+          if(length(coef(fit)) > 2) {
+              mean.vif <- mean(vif(fit), na.rm=TRUE)
+          } else {
+              mean.vif <- summary(fit)$coefficients[2,2]
+          }
         
-      } else {
+      } else if(method %in% c("lasso", "ridge")) {
+          S <- res.preproc[["S"]]
+          # Build null model #
+          null.model <- build.null.model(y=phenotype, x=covariates,
+                                       reg.family=reg.family)
         
-        fit <- res.preproc[["fit"]]
-        coef.multivar <- coef(fit)[-1]
-        S <- preddata
+          res <- simple.multvar.reg(null.model=null.model, Z=S)
         
-        if(sum(coef.multivar) == 0) {
-            print("All coefficients in LASSO/ridge regression 
-                are equal to 0. No relationships between predictors 
-                and outcome were discovered.
-                P-values will be set to 1.")
-          
-            rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
-                       pValue= data.frame(pVal1=1,pVal2=1,pVal3=1), 
-                       beta=NA, var.pooled=NA, mean.vif=NA, 
-                       model=res.preproc[["model"]])
-            
-            return(rslt)
-            
-        } else {
-          
-            beta.multivar <- coef.multivar[coef.multivar != 0L]
-            
-            vMat <- vcov_ridge(x=as.matrix(preddata), 
-                             y=phenotype, 
-                             rmod=fit)$vcov[coef.multivar != 0L, coef.multivar != 0L]
-            
-            #if(class(vMat)[1] == "dgeMatrix") {
-            #    se.multivar <- sqrt(diag(vMat))
-            #    print(se.multivar)
-            #} else {
-            #    se.multivar <- sqrt(vMat)
-            #}
-            nl <- length(which(coef.multivar != 0L))
-            vMat <- as.matrix(vMat, nrow=nl, ncol=nl, byrow=TRUE)
-            se.multivar <- sqrt(diag(vMat))
-            
-        }
+          S <- res[["S"]]
+          fit <- res[["fit"]]
+          if(dim(coef(summary(fit)))[2] >= 2) {
+              coef.multivar <- coef(summary(fit))[-1,1:2]
+          }
         
-        alpha <- as.matrix((1/(se.multivar^2)), ncol=1)
-        alpha <- alpha/sum(1/(se.multivar^2))
+          if(length(coef.multivar) != 2) { 
+              beta.multivar <- coef.multivar[,1]
+              se.multivar <- coef.multivar[,2] 
+          }
+          if(length(coef.multivar) == 2) { 
+              beta.multivar <- coef.multivar[1]
+              se.multivar <- coef.multivar[2] 
+          }
         
-        # Temporary disabled:
-        #mean.vif <- mean(vif(fit), na.rm=TRUE)
-        #print(mean.vif)
-        mean.vif <- NA
+          vMat <- vcov(fit)[-1,-1]
+          alpha <- 1/(se.multivar^2)
+          alpha <- alpha/sum(1/(se.multivar^2))
+        
+          if(length(coef(fit)) > 2) {
+              mean.vif <- mean(vif(fit), na.rm=TRUE)
+          } else {
+              mean.vif <- summary(fit)$coefficients[2,2]
+          }
+        
+        #  
+        #  if(sum(coef.multivar) == 0) {
+        #      print("All coefficients in LASSO/ridge regression 
+        #        are equal to 0. No relationships between predictors 
+        #        and outcome were discovered.
+        #        P-values will be set to 1.")
+        #  
+        #      rslt <- list(Qstatistic=data.frame(Q1=NA, Q2=NA, Q3=NA), 
+        #               pValue= data.frame(pVal1=1,pVal2=1,pVal3=1), 
+        #               beta=NA, var.pooled=NA, mean.vif=NA, 
+        #               model=res.preproc[["model"]])
+        #    
+        #      return(rslt)
+        #    
+        #  } else {
+        #      beta.multivar <- coef.multivar[coef.multivar != 0L]
+        #    
+        #      vMat <- vcov_ridge(x=as.matrix(preddata), 
+        #                     y=phenotype, 
+        #                     rmod=fit)$vcov[coef.multivar != 0L, coef.multivar != 0L]
+        #    
+        #     nl <- length(which(coef.multivar != 0L))
+        #      vMat <- as.matrix(vMat, nrow=nl, ncol=nl, byrow=TRUE)
+        #      se.multivar <- sqrt(diag(vMat))
+        #  }
+        #
+        #  alpha <- as.matrix((1/(se.multivar^2)), ncol=1)
+        #  alpha <- alpha/sum(1/(se.multivar^2))
+        #
+        #  # Temporary disabled:
+        #  #mean.vif <- mean(vif(fit), na.rm=TRUE)
+        #  #print(mean.vif)
+        #  mean.vif <- NA
       }
       
       beta.pool.base <- 0

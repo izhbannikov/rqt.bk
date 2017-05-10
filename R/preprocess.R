@@ -9,7 +9,7 @@
 #' @importFrom stats prcomp
 #' @importFrom stats coef predict
 #' @importFrom utils head
-#' @importFrom glmnet cv.glmnet
+#' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom ropls opls
 #' @importFrom Matrix Matrix
 #' @importFrom CompQuadForm davies imhof liu
@@ -79,9 +79,11 @@ vcov_ridge <- function(x, y,  rmod, verbose=FALSE) {
 #' not scaling should be performed. Default: \code{FALSE}.
 #' @param cumvar.threshold A threshold value for explained variance.
 #' Default: \code{75}
-#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @param out.type An output (phenotype) type. 
-#' Default: \code{"D"}.
+#' Default: \code{"D"}
+#' @param penalty Value of penalty parameter for LASSO/ridge regression. 
+#' Default: \code{0.001}
+#' @param verbose Indicates verbosing output. Default: FALSE.
 #' @return A list of one: "S" - a data frame of predictor values.
 preprocess <- function(data, pheno=NULL,
                        method="pca",
@@ -89,6 +91,7 @@ preprocess <- function(data, pheno=NULL,
                        scaleData=FALSE, 
                        cumvar.threshold=75,
                        out.type="D",
+                       penalty=0.001,
                        verbose=FALSE) {
     
     
@@ -100,10 +103,10 @@ preprocess <- function(data, pheno=NULL,
             return(preprocessPLS(data, pheno, scaleData, cumvar.threshold, out.type))
         },
         lasso={
-            return(preprocessLASSO(data, pheno, reg.family))
+            return(preprocessLASSO(data, pheno, reg.family, penalty))
         },
         ridge={
-            return(preprocessRidge(data, pheno, reg.family))
+            return(preprocessRidge(data, pheno, reg.family, penalty))
         },
         {
             stop("Unknown method provided.")
@@ -331,35 +334,41 @@ preprocessPLS <- function(data, pheno, scaleData, cumvar.threshold, out.type) {
     return(list(S = S, Y = Y, model=model))
 }
 
-preprocessLASSO <- function(data, pheno, reg.family) {
+preprocessLASSO <- function(data, pheno, reg.family, penalty=0.001) {
     #### LASSO ####
     tryCatch({
         if(reg.family == "binomial") {
             pheno <- as.factor(pheno)
         }
-        fit <- cv.glmnet(x=as.matrix(data),
+        fit <- glmnet(x=as.matrix(data),
                          alpha=1, # LASSO
                          y=pheno, 
                          family=reg.family)
+        #fit <- cv.glmnet(x=as.matrix(data),
+        #              alpha=1, # LASSO
+        #              y=pheno, 
+        #              family=reg.family,
+        #              nfolds=10)
+    
     }, error=function(e) {
         print(e)
     })
-    
-    return(list(fit=fit, model="LASSO"))
+    S <- data[,which(coef(fit, s=penalty)[-1] != 0)]
+    return(list(S=S, fit=fit, model="LASSO"))
 }
 
-preprocessRidge <- function(data, pheno, reg.family) {
+preprocessRidge <- function(data, pheno, reg.family, penalty=0.001) {
     tryCatch({
         if(reg.family == "binomial") {
             pheno <- as.factor(pheno)
         }
-        fit <- cv.glmnet(x=as.matrix(data),
+        fit <- glmnet(x=as.matrix(data),
                          alpha=0, # Ridge
                          y=pheno, 
                          family=reg.family)
     }, error=function(e) {
         print(e)
     })
-  
-    return(list(fit=fit, model="ridge"))
+    S <- data[,which(coef(fit, s=penalty)[-1] != 0)]
+    return(list(S=S, fit=fit, model="ridge"))
 }
